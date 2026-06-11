@@ -51,10 +51,14 @@
     
     
     
+    
+    
+    
+    
 
         
 
-                <!-- Header -->
+                        <!-- Header -->
     <header class="bg-gradient-to-r from-slate-900 via-emerald-950 to-teal-900 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
@@ -682,6 +686,9 @@
         <p>&copy; 2023 ML Learn by Anusorn Chaikaew</p>
     </footer>
 
+
+
+
 <!-- Slideshow Script -->
 <script>
 (function() {
@@ -700,275 +707,7 @@
     };
 
     function enterSlideshow() {
-        const mainContent = document.querySelector('.container, main, [role="main"]');
-        if (!mainContent) {
-            alert("ไม่สามารถสร้างสไลด์ได้เนื่องจากไม่พบเนื้อหาหลัก");
-            return;
-        }
-
-        const overlay = document.createElement('div');
-        overlay.id = 'slideshow-overlay';
-        overlay.className = 'fixed inset-0 z-[9999] bg-slate-950 text-white flex flex-col justify-between p-6 md:p-12 transition-opacity duration-300 opacity-0';
-        overlay.style.background = 'radial-gradient(circle at center, #1e1b4b 0%, #090d16 100%)';
-        
-        const header = document.createElement('div');
-        header.className = 'flex justify-between items-center text-slate-400 text-xs tracking-wider border-b border-indigo-950 pb-3';
-        
-        const titleText = document.querySelector('h1')?.innerText || document.title;
-        header.innerHTML = `
-            <div class="flex items-center space-x-2">
-                <span class="font-bold text-indigo-400">Canva-Style Presentation Mode</span>
-                <span class="text-slate-700">|</span>
-                <span class="text-slate-300 truncate max-w-xs md:max-w-md">${titleText}</span>
-            </div>
-            <button onclick="toggleSlideshow()" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white transition flex items-center space-x-1 border border-slate-800">
-                <span>✕ Exit (ESC)</span>
-            </button>
-        `;
-        overlay.appendChild(header);
-
-        const viewArea = document.createElement('div');
-        viewArea.id = 'slide-view-area';
-        viewArea.className = 'flex-1 flex flex-col justify-center items-center max-w-5xl mx-auto w-full my-6 overflow-y-auto pr-2';
-        overlay.appendChild(viewArea);
-
-        const footer = document.createElement('div');
-        footer.className = 'flex justify-between items-center border-t border-indigo-950 pt-3';
-        footer.innerHTML = `
-            <button id="prev-slide-btn" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg border border-slate-800 text-sm font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed">
-                ← ย้อนกลับ
-            </button>
-            <div id="slide-counter" class="text-xs md:text-sm font-semibold text-indigo-300 font-mono">
-                สไลด์ 1 / 1
-            </div>
-            <button id="next-slide-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed">
-                ถัดไป →
-            </button>
-        `;
-        overlay.appendChild(footer);
-        document.body.appendChild(overlay);
-
-        slides = buildSlides(mainContent);
-        currentSlide = 0;
-        showSlide(currentSlide);
-
-        footer.querySelector('#prev-slide-btn').addEventListener('click', prevSlide);
-        footer.querySelector('#next-slide-btn').addEventListener('click', nextSlide);
-        
-        window.addEventListener('keydown', handleKeypress);
-
-        setTimeout(() => {
-            overlay.classList.remove('opacity-0');
-        }, 10);
-        
-        document.body.style.overflow = 'hidden';
-    }
-
-    function exitSlideshow() {
-        const overlay = document.getElementById('slideshow-overlay');
-        if (overlay) {
-            overlay.classList.add('opacity-0');
-            setTimeout(() => {
-                restoreMovedElements();
-                overlay.remove();
-                document.body.style.overflow = '';
-            }, 300);
-        }
-        window.removeEventListener('keydown', handleKeypress);
-    }
-
-    function handleKeypress(e) {
-        if (e.key === 'Escape') {
-            exitSlideshow();
-        } else if (e.key === 'ArrowRight' || e.key === ' ') {
-            e.preventDefault();
-            nextSlide();
-        } else if (e.key === 'ArrowLeft') {
-            e.preventDefault();
-            prevSlide();
-        }
-    }
-
-    function buildSlides(mainContent) {
-        const header = document.querySelector('header');
-        const elements = Array.from(mainContent.children);
-        
-        let slideList = [];
-        
-        if (header) {
-            const coverNode = document.createElement('div');
-            coverNode.className = 'text-center flex flex-col justify-center items-center h-full p-8';
-            
-            const badge = header.querySelector('span')?.cloneNode(true);
-            const title = header.querySelector('h1')?.cloneNode(true);
-            const subtitle = header.querySelector('p')?.cloneNode(true);
-            
-            if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
-                coverNode.appendChild(badge);
-            }
-            if (title) {
-                title.className = "text-4xl md:text-6xl font-extrabold text-white leading-tight mb-4";
-                coverNode.appendChild(title);
-            }
-            if (subtitle) {
-                subtitle.className = "text-base md:text-xl text-slate-350 font-light max-w-2xl";
-                coverNode.appendChild(subtitle);
-            }
-            slideList.push({ title: "บทนำ", content: [coverNode] });
-        }
-
-        let currentGroup = [];
-        let currentTitle = "เนื้อหา";
-
-        elements.forEach((el) => {
-            if (el.classList.contains('fixed') || el.tagName === 'HEADER' || el.tagName === 'FOOTER' || el.tagName === 'SCRIPT' || el.id === 'slideshow-overlay') return;
-            
-            if (el.tagName === 'H2') {
-                if (currentGroup.length > 0) {
-                    slideList.push({ title: currentTitle, content: currentGroup });
-                    currentGroup = [];
-                }
-                currentTitle = el.innerText;
-            } else {
-                currentGroup.push(el);
-            }
-        });
-
-        if (currentGroup.length > 0) {
-            slideList.push({ title: currentTitle, content: currentGroup });
-        }
-
-        return slideList;
-    }
-
-    function showSlide(index) {
-        const viewArea = document.getElementById('slide-view-area');
-        viewArea.innerHTML = '';
-        
-        const slide = slides[index];
-        if (!slide) return;
-
-        const slideContainer = document.createElement('div');
-        slideContainer.className = 'w-full text-left transition-all duration-300 opacity-0 transform translate-y-4';
-        
-        if (index > 0) {
-            const titleEl = document.createElement('h2');
-            titleEl.className = 'text-2xl md:text-4xl font-extrabold bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent mb-6 border-b border-indigo-950/60 pb-3 tracking-tight';
-            titleEl.innerText = slide.title;
-            slideContainer.appendChild(titleEl);
-        }
-
-        const bodyEl = document.createElement('div');
-        bodyEl.className = 'text-sm md:text-base text-slate-200 leading-relaxed font-light space-y-4';
-
-        slide.content.forEach((el) => {
-            if (el.parentNode) {
-                const placeholder = document.createElement('div');
-                placeholder.id = `slideshow-placeholder-${originalParents.length}`;
-                placeholder.style.display = 'none';
-                el.parentNode.insertBefore(placeholder, el);
-                
-                originalParents.push({
-                    element: el,
-                    placeholderId: placeholder.id
-                });
-            }
-            
-            // Temporary styles for elements inside the presentation view
-            if (el.classList) {
-                if (!el.hasAttribute('data-original-class')) {
-                    el.setAttribute('data-original-class', el.className);
-                }
-                
-                // Format headings inside slides
-                if (el.tagName === 'H3') {
-                    el.className = 'text-xl md:text-2xl font-bold text-sky-400 mt-4 mb-2';
-                }
-                
-                el.querySelectorAll('p').forEach(p => {
-                    if (!p.hasAttribute('data-original-class')) p.setAttribute('data-original-class', p.className);
-                    p.className = 'text-base md:text-lg text-slate-200 leading-relaxed font-light mb-3';
-                });
-                
-                el.querySelectorAll('li').forEach(li => {
-                    if (!li.hasAttribute('data-original-class')) li.setAttribute('data-original-class', li.className);
-                    li.className = 'text-base md:text-lg text-slate-200 leading-relaxed font-light my-2 list-disc list-inside';
-                });
-            }
-            
-            bodyEl.appendChild(el);
-        });
-
-        slideContainer.appendChild(bodyEl);
-        viewArea.appendChild(slideContainer);
-
-        setTimeout(() => {
-            slideContainer.classList.remove('opacity-0', 'translate-y-4');
-        }, 50);
-
-        document.getElementById('slide-counter').innerText = `สไลด์ ${index + 1} / ${slides.length}`;
-        document.getElementById('prev-slide-btn').disabled = index === 0;
-        document.getElementById('next-slide-btn').disabled = index === slides.length - 1;
-    }
-
-    function restoreMovedElements() {
-        originalParents.forEach((item) => {
-            const placeholder = document.getElementById(item.placeholderId);
-            if (placeholder) {
-                if (item.element.hasAttribute('data-original-class')) {
-                    item.element.className = item.element.getAttribute('data-original-class');
-                    item.element.removeAttribute('data-original-class');
-                }
-                item.element.querySelectorAll('[data-original-class]').forEach(child => {
-                    child.className = child.getAttribute('data-original-class');
-                    child.removeAttribute('data-original-class');
-                });
-                
-                placeholder.parentNode.insertBefore(item.element, placeholder);
-                placeholder.remove();
-            }
-        });
-        originalParents = [];
-    }
-
-    function nextSlide() {
-        if (currentSlide < slides.length - 1) {
-            restoreMovedElements();
-            currentSlide++;
-            showSlide(currentSlide);
-        }
-    }
-
-    function prevSlide() {
-        if (currentSlide > 0) {
-            restoreMovedElements();
-            currentSlide--;
-            showSlide(currentSlide);
-        }
-    }
-})();
-</script>
-<!-- End Slideshow Script -->
-<!-- Slideshow Script -->
-<script>
-(function() {
-    let currentSlide = 0;
-    let slides = [];
-    let originalParents = [];
-
-    window.toggleSlideshow = function() {
-        const overlayId = 'slideshow-overlay';
-        let overlay = document.getElementById(overlayId);
-        if (overlay) {
-            exitSlideshow();
-        } else {
-            enterSlideshow();
-        }
-    };
-
-    function enterSlideshow() {
-        const mainContent = document.querySelector('.container, main, [role="main"]');
+        const mainContent = Array.from(document.querySelectorAll('.container, main')).find(el => !el.closest('header') && el.tagName !== 'HEADER');
         if (!mainContent) {
             alert("ไม่สามารถสร้างสไลด์ได้เนื่องจากไม่พบเนื้อหาหลัก");
             return;
