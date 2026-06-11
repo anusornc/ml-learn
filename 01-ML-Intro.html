@@ -72,126 +72,144 @@
                 </div>
                 <div class="p-6">
                     <p class="text-gray-700 mb-6">อัลกอริทึมเรียนรู้จากข้อมูลที่มีคำตอบ (Label) กำกับไว้แล้ว เพื่อทำนายผลลัพธ์สำหรับข้อมูลใหม่</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        <!-- Linear Regression -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-blue-500">
                             <div class="flex items-center mb-4">
-                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-semibold text-gray-800">Linear Regression</h3>
+                                <h3 class="text-lg font-bold text-gray-800">Linear Regression</h3>
                             </div>
-                            <p class="text-gray-700 mb-3">ใช้สำหรับการทำนายค่าต่อเนื่อง โดยหาความสัมพันธ์เชิงเส้นระหว่างตัวแปรอิสระและตัวแปรตาม</p>
-                            <div class="bg-gray-100 p-3 rounded-lg">
-                                <p class="text-gray-700"><strong>ตัวอย่างการใช้งาน:</strong> ทำนายราคาบ้าน, ทำนายยอดขาย, ทำนายอุณหภูมิ</p>
+                            <p class="text-xs text-gray-600 mb-3">ใช้ทำนายค่าตัวเลขต่อเนื่อง โดยสร้างสมการความสัมพันธ์เชิงเส้นตรงระหว่างตัวแปรต้นและตัวแปรตาม</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> ทำนายราคาบ้าน, ยอดขายรายปี, อุณหภูมิเฉลี่ย</p>
                             </div>
-                            <div class="mt-4 flex justify-center">
-                                <svg width="200" height="120" viewBox="0 0 200 120">
-                                    <line x1="20" y1="100" x2="180" y2="100" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="20" y1="100" x2="20" y2="20" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="20" y1="100" x2="180" y2="30" stroke="#3b82f6" stroke-width="3" />
-                                    <circle cx="40" cy="90" r="4" fill="#ef4444" />
-                                    <circle cx="70" cy="75" r="4" fill="#ef4444" />
-                                    <circle cx="100" cy="65" r="4" fill="#ef4444" />
-                                    <circle cx="130" cy="50" r="4" fill="#ef4444" />
-                                    <circle cx="160" cy="35" r="4" fill="#ef4444" />
-                                </svg>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.linear_model</span>
+                                <a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover">
+                        <!-- Logistic Regression -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-blue-500">
                             <div class="flex items-center mb-4">
-                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-semibold text-gray-800">Logistic Regression</h3>
+                                <h3 class="text-lg font-bold text-gray-800">Logistic Regression</h3>
                             </div>
-                            <p class="text-gray-700 mb-3">ใช้สำหรับการจำแนกประเภท (Classification) โดยทำนายความน่าจะเป็นที่ข้อมูลจะอยู่ในคลาสใดคลาสหนึ่ง</p>
-                            <div class="bg-gray-100 p-3 rounded-lg">
-                                <p class="text-gray-700"><strong>ตัวอย่างการใช้งาน:</strong> ทำนายว่าอีเมลเป็นสแปมหรือไม่, ทำนายว่าลูกค้าจะซื้อสินค้าหรือไม่</p>
+                            <p class="text-xs text-gray-600 mb-3">ใช้จำแนกประเภท (Classification) ทำนายความน่าจะเป็นของข้อมูลที่จะเกิดในแต่ละคลาส (Binary หรือ Multiclass)</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> ตรวจจับอีเมลสแปม, การทำนายการอนุมัติสินเชื่อ</p>
                             </div>
-                            <div class="mt-4 flex justify-center">
-                                <svg width="200" height="120" viewBox="0 0 200 120">
-                                    <line x1="20" y1="100" x2="180" y2="100" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="20" y1="100" x2="20" y2="20" stroke="#94a3b8" stroke-width="2" />
-                                    <path d="M20,90 Q100,10 180,30" stroke="#3b82f6" stroke-width="3" fill="none" />
-                                    <circle cx="40" cy="90" r="4" fill="#ef4444" />
-                                    <circle cx="60" cy="30" r="4" fill="#22c55e" />
-                                    <circle cx="80" cy="30" r="4" fill="#22c55e" />
-                                    <circle cx="100" cy="30" r="4" fill="#22c55e" />
-                                    <circle cx="120" cy="30" r="4" fill="#22c55e" />
-                                    <circle cx="140" cy="90" r="4" fill="#ef4444" />
-                                    <circle cx="160" cy="90" r="4" fill="#ef4444" />
-                                </svg>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.linear_model</span>
+                                <a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover">
+                        <!-- Decision Trees -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-blue-500">
                             <div class="flex items-center mb-4">
-                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-semibold text-gray-800">Decision Trees</h3>
+                                <h3 class="text-lg font-bold text-gray-800">Decision Trees</h3>
                             </div>
-                            <p class="text-gray-700 mb-3">สร้างโมเดลการตัดสินใจในรูปแบบของต้นไม้ โดยแต่ละโหนดแทนการตัดสินใจบนคุณลักษณะหนึ่งๆ</p>
-                            <div class="bg-gray-100 p-3 rounded-lg">
-                                <p class="text-gray-700"><strong>ตัวอย่างการใช้งาน:</strong> ระบบแนะนำสินเชื่อ, การวินิจฉัยโรค, การทำนายพฤติกรรมลูกค้า</p>
+                            <p class="text-xs text-gray-600 mb-3">จำลองการตัดสินใจเป็นแผนภาพต้นไม้ เข้าใจง่ายและถอดกฎเกณฑ์ทางธุรกิจ (IF-THEN) ออกมาได้ดี</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> การวินิจฉัยโรคทางการแพทย์, การแบ่งกลุ่มข้อมูลลูกค้า</p>
                             </div>
-                            <div class="mt-4 flex justify-center">
-                                <svg width="200" height="120" viewBox="0 0 200 120">
-                                    <line x1="100" y1="20" x2="100" y2="40" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="100" y1="40" x2="50" y2="60" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="100" y1="40" x2="150" y2="60" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="50" y1="60" x2="30" y2="80" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="50" y1="60" x2="70" y2="80" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="150" y1="60" x2="130" y2="80" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="150" y1="60" x2="170" y2="80" stroke="#94a3b8" stroke-width="2" />
-                                    <circle cx="100" cy="20" r="10" fill="#3b82f6" />
-                                    <circle cx="50" cy="60" r="10" fill="#3b82f6" />
-                                    <circle cx="150" cy="60" r="10" fill="#3b82f6" />
-                                    <circle cx="30" cy="80" r="10" fill="#22c55e" />
-                                    <circle cx="70" cy="80" r="10" fill="#ef4444" />
-                                    <circle cx="130" cy="80" r="10" fill="#22c55e" />
-                                    <circle cx="170" cy="80" r="10" fill="#ef4444" />
-                                </svg>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.tree</span>
+                                <a href="https://scikit-learn.org/stable/modules/tree.html" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover">
+                        <!-- Support Vector Machines (SVM) -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-blue-500">
                             <div class="flex items-center mb-4">
-                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-semibold text-gray-800">Support Vector Machines (SVM)</h3>
+                                <h3 class="text-lg font-bold text-gray-800">SVM</h3>
                             </div>
-                            <p class="text-gray-700 mb-3">หาเส้นแบ่ง (Hyperplane) ที่ดีที่สุดเพื่อแยกข้อมูลออกเป็นคลาสต่างๆ โดยมีระยะห่างจากข้อมูลมากที่สุด</p>
-                            <div class="bg-gray-100 p-3 rounded-lg">
-                                <p class="text-gray-700"><strong>ตัวอย่างการใช้งาน:</strong> การจำแนกรูปภาพ, การวิเคราะห์ข้อความ, การตรวจจับใบหน้า</p>
+                            <p class="text-xs text-gray-600 mb-3">หาเส้นแบ่งระนาบสูงสุด (Hyperplane) เพื่อแยกประเภทข้อมูล และรองรับขอบเขตที่คดเคี้ยวด้วยเทคนิค Kernel</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> การรู้จำใบหน้า, การจัดกลุ่มภาพทิวทัศน์, การวิเคราะห์ไบโอเซนเซอร์</p>
                             </div>
-                            <div class="mt-4 flex justify-center">
-                                <svg width="200" height="120" viewBox="0 0 200 120">
-                                    <line x1="20" y1="100" x2="180" y2="20" stroke="#3b82f6" stroke-width="3" stroke-dasharray="5,5" />
-                                    <line x1="30" y1="95" x2="190" y2="15" stroke="#3b82f6" stroke-width="2" />
-                                    <line x1="10" y1="105" x2="170" y2="25" stroke="#3b82f6" stroke-width="2" />
-                                    <circle cx="40" cy="40" r="5" fill="#22c55e" />
-                                    <circle cx="60" cy="30" r="5" fill="#22c55e" />
-                                    <circle cx="50" cy="50" r="5" fill="#22c55e" />
-                                    <circle cx="70" cy="45" r="5" fill="#22c55e" />
-                                    <circle cx="130" cy="70" r="5" fill="#ef4444" />
-                                    <circle cx="150" cy="80" r="5" fill="#ef4444" />
-                                    <circle cx="140" cy="90" r="5" fill="#ef4444" />
-                                    <circle cx="160" cy="85" r="5" fill="#ef4444" />
-                                </svg>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.svm</span>
+                                <a href="https://scikit-learn.org/stable/modules/svm.html" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
+                            </div>
+                        </div>
+
+                        <!-- k-Nearest Neighbors (k-NN) -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-blue-500">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-800">k-NN</h3>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-3">เปรียบเทียบข้อมูลใหม่กับข้อมูลที่อยู่ข้างเคียงที่มีระยะห่างสั้นที่สุด k ตัว และตัดสินผลตามเสียงส่วนใหญ่</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> ระบบวิเคราะห์หาลูกค้าที่ใกล้เคียง, ระบบแนะนำเพลง/ภาพยนตร์</p>
+                            </div>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.neighbors</span>
+                                <a href="https://scikit-learn.org/stable/modules/neighbors.html" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
+                            </div>
+                        </div>
+
+                        <!-- Naive Bayes -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-blue-500">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 9.172V5L8 4z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-800">Naive Bayes</h3>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-3">คำนวณตามหลักความน่าจะเป็นของเบย์ (Bayes' Theorem) ประสิทธิภาพสูงมากกับการวิเคราะห์ข้อความและทำงานได้เร็ว</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> คัดกรองอีเมลสแปม, จัดกลุ่มข่าว, การจำแนกอารมณ์ความรู้สึกเชิงบวก/ลบ</p>
+                            </div>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.naive_bayes</span>
+                                <a href="https://scikit-learn.org/stable/modules/naive_bayes.html" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
+                            </div>
+                        </div>
+
+                        <!-- Random Forest -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-blue-500">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-800">Random Forest</h3>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-3">โมเดลรวมกลุ่ม (Ensemble Model) ที่ผสานต้นไม้ตัดสินใจจำนวนมากมาร่วมคำนวณเพื่อลด Overfitting และเพิ่มความเสถียร</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> ประเมินความเสี่ยงทางการเงิน, การวิเคราะห์ข้อมูลทางการแพทย์</p>
+                            </div>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.ensemble</span>
+                                <a href="https://scikit-learn.org/stable/modules/ensemble.html#forests-of-randomized-trees" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
                             </div>
                         </div>
                     </div>
@@ -207,140 +225,104 @@
                 </div>
                 <div class="p-6">
                     <p class="text-gray-700 mb-6">อัลกอริทึมเรียนรู้จากข้อมูลที่ไม่มีคำตอบกำกับ เพื่อค้นหาโครงสร้างหรือรูปแบบที่ซ่อนอยู่ในข้อมูล</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        <!-- K-Means -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-green-500">
                             <div class="flex items-center mb-4">
-                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-semibold text-gray-800">K-Means Clustering</h3>
+                                <h3 class="text-lg font-bold text-gray-800">K-Means Clustering</h3>
                             </div>
-                            <p class="text-gray-700 mb-3">แบ่งข้อมูลออกเป็นกลุ่ม (Cluster) โดยข้อมูลในกลุ่มเดียวกันจะมีความคล้ายคลึงกัน</p>
-                            <div class="bg-gray-100 p-3 rounded-lg">
-                                <p class="text-gray-700"><strong>ตัวอย่างการใช้งาน:</strong> การแบ่งกลุ่มลูกค้า, การแบ่งกลุ่มเอกสาร, การบีบอัดรูปภาพ</p>
+                            <p class="text-xs text-gray-600 mb-3">จับกลุ่มข้อมูลออกเป็น k กลุ่ม โดยหาจุดศูนย์กลางที่ลดระยะทางเฉลี่ยระหว่างข้อมูลกับจุดศูนย์กลางของกลุ่มนั้น ๆ</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> แบ่งเซกเมนต์ลูกค้าตามยอดช้อปปิ้ง, แบ่งกลุ่มพฤติกรรมผู้เล่นเกม</p>
                             </div>
-                            <div class="mt-4 flex justify-center">
-                                <svg width="200" height="120" viewBox="0 0 200 120">
-                                    <circle cx="50" cy="40" r="5" fill="#22c55e" />
-                                    <circle cx="60" cy="30" r="5" fill="#22c55e" />
-                                    <circle cx="45" cy="50" r="5" fill="#22c55e" />
-                                    <circle cx="55" cy="45" r="5" fill="#22c55e" />
-                                    <circle cx="50" cy="35" r="10" fill="#22c55e" opacity="0.3" />
-                                    
-                                    <circle cx="130" cy="40" r="5" fill="#3b82f6" />
-                                    <circle cx="140" cy="30" r="5" fill="#3b82f6" />
-                                    <circle cx="125" cy="50" r="5" fill="#3b82f6" />
-                                    <circle cx="135" cy="45" r="5" fill="#3b82f6" />
-                                    <circle cx="130" cy="35" r="10" fill="#3b82f6" opacity="0.3" />
-                                    
-                                    <circle cx="90" cy="90" r="5" fill="#ef4444" />
-                                    <circle cx="100" cy="80" r="5" fill="#ef4444" />
-                                    <circle cx="85" cy="100" r="5" fill="#ef4444" />
-                                    <circle cx="95" cy="95" r="5" fill="#ef4444" />
-                                    <circle cx="90" cy="85" r="10" fill="#ef4444" opacity="0.3" />
-                                </svg>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.cluster</span>
+                                <a href="https://scikit-learn.org/stable/modules/clustering.html#k-means" target="_blank" rel="noopener" class="text-xs font-semibold text-green-600 hover:text-green-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover">
+                        <!-- DBSCAN -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-green-500">
                             <div class="flex items-center mb-4">
-                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 0v4m0-4h4m-4 0H8m2-6a8 8 0 11-8 8 8 8 0 018-8z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-semibold text-gray-800">Hierarchical Clustering</h3>
+                                <h3 class="text-lg font-bold text-gray-800">DBSCAN</h3>
                             </div>
-                            <p class="text-gray-700 mb-3">สร้างลำดับชั้นของกลุ่มข้อมูล โดยเริ่มจากแต่ละข้อมูลเป็นกลุ่มแยก แล้วค่อยๆ รวมกลุ่มที่คล้ายกันเข้าด้วยกัน</p>
-                            <div class="bg-gray-100 p-3 rounded-lg">
-                                <p class="text-gray-700"><strong>ตัวอย่างการใช้งาน:</strong> การจัดหมวดหมู่เอกสาร, การวิเคราะห์ลำดับพันธุกรรม, การแบ่งกลุ่มลูกค้า</p>
+                            <p class="text-xs text-gray-600 mb-3">แบ่งกลุ่มตามความหนาแน่นของจุดข้อมูล ข้อดีคือแบ่งรูปร่างของกลุ่มข้อมูลที่ทับซ้อนกันซับซ้อนได้ และคัดกรอง Noise อัตโนมัติ</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> แบ่งพื้นที่ภูมิศาสตร์, จัดกลุ่มภาพอิงตามความหนาแน่นของเม็ดสี</p>
                             </div>
-                            <div class="mt-4 flex justify-center">
-                                <svg width="200" height="120" viewBox="0 0 200 120">
-                                    <line x1="100" y1="20" x2="100" y2="40" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="100" y1="40" x2="50" y2="60" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="100" y1="40" x2="150" y2="60" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="50" y1="60" x2="30" y2="80" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="50" y1="60" x2="70" y2="80" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="150" y1="60" x2="130" y2="80" stroke="#94a3b8" stroke-width="2" />
-                                    <line x1="150" y1="60" x2="170" y2="80" stroke="#94a3b8" stroke-width="2" />
-                                    <circle cx="30" cy="80" r="5" fill="#22c55e" />
-                                    <circle cx="70" cy="80" r="5" fill="#22c55e" />
-                                    <circle cx="130" cy="80" r="5" fill="#3b82f6" />
-                                    <circle cx="170" cy="80" r="5" fill="#3b82f6" />
-                                    <circle cx="50" cy="60" r="5" fill="#ef4444" />
-                                    <circle cx="150" cy="60" r="5" fill="#ef4444" />
-                                    <circle cx="100" cy="40" r="5" fill="#9333ea" />
-                                    <circle cx="100" cy="20" r="5" fill="#9333ea" />
-                                </svg>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.cluster</span>
+                                <a href="https://scikit-learn.org/stable/modules/clustering.html#dbscan" target="_blank" rel="noopener" class="text-xs font-semibold text-green-600 hover:text-green-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover">
+                        <!-- PCA -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-green-500">
                             <div class="flex items-center mb-4">
-                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-semibold text-gray-800">Principal Component Analysis (PCA)</h3>
+                                <h3 class="text-lg font-bold text-gray-800">PCA</h3>
                             </div>
-                            <p class="text-gray-700 mb-3">ลดมิติของข้อมูลโดยการแปลงข้อมูลไปยังมิติใหม่ที่สามารถอธิบายความแปรปรวนของข้อมูลได้มากที่สุด</p>
-                            <div class="bg-gray-100 p-3 rounded-lg">
-                                <p class="text-gray-700"><strong>ตัวอย่างการใช้งาน:</strong> การลดมิติข้อมูล, การบีบอัดข้อมูล, การแสดงผลข้อมูลหลายมิติ</p>
+                            <p class="text-xs text-gray-600 mb-3">ลดมิติข้อมูลแบบเป็นเส้นตรง โดยสร้างแกนมิติใหม่ที่อธิบายความแปรปรวน (Variance) ของข้อมูลได้สูงที่สุด</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> ลดขนาดตัวแปรภาพถ่าย, เตรียมข้อมูลก่อนเข้า Neural Network</p>
                             </div>
-                            <div class="mt-4 flex justify-center">
-                                <svg width="200" height="120" viewBox="0 0 200 120">
-                                    <line x1="20" y1="100" x2="180" y2="100" stroke="#94a3b8" stroke-width="1" />
-                                    <line x1="20" y1="100" x2="20" y2="20" stroke="#94a3b8" stroke-width="1" />
-                                    <line x1="40" y1="90" x2="160" y2="30" stroke="#ef4444" stroke-width="3" />
-                                    <line x1="100" y1="110" x2="100" y2="10" stroke="#3b82f6" stroke-width="3" stroke-dasharray="5,5" />
-                                    <circle cx="60" cy="70" r="4" fill="#22c55e" />
-                                    <circle cx="80" cy="60" r="4" fill="#22c55e" />
-                                    <circle cx="100" cy="50" r="4" fill="#22c55e" />
-                                    <circle cx="120" cy="40" r="4" fill="#22c55e" />
-                                    <circle cx="140" cy="30" r="4" fill="#22c55e" />
-                                </svg>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.decomposition</span>
+                                <a href="https://scikit-learn.org/stable/modules/decomposition.html#pca" target="_blank" rel="noopener" class="text-xs font-semibold text-green-600 hover:text-green-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover">
+                        <!-- t-SNE -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-green-500">
                             <div class="flex items-center mb-4">
-                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5h8m-80-5h8M4 12V4M20 4H4v16h16V4z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-semibold text-gray-800">Anomaly Detection</h3>
+                                <h3 class="text-lg font-bold text-gray-800">t-SNE</h3>
                             </div>
-                            <p class="text-gray-700 mb-3">ค้นหาข้อมูลที่ผิดปกติหรือแตกต่างจากข้อมูลส่วนใหญ่อย่างมีนัยสำคัญ</p>
-                            <div class="bg-gray-100 p-3 rounded-lg">
-                                <p class="text-gray-700"><strong>ตัวอย่างการใช้งาน:</strong> การตรวจจับการฉ้อโกง, การตรวจจับความผิดปกติในระบบเครือข่าย, การตรวจจับความผิดปกติในเครื่องจักร</p>
+                            <p class="text-xs text-gray-600 mb-3">ลดมิติข้อมูลแบบไม่เป็นเส้นตรง โดยให้จุดข้อมูลที่อยู่ใกล้กันในมิติสูง ยังคงอยู่ใกล้กันเมื่อลดมิติเหลือ 2D หรือ 3D</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> พล็อตโครงสร้างโมเดลความสัมพันธ์คำศัพท์ (Word Embeddings), แผนภาพจำแนกกลุ่มแบบ Visualization</p>
                             </div>
-                            <div class="mt-4 flex justify-center">
-                                <svg width="200" height="120" viewBox="0 0 200 120">
-                                    <circle cx="60" cy="40" r="4" fill="#22c55e" />
-                                    <circle cx="70" cy="50" r="4" fill="#22c55e" />
-                                    <circle cx="65" cy="60" r="4" fill="#22c55e" />
-                                    <circle cx="55" cy="55" r="4" fill="#22c55e" />
-                                    <circle cx="50" cy="45" r="4" fill="#22c55e" />
-                                    <circle cx="60" cy="50" r="15" fill="#22c55e" opacity="0.2" />
-                                    
-                                    <circle cx="130" cy="60" r="4" fill="#22c55e" />
-                                    <circle cx="140" cy="70" r="4" fill="#22c55e" />
-                                    <circle cx="135" cy="80" r="4" fill="#22c55e" />
-                                    <circle cx="125" cy="75" r="4" fill="#22c55e" />
-                                    <circle cx="120" cy="65" r="4" fill="#22c55e" />
-                                    <circle cx="130" cy="70" r="15" fill="#22c55e" opacity="0.2" />
-                                    
-                                    <circle cx="100" cy="30" r="6" fill="#ef4444" stroke="#ef4444" stroke-width="2" />
-                                </svg>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.manifold</span>
+                                <a href="https://scikit-learn.org/stable/modules/manifold.html#t-sne" target="_blank" rel="noopener" class="text-xs font-semibold text-green-600 hover:text-green-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
+                            </div>
+                        </div>
+
+                        <!-- Isolation Forest -->
+                        <div class="bg-white rounded-lg shadow-md p-5 transition-all duration-300 card-hover border-t-4 border-green-500">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-800">Isolation Forest</h3>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-3">ตรวจจับความผิดปกติ (Anomaly Detection) โดยใช้สุ่มโครงสร้างต้นไม้แยกข้อมูลที่แปลกแยกออกมา โดยจะแยกเดี่ยวได้เร็วที่สุด</p>
+                            <div class="bg-slate-50 p-2.5 rounded text-xs text-gray-650">
+                                <p class="text-gray-700"><strong>การใช้งาน:</strong> การตรวจจับบัตรเครดิตโดนรูดใช้งานที่น่าสงสัย, การคัดกรองขยะสัญญาณเซนเซอร์</p>
+                            </div>
+                            <div class="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                                <span class="text-[10px] text-slate-400 font-mono">sklearn.ensemble</span>
+                                <a href="https://scikit-learn.org/stable/modules/outlier_detection.html#isolation-forest" target="_blank" rel="noopener" class="text-xs font-semibold text-green-600 hover:text-green-800 hover:underline">อ่านคู่มือ Scikit-Learn &rarr;</a>
                             </div>
                         </div>
                     </div>
@@ -558,6 +540,288 @@
                 </table>
             </div>
         </section>
+    
+                                <!-- Section: Scikit-Learn Portal Resource -->
+        <section class="mb-12">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 text-white shadow-xl">
+                <div class="flex flex-col md:flex-row items-center gap-6 justify-between">
+                    <div class="flex-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 px-3 py-1 rounded-full border border-sky-900/30">คลังเอกสารมาตรฐาน (Standard Library Portal)</span>
+                        <h2 class="text-2xl font-bold text-slate-100 mt-2">ศูนย์การเรียนรู้ Scikit-Learn Documentation</h2>
+                        <p class="text-slate-400 text-xs md:text-sm mt-2 leading-relaxed">
+                            <a href="https://scikit-learn.org/stable/index.html" target="_blank" rel="noopener" class="text-sky-400 hover:underline font-semibold font-mono">Scikit-Learn</a> คือหนึ่งในชุดไลบรารีภาษา Python ที่ได้รับความนิยมสูงสุดของโลกสำหรับการพัฒนาและวิจัยโมเดล Machine Learning แบบคลาสสิก นักศึกษาสามารถศึกษาและเรียนรู้วิธีการเขียนโค้ด การจูนค่าพารามิเตอร์ และตัวอย่างประยุกต์ใช้เพิ่มเติมได้โดยตรงจากเว็บไซต์หลัก
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2.5 shrink-0 w-full md:w-auto">
+                        <a href="https://scikit-learn.org/stable/index.html" target="_blank" rel="noopener" class="flex-1 md:flex-initial text-center bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-3 px-5 rounded-xl border border-slate-700 transition">
+                            คู่มือหลัก Scikit-Learn 📖
+                        </a>
+                        <a href="https://scikit-learn.org/stable/supervised_learning.html" target="_blank" rel="noopener" class="flex-1 md:flex-initial text-center bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold py-3 px-5 rounded-xl transition shadow">
+                            Supervised Guide &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: ML Algorithm Chooser Wizard -->
+        <section class="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-950 text-white rounded-3xl shadow-2xl p-6 md:p-8 mb-12 border border-slate-800">
+            <div class="text-center mb-8 border-b border-slate-850 pb-6">
+                <span class="text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 px-4 py-1.5 rounded-full border border-sky-900/30">เครื่องมือช่วยวิเคราะห์ (ML Chooser Wizard)</span>
+                <h2 class="text-3xl font-extrabold mt-3 text-slate-100">โปรแกรมถาม-ตอบเลือกโมเดลที่ใช่!</h2>
+                <p class="text-slate-400 text-xs md:text-sm mt-2 max-w-xl mx-auto font-light">
+                    ตอบคำถามสั้น ๆ ทีละขั้นตอน เพื่อหาว่าโจทย์ปัญหาวิเคราะห์ของคุณเหมาะสำหรับอัลกอริทึมประเภทใด และควรรันโมเดลไหน
+                </p>
+            </div>
+
+            <!-- Wizard Content Card -->
+            <div class="max-w-2xl mx-auto bg-slate-900/80 border border-slate-850 rounded-2xl p-6 md:p-8 min-h-[300px] flex flex-col justify-between" id="wizard-container">
+                <!-- Inner Wizard Screen (will be populated dynamically) -->
+                <div id="wizard-screen">
+                    <!-- Step 1 will be loaded here -->
+                </div>
+            </div>
+
+            <script>
+                // Wizard questions, branches, and outcomes
+                const wizardSteps = {
+                    start: {
+                        question: "คำถามที่ 1: ข้อมูลของคุณมี 'คำตอบเฉลย' (Labels / Targets) หรือไม่?",
+                        desc: "คำตอบเฉลยคือผลลัพธ์ที่คุณต้องการให้โมเดลทำนายได้ เช่น ราคาบ้าน, ประเภทผลลัพธ์ หรือ คลาสของข้อมูล",
+                        options: [
+                            { text: "มีคำตอบเฉลยกำกับ (Labels Available)", nextStep: "supervised_q" },
+                            { text: "ไม่มีคำตอบเฉลยกำกับ (No Labels)", nextStep: "unsupervised_q" },
+                            { text: "ไม่มีข้อมูลเฉลย แต่โมเดลต้องทดลองเล่นและเรียนรู้เพื่อรางวัล (Reward)", nextStep: "rl_result" }
+                        ]
+                    },
+                    supervised_q: {
+                        question: "คำถามที่ 2: คุณต้องการทำนายผลลัพธ์ในลักษณะใด?",
+                        desc: "เลือกประเภทค่าผลลัพธ์ที่คุณต้องการได้รับจากการประมวลผลโมเดล",
+                        options: [
+                            { text: "ทำนายตัวเลขต่อเนื่อง (เช่น ยอดขาย, ราคา, อุณหภูมิ)", nextStep: "regression_result" },
+                            { text: "ทำนายกลุ่ม/คลาสประเภท (เช่น สแปม/ไม่สแปม, ป่วย/ไม่ป่วย)", nextStep: "classification_choice" }
+                        ]
+                    },
+                    unsupervised_q: {
+                        question: "คำถามที่ 2: วัตถุประสงค์ในการประมวลผลข้อมูลของคุณคืออะไร?",
+                        desc: "การค้นหาความลับ โครงสร้าง หรือข้อยกเว้นของกลุ่มข้อมูลแบบไม่มีผู้สอน",
+                        options: [
+                            { text: "จัดกลุ่มข้อมูลที่มีลักษณะใกล้เคียงกัน (Clustering)", nextStep: "clustering_result" },
+                            { text: "ลดจำนวนมิติตัวแปรของข้อมูล (Dimensionality Reduction)", nextStep: "dim_reduction_result" },
+                            { text: "ค้นหาข้อมูลที่แปลกปลอมออกจากข้อมูลปกติ (Anomaly Detection)", nextStep: "anomaly_result" }
+                        ]
+                    },
+                    classification_choice: {
+                        question: "คำถามที่ 3: โครงสร้างข้อมูลของคุณมีความต้องการพิเศษแบบใด?",
+                        desc: "เลือกจุดเด่นด้านประสิทธิภาพหรือความเข้าเข้าใจของโมเดลตามโจทย์งาน",
+                        options: [
+                            { text: "ต้องการโมเดลที่แกะวิเคราะห์กฎการทำงานง่าย (Explainable Model)", nextStep: "class_simple_result" },
+                            { text: "ข้อมูลมีความหนาแน่น มีมิติสูง เช่น ข้อความ หรือรูปภาพขนาดเล็ก", nextStep: "class_complex_result" },
+                            { text: "ต้องการความแม่นยำสูงสุด มีตัวแปรเยอะ และยอมรับการทำ Ensemble ได้", nextStep: "class_ensemble_result" }
+                        ]
+                    }
+                };
+
+                const wizardOutcomes = {
+                    rl_result: {
+                        title: "Reinforcement Learning (การเรียนรู้แบบเสริมแรง)",
+                        badge: "RL Algorithms",
+                        badgeClass: "bg-purple-950/60 text-purple-400 border-purple-800/30",
+                        desc: "โจทย์ปัญหาของคุณเหมาะสำหรับโมเดลการสร้างการเรียนรู้ของตัวแทน (Agent) ที่ต้องทำงานในสภาวะแวดล้อม และเรียนรู้นโยบายที่ได้รับคะแนนสะสมสูงสุด",
+                        algorithms: [
+                            { name: "Q-Learning", url: "https://gymnasium.farama.org/", note: "เรียนรู้ผ่านตารางสภาวะและรางวัล เหมาะสำหรับโมเดลขนาดเล็ก" },
+                            { name: "DQN (Deep Q-Network)", url: "https://gymnasium.farama.org/", note: "ใช้โครงข่ายประสาทลึกเข้าช่วยขยายมิติสำหรับปัญหาที่มีสภาวะขนาดใหญ่" }
+                        ]
+                    },
+                    regression_result: {
+                        title: "Supervised Learning: Regression (การวิเคราะห์การถดถอย)",
+                        badge: "Regression",
+                        badgeClass: "bg-blue-950/60 text-blue-400 border-blue-800/30",
+                        desc: "โจทย์ของคุณเหมาะสำหรับโมเดลถดถอยเพื่อทำนายตัวเลขต่อเนื่องเชิงปริมาณ",
+                        algorithms: [
+                            { name: "Linear Regression", url: "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html", note: "สมการความสัมพันธ์เชิงเส้นทางตรง ใช้งานง่ายอธิบายไว" },
+                            { name: "Ridge / Lasso Regression", url: "https://scikit-learn.org/stable/modules/linear_model.html#ridge-regression", note: "โมเดลที่มีการควบคุมความหนาแน่นเพื่อลดปัญหาสูญเสียความแปรปรวน (Regularization)" },
+                            { name: "Random Forest Regressor", url: "https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html", note: "ใช้พลังการรวมกันของต้นไม้ตัดสินใจหลายต้นเพื่อทำนายค่าที่เสถียร" }
+                        ]
+                    },
+                    clustering_result: {
+                        title: "Unsupervised Learning: Clustering (การแบ่งกลุ่มข้อมูล)",
+                        badge: "Clustering",
+                        badgeClass: "bg-green-950/60 text-green-400 border-green-800/30",
+                        desc: "โจทย์เหมาะสำหรับการค้นหาโครงสร้างและจัดกลุ่มข้อมูลที่อยู่เป็นกระจุกตามลักษณะทางสถิติร่วมกัน",
+                        algorithms: [
+                            { name: "K-Means Clustering", url: "https://scikit-learn.org/stable/modules/clustering.html#k-means", note: "แบ่งกลุ่มอ้างอิงระยะจุดกึ่งกลางกลุ่ม ยอดนิยมและรันได้ไว" },
+                            { name: "DBSCAN", url: "https://scikit-learn.org/stable/modules/clustering.html#dbscan", note: "แบ่งกลุ่มอิงตามความหนาแน่น จับกลุ่มรูปทรงเว้าโค้งได้ดีและตัดจุดรบกวนออก" }
+                        ]
+                    },
+                    dim_reduction_result: {
+                        title: "Unsupervised: Dimensionality Reduction (การลดมิติข้อมูล)",
+                        badge: "Dimensionality Reduction",
+                        badgeClass: "bg-green-950/60 text-green-400 border-green-800/30",
+                        desc: "โจทย์เหมาะสำหรับใช้ย่นย่อจำนวนตัวแปรของข้อมูลจากหลายสิบมิติให้ลดลงเพื่อการนำเสนอหรือการเตรียมเข้าตัววิเคราะห์หลัก",
+                        algorithms: [
+                            { name: "PCA (Principal Component Analysis)", url: "https://scikit-learn.org/stable/modules/decomposition.html#pca", note: "ลดมิติเชิงเส้นโดยรักษาค่าความแปรปรวนสูงสุดของชุดข้อมูล" },
+                            { name: "t-SNE", url: "https://scikit-learn.org/stable/modules/manifold.html#t-sne", note: "ลดมิติแบบไม่เชิงเส้น เหมาะสร้างแผนภาพ 2D/3D เพื่อตรวจสอบโครงสร้างการแยกตัวด้วยสายตา" }
+                        ]
+                    },
+                    anomaly_result: {
+                        title: "Unsupervised: Anomaly Detection (การตรวจจับจุดผิดปกติ)",
+                        badge: "Anomaly Detection",
+                        badgeClass: "bg-green-950/60 text-green-400 border-green-800/30",
+                        desc: "โจทย์ของคุณเน้นคัดแยกเอาข้อมูลแปลกแยก หรือข้อมูลที่มีแนวโน้มเป็นความผิดพลาดออกจากชุดข้อมูลปกติ",
+                        algorithms: [
+                            { name: "Isolation Forest", url: "https://scikit-learn.org/stable/modules/outlier_detection.html#isolation-forest", note: "สร้างโครงสร้างต้นไม้แบ่งแยกตัวที่เข้าข่ายแปลกประหลาดได้รวดเร็วกว่า" },
+                            { name: "One-Class SVM", url: "https://scikit-learn.org/stable/modules/outlier_detection.html#one-class-svm-versus-elliptic-envelope", note: "ระบุขอบเขตสำหรับกลุ่มปกติ เพื่อกรองข้อมูลตัวใหม่ที่อยู่นอกขอบเขตออกไป" }
+                        ]
+                    },
+                    class_simple_result: {
+                        title: "Supervised: Classification - Simple / Explainable (การจำแนกที่เน้นความเข้าใจ)",
+                        badge: "Classification",
+                        badgeClass: "bg-blue-950/60 text-blue-400 border-blue-800/30",
+                        desc: "เหมาะสำหรับงานจำแนกประเภทที่คุณต้องการชี้แจงกฎเกณฑ์หรืออธิบายได้ง่ายว่าทำไมระบบจึงตัดสินใจเลือกคำตอบนี้",
+                        algorithms: [
+                            { name: "Decision Tree Classifier", url: "https://scikit-learn.org/stable/modules/tree.html#classification", note: "ระบบแผนภูมิแสดงการแบ่งเงื่อนไข IF-THEN ที่เขียนสรุปออกมาเป็นกฎเกณฑ์ได้ทันที" },
+                            { name: "Naive Bayes", url: "https://scikit-learn.org/stable/modules/naive_bayes.html", note: "คำนวณรวดเร็วโดยใช้สถิติความน่าจะเป็นเบื้องต้นแบบมีเงื่อนไข" }
+                        ]
+                    },
+                    class_complex_result: {
+                        title: "Supervised: Classification - High Dimensional / Linear Boundary",
+                        badge: "Classification",
+                        badgeClass: "bg-blue-950/60 text-blue-400 border-blue-800/30",
+                        desc: "เหมาะสำหรับโจทย์จำแนกประเภทที่มีตัวแปรมากหรือชุดข้อมูลมีโครงสร้างคลาสซ้อนทับกันค่อนข้างมาก",
+                        algorithms: [
+                            { name: "SVM (Support Vector Classifier)", url: "https://scikit-learn.org/stable/modules/svm.html#classification", note: "เด่นในการหามาร์จินความห่างที่ดีสุดในการแยกประเภทข้อมูลมิติสูง" },
+                            { name: "Logistic Regression", url: "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html", note: "ประมวลค่าระดับสถิติที่รองรับการจำแนกและจูนปรับแต่งได้เร็ว" }
+                        ]
+                    },
+                    class_ensemble_result: {
+                        title: "Supervised: Classification - Ensemble / Complex (การจำแนกความแม่นยำสูง)",
+                        badge: "Classification",
+                        badgeClass: "bg-blue-950/60 text-blue-400 border-blue-800/30",
+                        desc: "เหมาะสำหรับใช้ในการแข่งขันประลองผลลัพธ์ หรือต้องการโมเดลที่มีความแม่นยำและความทนทานเป็นเลิศ",
+                        algorithms: [
+                            { name: "Random Forest Classifier", url: "https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html", note: "รวบรวมพลังต้นไม้ตัดสินใจร่วมโหวตคำตอบร่วมกัน" },
+                            { name: "Neural Networks (MLP Classifier)", url: "https://scikit-learn.org/stable/modules/neural_networks_supervised.html#multi-layer-perceptron", note: "โครงข่ายประสาทลึกหลายเลเยอร์จำลองพฤติกรรมเซลล์ประสาทสมอง" }
+                        ]
+                    }
+                };
+
+                let wizardHistory = [];
+
+                function showStep(stepKey) {
+                    const screen = document.getElementById("wizard-screen");
+                    screen.style.opacity = 0;
+                    
+                    setTimeout(() => {
+                        // Check if outcome
+                        if (wizardOutcomes[stepKey]) {
+                            showOutcome(stepKey);
+                            return;
+                        }
+
+                        const step = wizardSteps[stepKey];
+                        if (!step) return;
+
+                        let optionsHtml = "";
+                        step.options.forEach(opt => {
+                            optionsHtml += `
+                                <button onclick="selectOption('${opt.nextStep}', '${stepKey}')" 
+                                    class="w-full text-left p-4 bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700 rounded-xl transition-all duration-200 hover:-translate-x-1 hover:border-indigo-500 hover:shadow-md text-sm font-semibold">
+                                    ${opt.text}
+                                </button>
+                            `;
+                        });
+
+                        let backButton = "";
+                        if (wizardHistory.length > 0) {
+                            backButton = `
+                                <button onclick="goBack()" class="flex items-center space-x-1 text-slate-450 hover:text-slate-350 text-xs transition mt-4">
+                                    <span>&larr; ย้อนกลับคำถามก่อนหน้า</span>
+                                </button>
+                            `;
+                        }
+
+                        screen.innerHTML = `
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-100">${step.question}</h3>
+                                <p class="text-slate-400 text-xs mt-1.5 leading-relaxed">${step.desc}</p>
+                                <div class="space-y-3 mt-6">
+                                    ${optionsHtml}
+                                </div>
+                                ${backButton}
+                            </div>
+                        `;
+                        screen.style.opacity = 1;
+                    }, 150);
+                }
+
+                function selectOption(nextStep, currentStep) {
+                    wizardHistory.push(currentStep);
+                    showStep(nextStep);
+                }
+
+                function goBack() {
+                    if (wizardHistory.length > 0) {
+                        const prevStep = wizardHistory.pop();
+                        showStep(prevStep);
+                    }
+                }
+
+                function resetWizard() {
+                    wizardHistory = [];
+                    showStep("start");
+                }
+
+                function showOutcome(outcomeKey) {
+                    const screen = document.getElementById("wizard-screen");
+                    const outcome = wizardOutcomes[outcomeKey];
+                    if (!outcome) return;
+
+                    let algosHtml = "";
+                    outcome.algorithms.forEach(algo => {
+                        algosHtml += `
+                            <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <h5 class="text-sm font-bold text-slate-200">${algo.name}</h5>
+                                    <p class="text-[11px] text-slate-450 mt-0.5 leading-relaxed">${algo.note}</p>
+                                </div>
+                                <a href="${algo.url}" target="_blank" rel="noopener" class="text-xs font-semibold text-sky-400 hover:text-sky-300 hover:underline shrink-0">
+                                    เปิดคู่มือ Scikit-Learn &rarr;
+                                </a>
+                            </div>
+                        `;
+                    });
+
+                    screen.innerHTML = `
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded border ${outcome.badgeClass}">
+                                    ผลวิเคราะห์: ${outcome.badge}
+                                </span>
+                            </div>
+                            <h3 class="text-xl font-bold mt-3 text-slate-100">${outcome.title}</h3>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">${outcome.desc}</p>
+                            
+                            <div class="space-y-2.5 mt-5">
+                                ${algosHtml}
+                            </div>
+                            
+                            <button onclick="resetWizard()" class="mt-6 w-full text-center py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all duration-200 shadow hover:shadow-md">
+                                🔄 ทำการวิเคราะห์วิซาร์ดอีกครั้ง
+                            </button>
+                        </div>
+                    `;
+                    screen.style.opacity = 1;
+                }
+
+                // Initial setup
+                document.addEventListener("DOMContentLoaded", () => {
+                    resetWizard();
+                });
+            </script>
+        </section>
+
+
     
                         <!-- Section: Practical Labs -->
         <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 text-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-slate-800 mt-8">
