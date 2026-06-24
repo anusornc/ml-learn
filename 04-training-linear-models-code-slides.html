@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Walkthrough: Training Linear Models</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '\\\\(', right: '\\\\)', display: false}]});"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            color-scheme: dark;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #0b1020;
+        }
+
+        .slide {
+            min-height: calc(100vh - 96px);
+            display: none;
+        }
+
+        .slide.active {
+            display: grid;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .code-card {
+            box-shadow: 0 22px 80px rgba(15, 23, 42, 0.38);
+        }
+    </style>
+</head>
+<body class="text-slate-100">
+    <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_20%_10%,rgba(14,165,233,0.18),transparent_28%),radial-gradient(circle_at_85%_20%,rgba(16,185,129,0.16),transparent_26%),linear-gradient(135deg,#0b1020_0%,#111827_45%,#0f172a_100%)]"></div>
+
+    <nav class="sticky top-0 z-30 border-b border-white/10 bg-slate-950/82 backdrop-blur-xl">
+        <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+            <div class="min-w-0">
+                <a href="03-ML-Regression.html" class="text-xs font-semibold text-sky-300 hover:text-sky-200">&larr; กลับบท Regression</a>
+                <h1 class="truncate text-sm font-bold text-white md:text-lg">04 Training Linear Models: Code Walkthrough</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="prevBtn" class="rounded-md border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-35">ก่อนหน้า</button>
+                <span id="slideCounter" class="min-w-20 text-center text-xs font-semibold text-slate-400">1 / 18</span>
+                <button id="nextBtn" class="rounded-md bg-sky-500 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-35">ถัดไป</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="mx-auto max-w-6xl px-4 py-6">
+        <section class="slide active place-items-center" data-title="ภาพรวม">
+            <div class="max-w-4xl text-center">
+                <p class="mb-4 text-sm font-bold uppercase tracking-[0.24em] text-emerald-300">Chapter 4 Notebook Guide</p>
+                <h2 class="text-3xl font-extrabold leading-snug text-white md:text-5xl">อ่านโค้ดเทรนโมเดลเชิงเส้นให้เป็นระบบ</h2>
+                <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">สไลด์นี้แยก `04_training_linear_models.py` ออกเป็นช่วง ๆ เพื่อให้นักศึกษาเข้าใจว่าแต่ละ block เตรียมอะไร คำนวณอะไร และเชื่อมกับแนวคิด Machine Learning อย่างไร</p>
+                <div class="mt-8 grid gap-3 text-left md:grid-cols-3">
+                    <div class="rounded-lg border border-sky-400/30 bg-sky-400/10 p-4">
+                        <p class="text-sm font-bold text-sky-200">1. สร้างและฟิตโมเดล</p>
+                        <p class="mt-1 text-sm text-slate-300">Normal Equation, LinearRegression, Gradient Descent</p>
+                    </div>
+                    <div class="rounded-lg border border-emerald-400/30 bg-emerald-400/10 p-4">
+                        <p class="text-sm font-bold text-emerald-200">2. คุมความซับซ้อน</p>
+                        <p class="mt-1 text-sm text-slate-300">Polynomial Regression, Learning Curves, Regularization</p>
+                    </div>
+                    <div class="rounded-lg border border-indigo-400/30 bg-indigo-400/10 p-4">
+                        <p class="text-sm font-bold text-indigo-200">3. ขยายไป Classification</p>
+                        <p class="mt-1 text-sm text-slate-300">Logistic Regression, Softmax, Early Stopping</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]" data-title="Setup">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-sky-300">Part 1</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Setup คือการทำให้ทุกเครื่องเริ่มจากสภาพแวดล้อมเดียวกัน</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">ก่อนเรียน algorithm ต้องตรวจ Python, Scikit-Learn, font ของกราฟ และโฟลเดอร์บันทึกรูป เพื่อให้ผลลัพธ์ใน Colab อธิบายซ้ำได้และใช้ภาพประกอบได้ทันที</p>
+                <ul class="mt-6 space-y-3 text-slate-300">
+                    <li><strong class="text-white">assert version</strong> ป้องกัน error จาก library เก่า</li>
+                    <li><strong class="text-white">plt.rc(...)</strong> ตั้งค่ากราฟให้อ่านง่าย</li>
+                    <li><strong class="text-white">save_fig()</strong> รวมขั้นตอนบันทึกรูปไว้จุดเดียว</li>
+                </ul>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-sm leading-relaxed text-slate-200"><code>import sys
+assert sys.version_info &gt;= (3, 7)
+
+from packaging import version
+import sklearn
+assert version.parse(sklearn.__version__) &gt;= version.parse("1.0.1")
+
+import matplotlib.pyplot as plt
+plt.rc('font', size=14)
+
+from pathlib import Path
+IMAGES_PATH = Path() / "images" / "training_linear_models"
+IMAGES_PATH.mkdir(parents=True, exist_ok=True)
+
+def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
+    path = IMAGES_PATH / f"{fig_id}.{fig_extension}"
+    if tight_layout:
+        plt.tight_layout()
+    plt.savefig(path, format=fig_extension, dpi=resolution)</code></pre>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.95fr_1.05fr]" data-title="Synthetic Data">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-emerald-300">Part 2</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">สร้างข้อมูลจำลองเพื่อรู้คำตอบที่ควรได้</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">โค้ดสร้างข้อมูลจากเส้นตรงจริง `y = 4 + 3x` แล้วเติม noise เพื่อให้เหมือนข้อมูลจริง การใช้ seed ทำให้ทุกคนได้ข้อมูลชุดเดียวกัน</p>
+                <div class="mt-6 rounded-lg border border-emerald-400/25 bg-emerald-400/10 p-4">
+                    <p class="font-semibold text-emerald-100">แนวคิดสำคัญ</p>
+                    <p class="mt-1 text-slate-300">โมเดลควรเรียนรู้ค่าใกล้ `intercept = 4` และ `coef = 3` แม้ข้อมูลมี noise</p>
+                </div>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-sm leading-relaxed text-slate-200"><code>import numpy as np
+
+np.random.seed(42)
+m = 100
+X = 2 * np.random.rand(m, 1)
+y = 4 + 3 * X + np.random.randn(m, 1)
+
+plt.figure(figsize=(6, 4))
+plt.plot(X, y, "b.")
+plt.xlabel("$x_1$")
+plt.ylabel("$y$", rotation=0)
+plt.axis([0, 2, 0, 15])
+plt.grid()
+save_fig("generated_data_plot")</code></pre>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.9fr_1.1fr]" data-title="Normal Equation">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-sky-300">Part 3</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Normal Equation: หาค่าน้ำหนักที่ดีที่สุดโดยตรง</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">ส่วนนี้เพิ่มคอลัมน์ bias `x0 = 1` แล้วใช้สูตรเมทริกซ์เพื่อหา `theta_best` โดยไม่ต้องวนรอบฝึกหลาย epoch</p>
+                <p class="mt-5 rounded-lg border border-sky-400/30 bg-sky-400/10 p-4 text-slate-300">เหมาะสำหรับอธิบายว่า Linear Regression คือการหา `theta` ที่ทำให้เส้นทำนายใกล้จุดข้อมูลมากที่สุด</p>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-sm leading-relaxed text-slate-200"><code>from sklearn.preprocessing import add_dummy_feature
+
+X_b = add_dummy_feature(X)  # add x0 = 1 to each instance
+theta_best = np.linalg.inv(X_b.T @ X_b) @ X_b.T @ y
+
+X_new = np.array([[0], [2]])
+X_new_b = add_dummy_feature(X_new)
+y_predict = X_new_b @ theta_best
+
+plt.plot(X_new, y_predict, "r-", label="Predictions")
+plt.plot(X, y, "b.")</code></pre>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.9fr_1.1fr]" data-title="Scikit-Learn API">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-indigo-300">Part 4</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Scikit-Learn ทำงานแบบ fit แล้ว predict</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">หลังจากเห็นสูตรด้วย NumPy แล้ว notebook แสดง API ที่ใช้จริงในงาน: สร้าง model, fit ด้วยข้อมูล, แล้ว predict ข้อมูลใหม่</p>
+                <ul class="mt-6 space-y-3 text-slate-300">
+                    <li>`intercept_` คือ bias หรือจุดเริ่มต้นของเส้นเมื่อ feature มีค่า 0</li>
+                    <li>`coef_` คือค่าน้ำหนักของ feature</li>
+                    <li>`lstsq()` และ `pinv()` เป็นวิธีเชิงเส้นพีชคณิตที่อยู่เบื้องหลัง</li>
+                </ul>
+                <div class="mt-4 rounded-lg border border-emerald-300/25 bg-emerald-300/10 p-4">
+                    <p class="text-sm font-bold text-emerald-100">bias คืออะไร?</p>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-300">bias คือค่าคงที่ที่โมเดลบวกเพิ่มเข้าไปเสมอ เช่นสมการ `y = 3x + 4` ค่า `4` คือ bias เพราะแม้ `x = 0` โมเดลก็ยังทำนาย `y = 4` ไม่ใช่เริ่มจากศูนย์</p>
+                </div>
+                <div class="mt-6 grid gap-3">
+                    <div class="rounded-lg border border-indigo-300/25 bg-indigo-300/10 p-4">
+                        <p class="text-sm font-bold text-indigo-100">`np.linalg.lstsq()` คืออะไร?</p>
+                        <p class="mt-1 text-sm leading-relaxed text-slate-300">ย่อจาก least squares solver: หา `theta` ที่ทำให้ผลรวมกำลังสองของ error ต่ำที่สุด แม้ระบบสมการมีข้อมูลมากกว่าจำนวน unknown เช่น มีจุดข้อมูล 100 จุด แต่มีพารามิเตอร์แค่ 2 ตัว</p>
+                        <div class="mt-3 grid gap-2 text-xs leading-relaxed text-slate-300 md:grid-cols-2">
+                            <p><strong class="text-indigo-100">theta_best_svd</strong>: ค่าน้ำหนักที่แก้ได้ เช่น bias และ slope</p>
+                            <p><strong class="text-indigo-100">residuals</strong>: ผลรวม error กำลังสองที่เหลือหลังฟิตเส้นแล้ว</p>
+                            <p><strong class="text-indigo-100">rank</strong>: จำนวนมิติ/คอลัมน์อิสระจริงของ X_b</p>
+                            <p><strong class="text-indigo-100">s</strong>: singular values ใช้บอกความแข็งแรงของแต่ละมิติในข้อมูล</p>
+                        </div>
+                    </div>
+                    <div class="rounded-lg border border-sky-300/25 bg-sky-300/10 p-4">
+                        <p class="text-sm font-bold text-sky-100">`np.linalg.pinv()` คืออะไร?</p>
+                        <p class="mt-1 text-sm leading-relaxed text-slate-300">คำนวณ pseudoinverse หรือ X+ เพื่อใช้แทน inverse ในกรณีที่เมทริกซ์ไม่เป็น square matrix หรือ inverse ปกติหาไม่ได้ จากนั้นคูณ `X+ @ y` เพื่อได้ค่าน้ำหนักที่ดีที่สุดในเชิง least squares</p>
+                    </div>
+                    <p class="text-sm leading-relaxed text-slate-400">สรุปสั้น ๆ: `lstsq()` แก้ปัญหา least squares โดยตรง ส่วน `pinv()` สร้างเมทริกซ์ผกผันแบบ generalized ก่อนแล้วค่อยคูณกับ `y`; ทั้งสองช่วยให้โมเดลเสถียรกว่าการใช้ `inv(X.T @ X)` ตรง ๆ เมื่อข้อมูลมี feature ซ้ำซ้อนหรือเมทริกซ์เกือบ singular</p>
+                </div>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-sm leading-relaxed text-slate-200"><code>from sklearn.linear_model import LinearRegression
+
+lin_reg = LinearRegression()
+lin_reg.fit(X, y)
+lin_reg.intercept_, lin_reg.coef_
+
+lin_reg.predict(X_new)
+
+theta_best_svd, residuals, rank, s = np.linalg.lstsq(X_b, y, rcond=1e-6)
+np.linalg.pinv(X_b) @ y</code></pre>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]" data-title="Batch Gradient Descent">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-rose-300">Part 5</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Gradient Descent: ค่อย ๆ ปรับน้ำหนักให้ error ลดลง</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">แทนที่จะคำนวณคำตอบตรง ๆ เราเริ่มจาก `theta` สุ่ม แล้วคำนวณ gradient เพื่อบอกว่าควรขยับน้ำหนักไปทิศไหน</p>
+                <div class="mt-6 grid gap-3 md:grid-cols-2">
+                    <div class="rounded-lg bg-slate-900/70 p-4"><p class="font-bold text-white">eta</p><p class="text-sm text-slate-300">learning rate: ก้าวใหญ่หรือเล็ก</p></div>
+                    <div class="rounded-lg bg-slate-900/70 p-4"><p class="font-bold text-white">n_epochs</p><p class="text-sm text-slate-300">จำนวนรอบการเรียนรู้</p></div>
+                </div>
+                <div class="mt-5 rounded-lg border border-rose-300/25 bg-rose-300/10 p-4">
+                    <p class="text-sm font-bold text-rose-100">แกะบรรทัด gradient</p>
+                    <div class="mt-2 rounded-md border border-rose-200/15 bg-slate-950/50 p-3 text-sm leading-relaxed text-slate-200">
+                        <p class="text-xs font-bold uppercase tracking-wide text-rose-100">Cost function</p>
+                        <div class="mt-1 overflow-x-auto rounded bg-slate-950/70 px-3 py-2 text-center text-slate-100">
+                            $$J(\theta)=\frac{1}{m}\sum_{i=1}^{m}\left(h_\theta(x^{(i)})-y^{(i)}\right)^2$$
+                        </div>
+                        <p class="mt-1 text-xs leading-relaxed text-slate-300">Cost function คือฟังก์ชันที่ใช้วัดว่าโมเดลผิดมากแค่ไหน ยิ่ง `J(theta)` ต่ำ แปลว่าเส้นทำนายอยู่ใกล้ข้อมูลจริงมากขึ้น</p>
+                        <p class="mt-2 text-xs font-bold uppercase tracking-wide text-rose-100">Vector form</p>
+                        <div class="mt-1 overflow-x-auto rounded bg-slate-950/70 px-3 py-2 text-center text-slate-100">
+                            $$J(\theta)=\frac{1}{m}\lVert X_b\theta-y\rVert^2$$
+                        </div>
+                        <p class="mt-1 text-xs leading-relaxed text-slate-300">Vector form คือการเขียนสูตรเดิมให้คำนวณทุกตัวอย่างพร้อมกันด้วยเมทริกซ์ แทนการวนรวมทีละแถวในเครื่องหมาย Σ</p>
+                        <p class="mt-2 text-xs font-bold uppercase tracking-wide text-rose-100">Gradient ที่ต้องหา</p>
+                        <div class="mt-1 overflow-x-auto rounded bg-slate-950/70 px-3 py-2 text-center text-slate-100">
+                            $$\nabla_\theta J(\theta)=\frac{2}{m}X_b^T(X_b\theta-y)$$
+                        </div>
+                        <p class="mt-1 text-xs leading-relaxed text-slate-300">Gradient ได้จากการหาอนุพันธ์ของ `J(theta)` ตาม `theta` เพื่อบอกทิศทางที่ cost เพิ่มเร็วที่สุด จากนั้นโค้ดใช้ `theta = theta - eta * gradients` เพื่อเดินสวนทางให้ cost ลดลง</p>
+                    </div>
+                    <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-slate-300">
+                        <li>`X_b @ theta` คือค่าทำนายของโมเดลทุกแถว</li>
+                        <li>`X_b @ theta - y` คือ error ระหว่างค่าทำนายกับค่าจริง</li>
+                        <li>`X_b.T @ error` รวมผลกระทบของ error กลับไปหาแต่ละพารามิเตอร์</li>
+                        <li>`2 / m` มาจากอนุพันธ์ของ Mean Squared Error และการเฉลี่ยตามจำนวนข้อมูล</li>
+                    </ul>
+                </div>
+                <div class="mt-3 rounded-lg border border-slate-600 bg-slate-900/70 p-4">
+                    <p class="text-sm font-bold text-white">`@` ใน Python คืออะไร?</p>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-300">`@` คือ matrix multiplication เช่น `A @ B` หมายถึงคูณเมทริกซ์/เวกเตอร์ตามกฎ linear algebra ไม่ใช่คูณสมาชิกต่อสมาชิกแบบ `A * B`</p>
+                </div>
+                <p class="mt-3 text-sm leading-relaxed text-slate-400">สูตรนี้ไม่ได้เป็น “สูตรของคนเดียว” โดยตรง แต่เกิดจากการหาอนุพันธ์ของ cost function แบบ MSE สำหรับ Linear Regression ส่วนแนวคิด gradient descent เป็นวิธี optimization คลาสสิกที่มักอ้างถึงงานของ Augustin-Louis Cauchy ในศตวรรษที่ 19</p>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-sm leading-relaxed text-slate-200"><code>eta = 0.1
+n_epochs = 1000
+m = len(X_b)
+
+np.random.seed(42)
+theta = np.random.randn(2, 1)
+
+for epoch in range(n_epochs):
+    gradients = 2 / m * X_b.T @ (X_b @ theta - y)
+    theta = theta - eta * gradients</code></pre>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.88fr_1.12fr]" data-title="SGD and Mini-batch">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-orange-300">Part 6</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">SGD และ Mini-batch ลดต้นทุนต่อรอบ</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">Batch ใช้ข้อมูลทั้งหมดทุกครั้ง ส่วน SGD ใช้ทีละตัวอย่าง และ Mini-batch ใช้ทีละกลุ่มเล็ก ๆ จึงเร็วกว่าเมื่อข้อมูลใหญ่</p>
+                <div class="mt-5 grid gap-3">
+                    <div class="rounded-lg border border-blue-300/25 bg-blue-300/10 p-3">
+                        <p class="text-sm font-bold text-blue-100">Batch GD</p>
+                        <p class="mt-1 text-sm leading-relaxed text-slate-300">เลือกเมื่อข้อมูลไม่ใหญ่มากและต้องการ update ที่นิ่ง เพราะคำนวณ gradient จากข้อมูลทั้งหมด แต่หนึ่งรอบจะช้าถ้าข้อมูลเยอะ</p>
+                    </div>
+                    <div class="rounded-lg border border-rose-300/25 bg-rose-300/10 p-3">
+                        <p class="text-sm font-bold text-rose-100">SGD</p>
+                        <p class="mt-1 text-sm leading-relaxed text-slate-300">เลือกเมื่อข้อมูลใหญ่มากหรือต้องการเริ่มเรียนรู้เร็ว ใช้ทีละตัวอย่างจึงเร็วต่อ update แต่เส้นทางการเรียนรู้จะแกว่งกว่า</p>
+                    </div>
+                    <div class="rounded-lg border border-emerald-300/25 bg-emerald-300/10 p-3">
+                        <p class="text-sm font-bold text-emerald-100">Mini-batch GD</p>
+                        <p class="mt-1 text-sm leading-relaxed text-slate-300">มักเป็นตัวเลือกหลักในงานจริง เพราะสมดุลระหว่างความเร็วและความนิ่ง ใช้เวกเตอร์/GPU ได้ดี และไม่แกว่งเท่า SGD</p>
+                    </div>
+                </div>
+                <p class="mt-5 rounded-lg border border-orange-300/25 bg-orange-300/10 p-4 text-slate-300">`learning_schedule()` ทำให้ learning rate ค่อย ๆ ลดลง เพื่อลดการกระโดดรอบจุดเหมาะสม</p>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-xs leading-relaxed text-slate-200"><code># Batch GD: ใช้ข้อมูลทั้งหมดในหนึ่ง update
+for epoch in range(n_epochs):
+    gradients = 2 / m * X_b.T @ (X_b @ theta - y)
+    theta = theta - eta * gradients
+
+# SGD: สุ่มข้อมูลทีละ 1 แถวในหนึ่ง update
+for epoch in range(n_epochs):
+    for iteration in range(m):
+        random_index = np.random.randint(m)
+        xi = X_b[random_index : random_index + 1]
+        yi = y[random_index : random_index + 1]
+        gradients = 2 * xi.T @ (xi @ theta - yi)
+        eta = learning_schedule(epoch * m + iteration)
+        theta = theta - eta * gradients
+
+# Mini-batch GD: ใช้ข้อมูลทีละกลุ่มเล็ก ๆ
+for epoch in range(n_epochs):
+    shuffled_indices = np.random.permutation(m)
+    X_b_shuffled = X_b[shuffled_indices]
+    y_shuffled = y[shuffled_indices]
+    for iteration in range(0, n_batches_per_epoch):
+        idx = iteration * minibatch_size
+        xi = X_b_shuffled[idx : idx + minibatch_size]
+        yi = y_shuffled[idx : idx + minibatch_size]
+        gradients = 2 / minibatch_size * xi.T @ (xi @ theta - yi)
+        theta = theta - eta * gradients
+
+# Scikit-Learn: ใช้ SGDRegressor สำหรับ SGD-style training
+sgd_reg = SGDRegressor(max_iter=1000, tol=1e-5,
+                       penalty=None, eta0=0.01)</code></pre>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]" data-title="Polynomial Regression">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-fuchsia-300">Part 7</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Polynomial Regression ทำให้เส้นตรงจับรูปโค้งได้</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">แนวคิดคือสร้าง feature ใหม่ เช่น `x^2` แล้วให้ Linear Regression เรียนรู้บน feature ที่ขยายแล้ว</p>
+                <div class="mt-6 rounded-lg border border-fuchsia-300/25 bg-fuchsia-300/10 p-4 text-slate-300">โมเดลยังเป็น linear ในเชิงพารามิเตอร์ แต่เส้นที่วาดบนแกน x กลายเป็นเส้นโค้ง</div>
+                <div class="mt-4 rounded-lg border border-slate-700 bg-slate-900/75 p-4">
+                    <p class="text-sm font-bold text-white">ทำไมต้องใช้ Polynomial?</p>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-300">ถ้าจุดข้อมูลมีรูปแบบโค้ง เส้นตรงธรรมดาจะ underfit เพราะอธิบายความสัมพันธ์ได้แค่แนวเพิ่ม/ลดเป็นเส้นตรง วิธีแก้คือเพิ่ม feature ที่บอกความโค้ง เช่น `x²`, `x³` แล้วให้ Linear Regression หา coefficient ของ feature เหล่านี้</p>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-400">พูดง่าย ๆ: เราไม่ได้เปลี่ยน algorithm หลัก แต่เปลี่ยน “หน้าตาข้อมูล input” ให้โมเดลมีข้อมูลพอจะวาดเส้นโค้งได้</p>
+                </div>
+                <div class="mt-5 rounded-xl border border-slate-700 bg-slate-950/70 p-4">
+                    <div class="flex items-center justify-between gap-3">
+                        <p class="text-sm font-bold text-white">ภาพเปรียบเทียบเส้นตรงกับเส้นโค้ง</p>
+                        <div class="flex gap-3 text-[11px] text-slate-300">
+                            <span class="inline-flex items-center gap-1"><span class="h-0.5 w-5 bg-rose-400"></span>Linear</span>
+                            <span class="inline-flex items-center gap-1"><span class="h-0.5 w-5 bg-fuchsia-300"></span>Polynomial</span>
+                        </div>
+                    </div>
+                    <svg viewBox="0 0 520 280" role="img" aria-label="Polynomial regression graph" class="mt-3 h-auto w-full">
+                        <rect x="0" y="0" width="520" height="280" rx="12" fill="#0f172a"/>
+                        <g stroke="#334155" stroke-width="1">
+                            <line x1="58" y1="32" x2="58" y2="224"/>
+                            <line x1="58" y1="224" x2="486" y2="224"/>
+                            <line x1="58" y1="176" x2="486" y2="176" opacity="0.45"/>
+                            <line x1="58" y1="128" x2="486" y2="128" opacity="0.45"/>
+                            <line x1="58" y1="80" x2="486" y2="80" opacity="0.45"/>
+                            <line x1="144" y1="32" x2="144" y2="224" opacity="0.35"/>
+                            <line x1="230" y1="32" x2="230" y2="224" opacity="0.35"/>
+                            <line x1="316" y1="32" x2="316" y2="224" opacity="0.35"/>
+                            <line x1="402" y1="32" x2="402" y2="224" opacity="0.35"/>
+                        </g>
+                        <text x="42" y="36" fill="#94a3b8" font-size="12">y</text>
+                        <text x="488" y="244" fill="#94a3b8" font-size="12">x</text>
+                        <path d="M70 132 L485 96" fill="none" stroke="#fb7185" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+                        <path d="M70 194 C130 134, 172 86, 238 96 C304 106, 336 174, 392 170 C438 166, 462 128, 485 78" fill="none" stroke="#f0abfc" stroke-width="5" stroke-linecap="round"/>
+                        <g fill="#38bdf8" stroke="#e0f2fe" stroke-width="2">
+                            <circle cx="80" cy="202" r="5"/>
+                            <circle cx="116" cy="160" r="5"/>
+                            <circle cx="154" cy="122" r="5"/>
+                            <circle cx="194" cy="88" r="5"/>
+                            <circle cx="236" cy="101" r="5"/>
+                            <circle cx="276" cy="126" r="5"/>
+                            <circle cx="314" cy="169" r="5"/>
+                            <circle cx="354" cy="186" r="5"/>
+                            <circle cx="394" cy="163" r="5"/>
+                            <circle cx="436" cy="126" r="5"/>
+                            <circle cx="476" cy="82" r="5"/>
+                        </g>
+                        <text x="84" y="56" fill="#f0abfc" font-size="13" font-weight="700">เพิ่ม feature x² แล้ว fit เส้นโค้งได้</text>
+                        <text x="296" y="108" fill="#fb7185" font-size="12">เส้นตรงพลาดรูปแบบโค้ง</text>
+                    </svg>
+                </div>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-sm leading-relaxed text-slate-200"><code>from sklearn.preprocessing import PolynomialFeatures
+
+poly_features = PolynomialFeatures(degree=2, include_bias=False)
+X_poly = poly_features.fit_transform(X)
+
+lin_reg = LinearRegression()
+lin_reg.fit(X_poly, y)
+
+X_new = np.linspace(-3, 3, 100).reshape(100, 1)
+X_new_poly = poly_features.transform(X_new)
+y_new = lin_reg.predict(X_new_poly)</code></pre>
+                <div class="mt-4 rounded-lg border border-fuchsia-300/25 bg-fuchsia-300/10 p-4">
+                    <p class="text-sm font-bold text-fuchsia-100">ทำไมต้องใช้ `np.linspace(-3, 3, 100).reshape(100, 1)`?</p>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-300">`np.linspace(-3, 3, 100)` สร้างค่า x ใหม่ 100 จุด ตั้งแต่ -3 ถึง 3 เพื่อเอาไปวาดเส้น prediction ให้ต่อเนื่องและเรียบ ไม่ใช่ทำนายแค่จุดข้อมูลเดิม</p>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-300">`.reshape(100, 1)` เปลี่ยน array จากรูปแบบแถวเดียว `(100,)` ให้เป็น column vector `(100, 1)` เพราะ Scikit-Learn คาดว่า input ต้องมีรูป `(จำนวนตัวอย่าง, จำนวน feature)`</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]" data-title="Learning Curves">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-cyan-300">Part 8</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Learning Curves ใช้ดู underfitting และ overfitting</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">โค้ดวัด RMSE ของ train และ validation เมื่อเพิ่มจำนวนข้อมูลฝึก ถ้าเส้นทั้งสองสูงใกล้กันคือ underfitting ถ้าห่างกันมากมักเป็น overfitting</p>
+                <p class="mt-5 rounded-lg border border-cyan-300/25 bg-cyan-300/10 p-4 text-slate-300">ส่วนนี้สอนให้นักศึกษาไม่ดูแค่คะแนน train แต่ต้องดู validation ด้วย</p>
+                <div class="mt-5 rounded-lg border border-cyan-300/25 bg-slate-950/60 p-4">
+                    <p class="text-sm font-bold text-cyan-100">RMSE คืออะไร?</p>
+                    <div class="mt-2 overflow-x-auto rounded bg-slate-950/80 px-3 py-2 text-center text-slate-100">
+                        $$RMSE=\sqrt{\frac{1}{m}\sum_{i=1}^{m}\left(\hat{y}^{(i)}-y^{(i)}\right)^2}$$
+                    </div>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-300">RMSE คือรากที่สองของค่า error กำลังสองเฉลี่ย หน่วยจะกลับมาเป็นหน่วยเดียวกับ target เช่น ถ้าทำนายราคา RMSE ก็อยู่ในหน่วยราคา</p>
+                </div>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-sm leading-relaxed text-slate-200"><code>from sklearn.model_selection import learning_curve
+
+train_sizes, train_scores, valid_scores = learning_curve(
+    LinearRegression(), X, y,
+    train_sizes=np.linspace(0.01, 1.0, 40),
+    cv=5,
+    scoring="neg_root_mean_squared_error")  # Scikit-Learn ใช้คะแนนติดลบ
+
+# กลับเครื่องหมายลบให้เป็นค่า RMSE จริง เพราะ error ยิ่งน้อยยิ่งดี
+train_errors = -train_scores.mean(axis=1)
+valid_errors = -valid_scores.mean(axis=1)</code></pre>
+                <p class="mt-3 rounded-lg border border-cyan-300/25 bg-slate-900/75 p-3 text-sm leading-relaxed text-slate-300">หมายเหตุ: `neg_root_mean_squared_error` คือ RMSE ที่ใส่เครื่องหมายลบ เพราะระบบ scoring ของ Scikit-Learn มองว่า “คะแนนยิ่งมากยิ่งดี” แต่ RMSE เป็น error ที่ “ยิ่งน้อยยิ่งดี” จึงต้องใส่ `-` หน้า score เพื่อแปลงกลับเป็น RMSE จริง</p>
+                <div class="mt-4 grid gap-3 text-sm md:grid-cols-2">
+                    <div class="rounded-lg border border-cyan-300/25 bg-cyan-300/10 p-3">
+                        <p class="font-bold text-cyan-100">ใช้ RMSE เมื่อ</p>
+                        <p class="mt-1 leading-relaxed text-slate-300">อยากอ่าน error ในหน่วยเดียวกับ target และต้องการลงโทษ error ใหญ่ ๆ มากเป็นพิเศษ</p>
+                    </div>
+                    <div class="rounded-lg border border-blue-300/25 bg-blue-300/10 p-3">
+                        <p class="font-bold text-blue-100">ใช้ MSE เมื่อ</p>
+                        <p class="mt-1 leading-relaxed text-slate-300">ต้องการ cost function ที่ smooth สำหรับ optimization แต่ค่าที่ได้เป็นหน่วยยกกำลังสองจึงตีความยากกว่า</p>
+                    </div>
+                    <div class="rounded-lg border border-emerald-300/25 bg-emerald-300/10 p-3">
+                        <p class="font-bold text-emerald-100">ใช้ MAE เมื่อ</p>
+                        <p class="mt-1 leading-relaxed text-slate-300">ข้อมูลมี outlier เยอะ และไม่อยากให้ error ใหญ่บางจุดครอบงำผลรวมมากเกินไป</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-600 bg-slate-900/70 p-3">
+                        <p class="font-bold text-white">Metric อื่น ๆ</p>
+                        <p class="mt-1 leading-relaxed text-slate-300">ถ้าเป็น classification ให้ใช้ accuracy, precision, recall, F1 หรือ ROC-AUC ตามเป้าหมายของปัญหา</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.9fr_1.1fr]" data-title="Regularization">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-lime-300">Part 9</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Regularization คือการลงโทษโมเดลที่ซับซ้อนเกินไป</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">Ridge ใช้ L2 penalty, Lasso ใช้ L1 penalty และ Elastic Net ผสมทั้งสองแบบ เพื่อช่วยลด overfitting โดยเฉพาะเมื่อใช้ polynomial degree สูง</p>
+                <ul class="mt-6 space-y-3 text-slate-300">
+                    <li><strong class="text-white">Ridge</strong> ลดน้ำหนักให้เล็กลง</li>
+                    <li><strong class="text-white">Lasso</strong> ดันบางน้ำหนักเป็นศูนย์ จึงช่วยเลือก feature</li>
+                    <li><strong class="text-white">Elastic Net</strong> ประนีประนอมระหว่าง Ridge และ Lasso</li>
+                </ul>
+                <div class="mt-5 rounded-lg border border-lime-300/25 bg-lime-300/10 p-4">
+                    <p class="text-sm font-bold text-lime-100">ชื่อแปลก แต่ idea ง่าย</p>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-300">ทั้งสามตัวคือ Linear Regression ที่เพิ่ม “ค่าปรับ” เข้าไปใน cost function เพื่อบอกโมเดลว่าอย่าใช้ coefficient ใหญ่เกินจำเป็น เพราะ coefficient ใหญ่ทำให้เส้นแกว่งและ overfit ได้ง่าย</p>
+                </div>
+                <div class="mt-4 rounded-lg border border-slate-700 bg-slate-900/75 p-4">
+                    <p class="text-sm font-bold text-white">เกร็ดชื่อเรียก</p>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-300"><strong class="text-lime-100">Ridge</strong> มาจาก ridge regression ที่เพิ่มค่าบนแนวทแยงของเมทริกซ์ ทำให้การแก้สมการนิ่งขึ้น คล้ายสร้าง “สัน” ช่วยพยุงปัญหาที่ไม่เสถียร</p>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-300"><strong class="text-lime-100">Lasso</strong> ย่อจาก Least Absolute Shrinkage and Selection Operator คำว่า lasso สื่อถึงบ่วงที่รัด coefficient ให้เล็กลง และบางตัวถูกดึงเหลือศูนย์</p>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-300"><strong class="text-lime-100">Elastic Net</strong> สื่อถึงตาข่ายยืดหยุ่นที่ผสมแรงรัดแบบ Lasso กับแรงดึงให้นุ่มแบบ Ridge</p>
+                </div>
+                <div class="mt-4 rounded-lg border border-amber-300/25 bg-amber-300/10 p-4">
+                    <p class="text-sm font-bold text-amber-100">ต้องใช้ทั้งสามตัวไหม?</p>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-300">ไม่ต้องใช้พร้อมกัน ปกติเลือกตัวใดตัวหนึ่งแล้วทดลองปรับ `alpha` ด้วย validation set หรือ cross-validation</p>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-300">เริ่มจาก <strong class="text-white">Ridge</strong> ถ้ายังอยากเก็บทุก feature, ใช้ <strong class="text-white">Lasso</strong> ถ้าอยากให้โมเดลช่วยตัด feature, และใช้ <strong class="text-white">Elastic Net</strong> เมื่อ feature เยอะหรือสัมพันธ์กันสูง</p>
+                </div>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-sm leading-relaxed text-slate-200"><code>from sklearn.linear_model import Ridge, Lasso, ElasticNet
+
+ridge_reg = Ridge(alpha=0.1, solver="cholesky")
+ridge_reg.fit(X, y)
+
+lasso_reg = Lasso(alpha=0.1)
+lasso_reg.fit(X, y)
+
+elastic_net = ElasticNet(alpha=0.1, l1_ratio=0.5)
+elastic_net.fit(X, y)</code></pre>
+                <div class="mt-4 grid gap-3 text-sm">
+                    <div class="rounded-lg border border-blue-300/25 bg-blue-300/10 p-3">
+                        <p class="font-bold text-blue-100">Ridge = L2 penalty</p>
+                        <div class="mt-1 overflow-x-auto rounded bg-slate-950/70 px-3 py-2 text-center text-slate-100">$$J(\theta)+\alpha\sum_j\theta_j^2$$</div>
+                        <p class="mt-1 leading-relaxed text-slate-300">ลงโทษน้ำหนักใหญ่ด้วยกำลังสอง ทำให้น้ำหนักเล็กลงแบบนุ่ม ๆ แต่โดยมากไม่เป็นศูนย์</p>
+                    </div>
+                    <div class="rounded-lg border border-rose-300/25 bg-rose-300/10 p-3">
+                        <p class="font-bold text-rose-100">Lasso = L1 penalty</p>
+                        <div class="mt-1 overflow-x-auto rounded bg-slate-950/70 px-3 py-2 text-center text-slate-100">$$J(\theta)+\alpha\sum_j|\theta_j|$$</div>
+                        <p class="mt-1 leading-relaxed text-slate-300">ลงโทษด้วยค่าสัมบูรณ์ จึงมักดัน feature ที่ไม่สำคัญให้ coefficient เป็น 0 ได้</p>
+                    </div>
+                    <div class="rounded-lg border border-emerald-300/25 bg-emerald-300/10 p-3">
+                        <p class="font-bold text-emerald-100">Elastic Net = L1 + L2</p>
+                        <p class="mt-1 leading-relaxed text-slate-300">ผสมข้อดีของ Ridge และ Lasso ใช้ `l1_ratio` บอกว่าจะเอียงไปทาง Lasso มากแค่ไหน และ `alpha` บอกแรงลงโทษรวม</p>
+                    </div>
+                </div>
+                <p class="mt-3 rounded-lg border border-slate-600 bg-slate-900/70 p-3 text-sm leading-relaxed text-slate-300">วิธีใช้จริง: แทน `LinearRegression()` ด้วย `Ridge`, `Lasso` หรือ `ElasticNet` แล้วปรับ `alpha`; ค่า `alpha` มากขึ้นทำให้โมเดลเรียบขึ้นแต่อาจ underfit ส่วน `l1_ratio` ใช้เฉพาะ Elastic Net โดยใกล้ 1 จะคล้าย Lasso และใกล้ 0 จะคล้าย Ridge</p>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]" data-title="Early Stopping">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-amber-300">Part 10</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Early Stopping หยุดเมื่อ validation เริ่มแย่ลง</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">โค้ดนี้ฝึกโมเดล polynomial degree สูงด้วย SGD แล้วเก็บโมเดลที่ validation RMSE ต่ำที่สุดไว้ การหยุดเร็วช่วยลด overfitting และประหยัดเวลา</p>
+                <p class="mt-5 rounded-lg border border-amber-300/25 bg-amber-300/10 p-4 text-slate-300">หลักคิด: train ต่อได้ แต่ถ้า validation แย่ลงเรื่อย ๆ แปลว่าเริ่มจำข้อมูลฝึกมากเกินไป</p>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-sm leading-relaxed text-slate-200"><code>best_valid_rmse = float('inf')
+
+for epoch in range(n_epochs):
+    sgd_reg.partial_fit(X_train_prep, y_train)
+    y_valid_predict = sgd_reg.predict(X_valid_prep)
+    val_error = root_mean_squared_error(y_valid, y_valid_predict)
+
+    if val_error &lt; best_valid_rmse:
+        best_valid_rmse = val_error
+        best_model = deepcopy(sgd_reg)</code></pre>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]" data-title="Logistic Regression">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-violet-300">Part 11</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Logistic Regression เปลี่ยนคะแนนเป็นความน่าจะเป็น</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">แม้ชื่อมี Regression แต่ใช้ classification โดยผ่าน sigmoid เพื่อให้ผลลัพธ์อยู่ระหว่าง 0 ถึง 1 แล้วใช้ decision boundary แยก class</p>
+                <p class="mt-5 rounded-lg border border-violet-300/25 bg-violet-300/10 p-4 text-slate-300">ใน Iris notebook ใช้ petal width เพื่อทำนายว่าเป็น Iris virginica หรือไม่</p>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-sm leading-relaxed text-slate-200"><code>from sklearn.datasets import load_iris
+from sklearn.linear_model import LogisticRegression
+
+iris = load_iris(as_frame=True)
+X = iris.data[["petal width (cm)"]].values
+y = iris.target_names[iris.target] == 'virginica'
+
+log_reg = LogisticRegression(random_state=42)
+log_reg.fit(X_train, y_train)
+
+y_proba = log_reg.predict_proba(X_new)
+decision_boundary = X_new[y_proba[:, 1] &gt;= 0.5][0, 0]</code></pre>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.9fr_1.1fr]" data-title="Softmax">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-teal-300">Part 12</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Softmax ขยาย Logistic Regression เป็นหลายคลาส</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">ส่วนท้าย notebook ให้ทั้งแบบใช้ Scikit-Learn และแบบเขียน NumPy เอง เพื่อให้นักศึกษาเห็น one-hot targets, softmax probabilities, cross-entropy loss และ gradient update</p>
+                <div class="mt-6 rounded-lg border border-teal-300/25 bg-teal-300/10 p-4 text-slate-300">นี่คือสะพานไปสู่ neural networks เพราะ softmax + cross-entropy เป็น pattern ที่ใช้บ่อยมาก</div>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+<pre class="text-sm leading-relaxed text-slate-200"><code>def softmax(logits):
+    exps = np.exp(logits)
+    exp_sums = exps.sum(axis=1, keepdims=True)
+    return exps / exp_sums
+
+for epoch in range(n_epochs):
+    logits = X_train @ Theta
+    Y_proba = softmax(logits)
+    error = Y_proba - Y_train_one_hot
+    gradients = 1 / m * X_train.T @ error
+    Theta = Theta - eta * gradients</code></pre>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.95fr_1.05fr]" data-title="Manual Linear Regression">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-amber-300">Part 13</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">ทำ Linear Regression ด้วยมือแบบตาราง Excel</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">วิธีที่นิยมที่สุดสำหรับเส้นตรงหนึ่งตัวแปรคือ Ordinary Least Squares หรือ OLS: หาเส้นที่ทำให้ผลรวม error กำลังสองต่ำที่สุด</p>
+                <div class="mt-5 rounded-lg border border-amber-300/25 bg-amber-300/10 p-4 text-slate-300">
+                    <p class="font-bold text-amber-100">โจทย์จากหน้า Regression</p>
+                    <p class="mt-1 text-sm leading-relaxed">ใช้ข้อมูลจำนวนชั่วโมงเรียน `x` และคะแนนสอบ `y` เพื่อหาเส้นตรง</p>
+                    <div class="mt-3 overflow-x-auto rounded bg-slate-950/70 px-3 py-2 text-center text-slate-100">
+                        $$\hat{y}=b_1x+b_0$$
+                    </div>
+                    <p class="mt-2 text-sm leading-relaxed">เป้าหมายคืออธิบายว่า `b1 = 8.58` และ `b0 = 13.75` มาจากไหน</p>
+                </div>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-5">
+                <p class="text-sm font-bold text-white">ข้อมูลตั้งต้น</p>
+                <div class="mt-3 overflow-x-auto">
+                    <table class="w-full border-collapse text-sm text-slate-200">
+                        <thead>
+                            <tr class="bg-slate-900 text-amber-100">
+                                <th class="border border-slate-700 px-3 py-2 text-left">x: ชั่วโมงเรียน</th>
+                                <th class="border border-slate-700 px-3 py-2 text-left">y: คะแนนสอบ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="border border-slate-800 px-3 py-1.5">1</td><td class="border border-slate-800 px-3 py-1.5">20</td></tr>
+                            <tr><td class="border border-slate-800 px-3 py-1.5">2</td><td class="border border-slate-800 px-3 py-1.5">30</td></tr>
+                            <tr><td class="border border-slate-800 px-3 py-1.5">3</td><td class="border border-slate-800 px-3 py-1.5">40</td></tr>
+                            <tr><td class="border border-slate-800 px-3 py-1.5">4</td><td class="border border-slate-800 px-3 py-1.5">50</td></tr>
+                            <tr><td class="border border-slate-800 px-3 py-1.5">5</td><td class="border border-slate-800 px-3 py-1.5">60</td></tr>
+                            <tr><td class="border border-slate-800 px-3 py-1.5">6</td><td class="border border-slate-800 px-3 py-1.5">65</td></tr>
+                            <tr><td class="border border-slate-800 px-3 py-1.5">7</td><td class="border border-slate-800 px-3 py-1.5">75</td></tr>
+                            <tr><td class="border border-slate-800 px-3 py-1.5">8</td><td class="border border-slate-800 px-3 py-1.5">80</td></tr>
+                            <tr><td class="border border-slate-800 px-3 py-1.5">9</td><td class="border border-slate-800 px-3 py-1.5">90</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mt-4 rounded-lg border border-slate-600 bg-slate-900/70 p-3 text-sm leading-relaxed text-slate-300">ใน Excel ให้ใส่ `x` ที่คอลัมน์ A และ `y` ที่คอลัมน์ B เช่น `A2:A10` และ `B2:B10`</p>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.82fr_1.18fr]" data-title="Excel Table Sums">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-amber-300">Part 14</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Step 1: สร้างคอลัมน์ช่วยใน Excel</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">สูตร slope แบบทำมือต้องใช้ผลรวมของ `x`, `y`, `x²` และ `xy` ดังนั้นใน Excel เราเพิ่มคอลัมน์ `x²` และ `xy` แล้วรวมท้ายตาราง</p>
+                <div class="mt-5 rounded-lg border border-amber-300/25 bg-amber-300/10 p-4 text-sm leading-relaxed text-slate-300">
+                    <p><strong class="text-amber-100">C2:</strong> `=A2^2` แล้วลากลง</p>
+                    <p class="mt-1"><strong class="text-amber-100">D2:</strong> `=A2*B2` แล้วลากลง</p>
+                    <p class="mt-1"><strong class="text-amber-100">แถวรวม:</strong> ใช้ `=SUM(A2:A10)`, `=SUM(B2:B10)`, `=SUM(C2:C10)`, `=SUM(D2:D10)`</p>
+                </div>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-4">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-xs text-slate-200 md:text-sm">
+                        <thead>
+                            <tr class="bg-slate-900 text-amber-100">
+                                <th class="border border-slate-700 px-2 py-2">i</th>
+                                <th class="border border-slate-700 px-2 py-2">x</th>
+                                <th class="border border-slate-700 px-2 py-2">y</th>
+                                <th class="border border-slate-700 px-2 py-2">x²</th>
+                                <th class="border border-slate-700 px-2 py-2">xy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="border border-slate-800 px-2 py-1.5">1</td><td class="border border-slate-800 px-2 py-1.5">1</td><td class="border border-slate-800 px-2 py-1.5">20</td><td class="border border-slate-800 px-2 py-1.5">1</td><td class="border border-slate-800 px-2 py-1.5">20</td></tr>
+                            <tr><td class="border border-slate-800 px-2 py-1.5">2</td><td class="border border-slate-800 px-2 py-1.5">2</td><td class="border border-slate-800 px-2 py-1.5">30</td><td class="border border-slate-800 px-2 py-1.5">4</td><td class="border border-slate-800 px-2 py-1.5">60</td></tr>
+                            <tr><td class="border border-slate-800 px-2 py-1.5">3</td><td class="border border-slate-800 px-2 py-1.5">3</td><td class="border border-slate-800 px-2 py-1.5">40</td><td class="border border-slate-800 px-2 py-1.5">9</td><td class="border border-slate-800 px-2 py-1.5">120</td></tr>
+                            <tr><td class="border border-slate-800 px-2 py-1.5">4</td><td class="border border-slate-800 px-2 py-1.5">4</td><td class="border border-slate-800 px-2 py-1.5">50</td><td class="border border-slate-800 px-2 py-1.5">16</td><td class="border border-slate-800 px-2 py-1.5">200</td></tr>
+                            <tr><td class="border border-slate-800 px-2 py-1.5">5</td><td class="border border-slate-800 px-2 py-1.5">5</td><td class="border border-slate-800 px-2 py-1.5">60</td><td class="border border-slate-800 px-2 py-1.5">25</td><td class="border border-slate-800 px-2 py-1.5">300</td></tr>
+                            <tr><td class="border border-slate-800 px-2 py-1.5">6</td><td class="border border-slate-800 px-2 py-1.5">6</td><td class="border border-slate-800 px-2 py-1.5">65</td><td class="border border-slate-800 px-2 py-1.5">36</td><td class="border border-slate-800 px-2 py-1.5">390</td></tr>
+                            <tr><td class="border border-slate-800 px-2 py-1.5">7</td><td class="border border-slate-800 px-2 py-1.5">7</td><td class="border border-slate-800 px-2 py-1.5">75</td><td class="border border-slate-800 px-2 py-1.5">49</td><td class="border border-slate-800 px-2 py-1.5">525</td></tr>
+                            <tr><td class="border border-slate-800 px-2 py-1.5">8</td><td class="border border-slate-800 px-2 py-1.5">8</td><td class="border border-slate-800 px-2 py-1.5">80</td><td class="border border-slate-800 px-2 py-1.5">64</td><td class="border border-slate-800 px-2 py-1.5">640</td></tr>
+                            <tr><td class="border border-slate-800 px-2 py-1.5">9</td><td class="border border-slate-800 px-2 py-1.5">9</td><td class="border border-slate-800 px-2 py-1.5">90</td><td class="border border-slate-800 px-2 py-1.5">81</td><td class="border border-slate-800 px-2 py-1.5">810</td></tr>
+                            <tr class="bg-amber-300/10 font-bold text-amber-100"><td class="border border-amber-500/30 px-2 py-2">Σ</td><td class="border border-amber-500/30 px-2 py-2">45</td><td class="border border-amber-500/30 px-2 py-2">510</td><td class="border border-amber-500/30 px-2 py-2">285</td><td class="border border-amber-500/30 px-2 py-2">3065</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mt-3 text-sm leading-relaxed text-slate-400">ค่าที่ต้องใช้ต่อไป: `n = 9`, `Σx = 45`, `Σy = 510`, `Σx² = 285`, `Σxy = 3065`</p>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]" data-title="Manual Slope">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-amber-300">Part 15</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Step 2: หา slope หรือความชันของเส้น</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">slope คือคะแนนที่คาดว่าจะเพิ่มขึ้นเมื่อชั่วโมงเรียนเพิ่ม 1 ชั่วโมง สูตรนี้คือสูตร OLS สำหรับเส้นตรงหนึ่งตัวแปร</p>
+                <div class="mt-5 rounded-lg border border-amber-300/25 bg-slate-950/60 p-4">
+                    <p class="text-sm font-bold text-amber-100">สูตรหา slope</p>
+                    <div class="mt-2 overflow-x-auto rounded bg-slate-950/80 px-3 py-2 text-center text-slate-100">
+                        $$b_1=\frac{n\sum xy-\sum x\sum y}{n\sum x^2-(\sum x)^2}$$
+                    </div>
+                </div>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-5">
+                <p class="text-sm font-bold text-white">แทนค่าจากตาราง</p>
+                <div class="mt-3 overflow-x-auto rounded bg-slate-950/80 px-3 py-3 text-center text-slate-100">
+                    $$b_1=\frac{9(3065)-45(510)}{9(285)-45^2}$$
+                    $$b_1=\frac{27585-22950}{2565-2025}=\frac{4635}{540}=8.5833$$
+                </div>
+                <div class="mt-4 rounded-lg border border-amber-300/25 bg-amber-300/10 p-4 text-slate-300">
+                    <p class="font-bold text-amber-100">ดังนั้น slope = 8.58</p>
+                    <p class="mt-1 text-sm leading-relaxed">แปลว่า ถ้านักศึกษาเรียนเพิ่ม 1 ชั่วโมง โมเดลจะทำนายว่าคะแนนเพิ่มประมาณ 8.58 คะแนน โดยเฉลี่ยตามข้อมูลชุดนี้</p>
+                </div>
+                <pre class="mt-4 rounded-lg bg-slate-900/80 p-3 text-sm text-slate-200"><code>Excel:
+=((9*3065)-(45*510))/((9*285)-(45^2))</code></pre>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.9fr_1.1fr]" data-title="Manual Intercept">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-amber-300">Part 16</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Step 3: หา intercept หรือจุดเริ่มต้นของเส้น</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">เมื่อได้ slope แล้ว intercept คือค่าคงที่ที่ทำให้เส้นวางอยู่ในตำแหน่งที่เหมาะกับข้อมูล ไม่จำเป็นต้องผ่านจุดศูนย์</p>
+                <div class="mt-5 rounded-lg border border-amber-300/25 bg-slate-950/60 p-4">
+                    <p class="text-sm font-bold text-amber-100">สูตรหา intercept</p>
+                    <div class="mt-2 overflow-x-auto rounded bg-slate-950/80 px-3 py-2 text-center text-slate-100">
+                        $$b_0=\frac{\sum y-b_1\sum x}{n}$$
+                    </div>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-300">หรือจำง่าย ๆ ว่า `intercept = ค่าเฉลี่ย y - slope * ค่าเฉลี่ย x`</p>
+                </div>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-5">
+                <p class="text-sm font-bold text-white">แทนค่า slope ที่หาได้</p>
+                <div class="mt-3 overflow-x-auto rounded bg-slate-950/80 px-3 py-3 text-center text-slate-100">
+                    $$b_0=\frac{510-(8.5833)(45)}{9}$$
+                    $$b_0=\frac{510-386.25}{9}=\frac{123.75}{9}=13.75$$
+                </div>
+                <div class="mt-4 rounded-lg border border-amber-300/25 bg-amber-300/10 p-4 text-slate-300">
+                    <p class="font-bold text-amber-100">ดังนั้น intercept = 13.75</p>
+                    <p class="mt-1 text-sm leading-relaxed">แปลว่า ถ้า `x = 0` โมเดลจะเริ่มทำนายที่ 13.75 คะแนน ซึ่งเป็นค่าตั้งต้นของเส้น ไม่ใช่คะแนนจริงที่ต้องเกิดขึ้นเสมอ</p>
+                </div>
+                <pre class="mt-4 rounded-lg bg-slate-900/80 p-3 text-sm text-slate-200"><code>Excel:
+=(510-(8.583333*45))/9</code></pre>
+            </div>
+        </section>
+
+        <section class="slide grid-cols-1 items-center gap-6 lg:grid-cols-[0.95fr_1.05fr]" data-title="Manual Regression Result">
+            <article>
+                <p class="text-sm font-bold uppercase tracking-[0.2em] text-amber-300">Part 17</p>
+                <h2 class="mt-2 text-2xl font-extrabold leading-snug text-white md:text-4xl">Step 4: ได้สมการและสูตร Excel ที่ใช้จริง</h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-300">เมื่อนำ slope และ intercept มาประกอบกัน จะได้สมการเส้นตรงสำหรับทำนายคะแนนจากจำนวนชั่วโมงเรียน</p>
+                <div class="mt-5 rounded-lg border border-amber-300/25 bg-slate-950/60 p-4">
+                    <p class="text-sm font-bold text-amber-100">สมการสุดท้าย</p>
+                    <div class="mt-2 overflow-x-auto rounded bg-slate-950/80 px-3 py-2 text-center text-slate-100">
+                        $$\hat{y}=8.58x+13.75$$
+                    </div>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-300">เช่น ถ้าเรียน 5 ชั่วโมง จะได้ `8.58(5)+13.75 = 56.65` คะแนนโดยประมาณ</p>
+                </div>
+            </article>
+            <div class="code-card rounded-xl border border-slate-700 bg-slate-950/86 p-5">
+                <p class="text-sm font-bold text-white">Excel formulas</p>
+                <pre class="mt-3 rounded-lg bg-slate-900/80 p-3 text-sm leading-relaxed text-slate-200"><code># แบบทำมือจากตารางรวม
+slope:
+=((COUNT(A2:A10)*SUM(D2:D10))-(SUM(A2:A10)*SUM(B2:B10)))/
+ ((COUNT(A2:A10)*SUM(C2:C10))-(SUM(A2:A10)^2))
+
+intercept:
+=(SUM(B2:B10)-(slope_cell*SUM(A2:A10)))/COUNT(A2:A10)</code></pre>
+                <pre class="mt-4 rounded-lg bg-slate-900/80 p-3 text-sm leading-relaxed text-slate-200"><code># แบบใช้ฟังก์ชัน Excel โดยตรง
+=SLOPE(B2:B10, A2:A10)
+=INTERCEPT(B2:B10, A2:A10)
+
+# ทำนายคะแนนจาก x ใหม่
+=slope_cell*new_x + intercept_cell</code></pre>
+                <p class="mt-4 rounded-lg border border-slate-600 bg-slate-900/70 p-3 text-sm leading-relaxed text-slate-300">สำหรับการสอน แนะนำเริ่มจากตารางทำมือก่อนเพื่อเห็นที่มาของ 8.58 และ 13.75 แล้วค่อยบอกว่า Excel มี `SLOPE()` และ `INTERCEPT()` เป็นทางลัด</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-white/10 px-4 py-4 text-center text-xs text-slate-500">
+        ใช้คู่กับไฟล์ <code>04_training_linear_models.py</code> และ Colab notebook บทที่ 4
+    </footer>
+
+    <script>
+        const slides = Array.from(document.querySelectorAll('.slide'));
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slideCounter');
+        let current = 0;
+
+        function showSlide(index) {
+            current = Math.max(0, Math.min(index, slides.length - 1));
+            slides.forEach((slide, slideIndex) => {
+                slide.classList.toggle('active', slideIndex === current);
+            });
+            prevBtn.disabled = current === 0;
+            nextBtn.disabled = current === slides.length - 1;
+            slideCounter.textContent = `${current + 1} / ${slides.length}`;
+            document.title = `${slides[current].dataset.title} - Training Linear Models`;
+        }
+
+        prevBtn.addEventListener('click', () => showSlide(current - 1));
+        nextBtn.addEventListener('click', () => showSlide(current + 1));
+
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                event.preventDefault();
+                showSlide(current + 1);
+            }
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                showSlide(current - 1);
+            }
+            if (event.key === 'Home') {
+                showSlide(0);
+            }
+            if (event.key === 'End') {
+                showSlide(slides.length - 1);
+            }
+        });
+
+        showSlide(0);
+    </script>
+</body>
+</html>
