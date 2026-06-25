@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 CIT0013 Machine Learning - เจาะลึกโค้ด Training Linear Models (04)</title>
+    <!-- Reveal.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <!-- Reveal.js Dark Theme (modified by custom CSS) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/black.min.css">
+    <!-- Highlight.js Theme for Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/monokai.min.css">
+    
+    <!-- Google Fonts (Inter & Prompt) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Prompt:wght@200;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- KaTeX for Beautiful LaTeX Math -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+    <style>
+        :root {
+            --r-main-font: 'Prompt', 'Inter', sans-serif;
+            --r-heading-font: 'Prompt', 'Inter', sans-serif;
+            --r-background-color: #0b132b;
+            --r-heading-color: #f8fafc;
+            --r-main-color: #cbd5e1;
+            --r-link-color: #00b4d8;
+            --r-link-color-hover: #90e0ef;
+            --accent-primary: #00b4d8;
+            --accent-secondary: #06d6a0;
+            --accent-gradient: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+            --glass-bg: rgba(28, 37, 65, 0.75);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-muted: #94a3b8;
+        }
+
+        .reveal {
+            font-family: var(--r-main-font);
+            color: var(--r-main-color);
+        }
+
+        .reveal h1 {
+            font-size: 2.8rem !important;
+            font-weight: 700;
+            line-height: 1.25 !important;
+        }
+
+        .reveal h2 {
+            font-size: 1.7rem !important;
+            font-weight: 700;
+            border-bottom: 2px solid rgba(0, 180, 216, 0.15);
+            padding-bottom: 0.4rem;
+            margin-bottom: 0.8rem !important;
+            color: var(--r-heading-color);
+        }
+
+        .reveal h3 {
+            font-size: 1.35rem !important;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .reveal h4 {
+            font-size: 1.05rem !important;
+            font-weight: 600;
+        }
+
+        .reveal p, .reveal li {
+            font-size: 0.82rem !important;
+            line-height: 1.55 !important;
+            color: var(--r-main-color);
+        }
+
+        .reveal ol, .reveal ul {
+            margin-left: 1.5rem !important;
+        }
+
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 {
+            font-family: var(--r-heading-font);
+            text-transform: none;
+            word-wrap: break-word;
+        }
+
+        .reveal .slides {
+            text-align: left;
+        }
+
+        .reveal .state-background {
+            background-color: var(--r-background-color);
+        }
+
+        /* Glassmorphism Slide Container */
+        .slide-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.8rem 2.2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Code Block Styling */
+        .reveal pre {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%;
+            margin: 0.4rem 0;
+            font-size: 0.54em;
+            line-height: 1.4;
+        }
+
+        .reveal code {
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+        }
+
+        /* Text gradient */
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        /* Badges */
+        .lab-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-py {
+            background-color: rgba(0, 180, 216, 0.2);
+            color: #00b4d8;
+            border: 1px solid rgba(0, 180, 216, 0.3);
+        }
+
+        .badge-cs {
+            background-color: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .badge-theory {
+            background-color: rgba(6, 214, 160, 0.2);
+            color: #06d6a0;
+            border: 1px solid rgba(6, 214, 160, 0.3);
+        }
+
+        /* Grid */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+            margin-top: 0.6rem;
+        }
+
+        .grid-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .grid-item h4 {
+            color: var(--accent-primary);
+            margin-bottom: 0.4rem;
+            font-size: 0.95rem;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            margin-top: 0.6rem;
+        }
+
+        .comparison-table th {
+            background: rgba(0, 180, 216, 0.15);
+            color: var(--accent-primary);
+            font-weight: 600;
+            padding: 0.6rem;
+            border-bottom: 2px solid var(--border-color);
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 0.6rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Controls */
+        .reveal .controls {
+            color: var(--accent-primary);
+        }
+
+        .reveal .progress {
+            color: var(--accent-primary);
+            height: 4px;
+        }
+
+        .note-box {
+            background: rgba(0, 180, 216, 0.05);
+            border-left: 3px solid var(--accent-primary);
+            padding: 0.6rem 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 0.5rem 0;
+        }
+
+        .note-box p {
+            font-size: 0.78rem !important;
+            margin: 0 !important;
+        }
+
+        /* 3-column layout for Regularization cards */
+        .triple-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            margin-top: 0.5rem;
+        }
+        .triple-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.8rem;
+        }
+        .triple-item h4 {
+            color: var(--accent-primary);
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+        .triple-item p, .triple-item li {
+            font-size: 0.72rem !important;
+        }
+
+        /* Section intro slide styling */
+        .section-intro {
+            text-align: center;
+        }
+        .section-intro h2 {
+            font-size: 2.2rem !important;
+            border-bottom: none !important;
+            text-align: center !important;
+            margin-bottom: 1.5rem !important;
+        }
+
+        /* Responsive images */
+        .slide-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+
+<div class="reveal">
+    <div class="slides">
+        
+        <!-- สไลด์ 1: หน้าแรก -->
+        <section data-background-color="#0b132b">
+            <div style="text-align: center; margin-top: 2rem;">
+                <h3 style="letter-spacing: 2px; color: var(--accent-primary); font-size: 1.2rem; font-weight: 600;">CIT0013 MACHINE LEARNING WORKSHOP</h3>
+                <h1 style="font-size: 3.2rem; font-weight: 700; margin: 1.5rem 0 0.5rem;">
+                    เจาะลึกโค้ด <span class="gradient-text">Linear Models (04)</span>
+                </h1>
+                <h2 style="font-size: 1.5rem; font-weight: 400; color: #94a3b8; margin-bottom: 3rem; border-bottom: none;">
+                    คู่มือการทำความเข้าใจ Python สำหรับนักพัฒนา C# ก่อนลงมือรันโค้ด
+                </h2>
+                <p style="font-size: 0.85rem; color: #64748b;">
+                    รหัสไฟล์: <code>04_training_linear_models_th.py</code> &nbsp;|&nbsp; กดปุ่มลูกศรขวา (→) เพื่อเลื่อนหน้าถัดไป
+                </p>
+            </div>
+        </section>
+
+        <!-- กลุ่มสไลด์ย่อย 1: Python vs C# Syntax Guide (แนวตั้ง) -->
+        <section>
+            <!-- 1.1 Intro -->
+            <section class="section-intro">
+                <div class="slide-container" style="text-align: center;">
+                    <span class="lab-badge badge-py">Part 1</span>
+                    <h2>เปรียบเทียบโครงสร้างภาษา Python vs C#</h2>
+                    <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 2rem;">เจาะลึกความต่างของระบบ Syntax และกลไกของภาษาเพื่อช่วยนักพัฒนา C# ในการอ่านโค้ด</p>
+                    <p style="font-size: 0.85rem; color: var(--accent-primary);">⬇️ กดปุ่มลูกศรลงเพื่อดูรายละเอียด ⬇️</p>
+                </div>
+            </section>
+
+            <!-- 1.2 Blocks & Typing -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Python Syntax</span>
+                    <span class="lab-badge badge-cs">เทียบ C#</span>
+                    <h2>1. บล็อกขอบเขต, ชนิดตัวแปร และการ Assert</h2>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">หัวข้อ</th>
+                                <th style="width: 38%;">สไตล์ C# (Static Typing)</th>
+                                <th style="width: 37%;">สไตล์ Python (Dynamic Typing)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>บล็อกขอบเขต (Scope)</strong></td>
+                                <td>ใช้ปีกกา <code>{ ... }</code> ครอบลูปหรือเงื่อนไข</td>
+                                <td>ใช้<strong>การย่อหน้า (Indentation/4 Spaces)</strong> เท่านั้น ห้ามลืมหรือสลับสเปซเด็ดขาด!</td>
+                            </tr>
+                            <tr>
+                                <td><strong>การประกาศตัวแปร</strong></td>
+                                <td>ระบุชนิดชัดเจน หรือใช้ <code>var</code>: <code>double x = 4.2;</code></td>
+                                <td>ไม่ต้องระบุชนิด (Dynamic): <code>x = 4.2</code> เปลี่ยนชนิดค่าได้อิสระ</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ยืนยันเวอร์ชัน (Assert)</strong></td>
+                                <td><code>Debug.Assert(condition);</code></td>
+                                <td>คีย์เวิร์ดในภาษา: <code>assert sys.version_info >= (3, 7)</code> (หากเท็จโปรแกรมแครชหยุดรันทันที)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 1.3 Expressions & Math -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Python Expressions</span>
+                    <span class="lab-badge badge-cs">เทียบ C#</span>
+                    <h2>2. รูปแบบนิพจน์คณิตศาสตร์และลูป Tuple</h2>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">หัวข้อ</th>
+                                <th style="width: 38%;">สไตล์ C# (Traditional)</th>
+                                <th style="width: 37%;">สไตล์ Python (Expressive)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>ยกกำลังคณิตศาสตร์</strong></td>
+                                <td><code>Math.Pow(x, 2)</code></td>
+                                <td><code>X ** 2</code> (ในโค้ดใช้ยกกำลังฟีเจอร์พหุนาม)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>เขียนเงื่อนไขสั้น</strong></td>
+                                <td>Ternary: <code>var text = degree > 1 ? "degrees" : "degree";</code></td>
+                                <td><code>"degrees" if degree > 1 else "degree"</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>ลูปแกะทูเพิล (Unpacking)</strong></td>
+                                <td>
+                                    <code>foreach (var (style, width, deg) in list)</code>
+                                </td>
+                                <td>
+                                    <pre style="margin: 0;"><code class="language-python"># วนลูปสไตล์พร้อมขนาดความหนาเส้น
+for style, width, degree in (("r-+", 2, 1), ...):</code></pre>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 1.4 Keyword Arguments -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Parameters</span>
+                    <span class="lab-badge badge-cs">เทียบ C#</span>
+                    <h2>3. พารามิเตอร์แบบระบุชื่อ (Keyword Arguments)</h2>
+                    <p style="font-size: 0.85rem; margin-bottom: 0.6rem;">ใน Python การสร้างออบเจกต์โมเดล ML นิยมระบุชื่อพารามิเตอร์เพื่อความชัดเจนโดยไม่ต้องเรียงลำดับ:</p>
+                    
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>🐍 สไตล์ Python</h4>
+                            <pre style="margin: 0.2rem 0;"><code class="language-python"># ส่งอาร์กิวเมนต์ผ่านชื่อ (Keyword)
+sgd_reg = SGDRegressor(
+    max_iter=1000, 
+    tol=1e-5, 
+    penalty=None, 
+    eta0=0.01, 
+    random_state=42
+)</code></pre>
+                        </div>
+                        <div class="grid-item">
+                            <h4>💻 เทียบเท่าใน C# (Named Arguments)</h4>
+                            <pre style="margin: 0.2rem 0;"><code class="language-csharp">// ส่งผ่านพารามิเตอร์โดยใช้เครื่องหมายโคลอน (:)
+var sgdReg = new SGDRegressor(
+    maxIter: 1000,
+    tol: 1e-5,
+    penalty: null,
+    eta0: 0.01,
+    randomState: 42
+);</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- กลุ่มสไลด์ย่อย 2: NumPy & Vectorization (แนวตั้ง) -->
+        <section>
+            <!-- 2.1 Intro -->
+            <section class="section-intro">
+                <div class="slide-container" style="text-align: center;">
+                    <span class="lab-badge badge-py">Part 2</span>
+                    <h2>พลังการประมวลผลเมทริกซ์ด้วย NumPy</h2>
+                    <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 2rem;">เรียนรู้การคิดแบบเวกเตอร์ (Vectorization) หลักคณิตศาสตร์คูณเมทริกซ์ และการจัดการมิติอาร์เรย์</p>
+                    <p style="font-size: 0.85rem; color: var(--accent-primary);">⬇️ กดปุ่มลูกศรลงเพื่อดูรายละเอียด ⬇️</p>
+                </div>
+            </section>
+
+            <!-- 2.2 ปูพื้นฐานการคูณเมทริกซ์ทางคณิตศาสตร์ -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">Mathematics</span>
+                    <h2>4. ปูพื้นฐาน: วิธีคูณเมทริกซ์ทางคณิตศาสตร์ (Matrix Multiplication)</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.4rem;">การทำนายโมเดลเชิงเส้น ($X_b \theta$) ตั้งอยู่บนฐานของการคูณเมทริกซ์ มาทำความเข้าใจกฎและวิธีคิดด้วยมือก่อนใช้โปรแกรม:</p>
+
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>📏 1. กฎตรวจสอบมิติ (Dimension Check)</h4>
+                            <p>เราจะคูณเมทริกซ์ $A$ และ $B$ ได้ก็ต่อเมื่อ <strong>จำนวนคอลัมน์ของตัวตั้ง เท่ากับ จำนวนแถวของตัวคูณ</strong></p>
+                            <div style="text-align: center; margin: 0.5rem 0; font-size: 1rem; font-weight: bold; color: var(--accent-primary);">
+                                $(M \times N) \times (N \times P) = (M \times P)$
+                            </div>
+                            <p style="font-size: 0.72rem !important; color: var(--text-muted);">
+                                ตัวอย่าง: เมทริกซ์ขนาด $100 \times 2$ (ฟีเจอร์บวก Bias) คูณกับเวกเตอร์ขนาด $2 \times 1$ ผลลัพธ์สุดท้ายที่ได้จะมีมิติเท่ากับ $100 \times 1$
+                            </p>
+                        </div>
+                        <div class="grid-item">
+                            <h4>🧮 2. วิธีคิดแบบ Dot Product (แถวคูณคอลัมน์)</h4>
+                            <p>จับคู่สมาชิกแต่ละตัวของ <strong>"แถว (Row)"</strong> ในเมทริกซ์แรก คูณกับ <strong>"คอลัมน์ (Column)"</strong> ในเมทริกซ์หลัง แล้วนำผลลัพธ์มารวมกัน:</p>
+                            
+                            <div style="background: rgba(255,255,255,0.015); padding: 0.4rem; border-radius: 8px; font-size: 0.72rem; margin: 0.3rem 0;">
+                                $$\begin{bmatrix} a & b \\ c & d \end{bmatrix} \times \begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} a \cdot x + b \cdot y \\ c \cdot x + d \cdot y \end{bmatrix}$$
+                            </div>
+                            
+                            <div style="font-size: 0.76rem;">
+                                <strong>ทดลองคำนวณจริง:</strong>
+                                $$\begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} \times \begin{bmatrix} 5 \\ 6 \end{bmatrix} = \begin{bmatrix} 1\cdot5 + 2\cdot6 \\ 3\cdot5 + 4\cdot6 \end{bmatrix} = \begin{bmatrix} 5+12 \\ 15+24 \end{bmatrix} = \begin{bmatrix} 17 \\ 39 \end{bmatrix}$$
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2.3 Vectorization in Python -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">NumPy Basics</span>
+                    <h2>4.1 การคูณเมทริกซ์และการเขียนคำสั่งแบบเวกเตอร์ใน Python</h2>
+                    <div class="grid-container">
+                        <div class="grid-item" style="grid-column: span 2;">
+                            <pre style="margin: 0.1rem 0;"><code class="language-python"># สร้างชุดข้อมูลสุ่ม X และ y พร้อมกัน 100 จุดในสเต็ปเดียวโดยไม่ต้องเขียนลูป!
+X = 2 * np.random.rand(100, 1)
+y = 4 + 3 * X + np.random.randn(100, 1)</code></pre>
+                        </div>
+                        <div class="grid-item">
+                            <h4>📌 คูณเมทริกซ์ใน Python ด้วยเครื่องหมาย <code>@</code></h4>
+                            <p>ตัวดำเนินการ <code>@</code> ทำการคูณเมทริกซ์แบบแถวคูณคอลัมน์ (Dot Product) ตามทฤษฎีทางคณิตศาสตร์:</p>
+                            <pre style="margin: 0.2rem 0;"><code class="language-python"># inv(X^T * X) @ X^T @ y (คำนวณ Normal Equation)
+theta_best = np.linalg.inv(X_b.T @ X_b) @ X_b.T @ y</code></pre>
+                            <p style="margin-top: 0.3rem; font-size: 0.72rem !important; color: var(--text-muted);">*คำเตือน: ห้ามใช้เครื่องหมาย <code>*</code> ในการคูณเมทริกซ์ เพราะจะเป็นการคูณสมาชิกต่อตำแหน่งแบบ Element-wise</p>
+                        </div>
+                        <div class="grid-item">
+                            <h4>📌 ทริกจัดการมิติของ NumPy</h4>
+                            <ul>
+                                <li><code>.T</code> : สลับแถวเป็นคอลัมน์และคอลัมน์เป็นแถว (Transpose)</li>
+                                <li><code>.ravel()</code> : ยุบเมทริกซ์หลายมิติให้เป็นอาร์เรย์ 1 มิติ (Flat)</li>
+                                <li><code>.reshape(row, col)</code> : จัดระเบียบมิติใหม่ เช่น <code>.reshape(-1, 1)</code> จัดเป็นเมทริกซ์แนวตั้ง</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2.4 NumPy Utilities -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">NumPy Magic</span>
+                    <h2>5. ฟังก์ชันต่อตัวแปรและสร้างตาข่าย (NumPy Magic)</h2>
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>🔗 การต่ออาร์เรย์แบบ <code>np.c_</code> และ <code>np.r_</code></h4>
+                            <ul>
+                                <li><code>np.c_[a, b]</code> : นำเวกเตอร์สองก้อนมาประกบเชื่อมกันด้านข้าง (คอลัมน์) 
+                                    <br><span class="gradient-text">ในโค้ด:</span> <code>np.c_[np.ones(m), X]</code> เติมคอลัมน์เลข 1 ข้างหน้า X เพื่อทำ Bias</li>
+                                <li><code>np.r_[a, b]</code> : นำเวกเตอร์สองก้อนมาเชื่อมกันด้านบน-ล่าง (แถว)
+                                    <br><span class="gradient-text">ในโค้ด:</span> ใช้ต่อค่าความชันของ Bias กับค่าน้ำหนักโมเดล L2</li>
+                            </ul>
+                        </div>
+                        <div class="grid-item">
+                            <h4>🌐 <code>np.linspace()</code> & <code>np.meshgrid()</code></h4>
+                            <ul>
+                                <li><code>np.linspace(-3, 3, 100)</code>: สร้างจุดตัวเลข 100 จุดไล่ระดับเฉลี่ยระยะทางคงที่สม่ำเสมอตั้งแต่ -3 ถึง 3 เพื่อสร้างเส้นโค้งในกราฟทำนายผล</li>
+                                <li><code>np.meshgrid(x, y)</code>: ผลิตตาข่ายมิติพิกัดแบบ 2 มิติ เพื่อใช้คำนวณจุดทำนายระดับเฉดสีคอนทัวร์แบ่งขอบเขตคลาส</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- กลุ่มสไลด์ย่อย 3: Linear Regression & Normal Equation (แนวตั้ง) -->
+        <section>
+            <!-- 3.1 Intro -->
+            <section class="section-intro">
+                <div class="slide-container" style="text-align: center;">
+                    <span class="lab-badge badge-theory">Part 3</span>
+                    <h2>Linear Regression & Normal Equation</h2>
+                    <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 2rem;">ทำความเข้าใจการพยากรณ์เชิงเส้นตรงด้วยวิธีหาคำตอบสมการปิดและเปรียบเทียบกับไลบรารีของ Scikit-Learn</p>
+                    <p style="font-size: 0.85rem; color: var(--accent-primary);">⬇️ กดปุ่มลูกศรลงเพื่อดูรายละเอียด ⬇️</p>
+                </div>
+            </section>
+
+            <!-- 3.2 สมการคณิตศาสตร์ Normal Equation -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">ML Concept</span>
+                    <h2>6. สมการเชิงเส้นและทฤษฎี Normal Equation</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.6rem;">เป้าหมายคือการหาค่าน้ำหนักพารามิเตอร์ $\hat{\theta}$ ที่ทำให้โมเดลทำนายได้ใกล้เคียงจุดข้อมูลจริงมากที่สุด:</p>
+                    
+                    <div class="grid-container" style="grid-template-columns: 1fr 1.2fr;">
+                        <div class="grid-item">
+                            <h4>🧮 สมการปิด Normal Equation</h4>
+                            $$\hat{\theta} = (X^T X)^{-1} X^T y$$
+                            <p style="margin-top: 0.5rem;">สูตรนี้หาค่าน้ำหนักพารามิเตอร์ที่ดีที่สุดทางคณิตศาสตร์ได้โดยตรงในสเต็ปเดียว ไม่ต้องทำซ้ำ</p>
+                            <div class="note-box" style="margin-top: 0.5rem;">
+                                <p><strong>ทำไมต้องใช้ Bias Feature ($x_0 = 1$)?</strong> เพื่อให้ระบบคูณเมทริกซ์คำนวณค่าจุดตัดแกน Y ($\theta_0$) ได้สะดวกด้วยตัวแปรเดียวกัน</p>
+                            </div>
+                        </div>
+                        <div class="grid-item">
+                            <h4>🐍 โค้ด NumPy สำหรับคำนวณสูตรแมนนวล</h4>
+                            <pre style="margin: 0.2rem 0;"><code class="language-python">from sklearn.preprocessing import add_dummy_feature
+
+# 1) เติมคอลัมน์ Bias (x0 = 1) ให้กับแถวข้อมูล
+X_b = add_dummy_feature(X)  
+
+# 2) คำนวณตามสูตรทางคณิตศาสตร์:
+theta_best = np.linalg.inv(X_b.T @ X_b) @ X_b.T @ y</code></pre>
+                            <p style="font-size: 0.75rem !important; margin-top: 0.4rem; color: var(--text-muted);">*คำเตือน: หาก Feature มีจำนวนเยอะมาก เมทริกซ์จะมีขนาดใหญ่ขึ้น และการทำ Inverse จะช้ามากๆ ($O(n^3)$)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3.3 การคำนวณผ่าน Scikit-Learn API -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Scikit-Learn API</span>
+                    <h2>6.1 การรันเชิงเส้นผ่าน Scikit-Learn (วิธีมาตรฐาน)</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.6rem;">การเรียนรู้ผ่านระดับสากลด้วยคลาสสำเร็จรูปของ Scikit-Learn สะดวกกว่าและพร้อมนำขึ้นระบบงาน:</p>
+                    
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>🐍 โค้ดภาษา Python</h4>
+                            <pre style="margin: 0.2rem 0;"><code class="language-python">from sklearn.linear_model import LinearRegression
+
+# สร้างโมเดลและป้อนสอนโมเดล (fit)
+lin_reg = LinearRegression()
+lin_reg.fit(X, y)
+
+# ดูจุดตัดแกน Y และน้ำหนักความชัน
+bias = lin_reg.intercept_
+coef = lin_reg.coef_
+
+# ทำนายค่าจุดข้อมูลใหม่
+predictions = lin_reg.predict(X_new)</code></pre>
+                        </div>
+                        <div class="grid-item">
+                            <h4>📌 อธิบายกลไกเบื้องหลัง</h4>
+                            <ul>
+                                <li><strong> fit(X, y) </strong>: สั่งสอนและปรับค่าน้ำหนักพารามิเตอร์ให้เข้ากับรูปแบบข้อมูลดิบ</li>
+                                <li><strong> predict(X) </strong>: นำพารามิเตอร์ที่ได้ไปคำนวณทำนายผลลัพธ์ข้อมูลชุดใหม่</li>
+                                <li>เบื้องหลังคลาสนี้จะไม่ได้ใช้ Normal Equation ตรงๆ แต่จะแก้คำตอบด้วยวิธี <strong>SVD Least Squares (lstsq)</strong> ซึ่งปลอดภัยและทำงานได้มั่นคงกว่าเมื่อพบเมทริกซ์ที่มีความเสี่ยงไม่สามารถ Inverse ได้</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3.4 SVD Least Squares & Pseudoinverse -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">Numerical Algebra</span>
+                    <h2>6.2 พีชคณิตเชิงเส้นเบื้องหลังโมเดล: SVD และ Pseudoinverse</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.6rem;">สคริปต์มีการนำเสนอนิพจน์คำนวณน้ำหนักทางเลือกที่เสถียรกว่าการทำ Inverse แบบปกติ:</p>
+                    
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>🧮 1. ฟังก์ชันกำลังสองน้อยที่สุด (Least Squares SVD)</h4>
+                            <p>ใช้ <code>np.linalg.lstsq()</code> เพื่อคำนวณหาน้ำหนัก:</p>
+                            <pre style="margin: 0.2rem 0;"><code class="language-python"># เบื้องหลังคำนวณหาค่าต่ำสุดของกำลังสองความคลาดเคลื่อน
+theta, residuals, rank, s = np.linalg.lstsq(
+    X_b, y, rcond=1e-6
+)</code></pre>
+                            <p style="margin-top: 0.3rem; font-size: 0.72rem !important;">*ความเสถียร: แก้ไขสมการเชิงเส้นได้แม้คอลัมน์ของข้อมูลจะมีตัวแปรเกี่ยวเนื่องกันแบบเกือบสมบูรณ์ (Singular Matrix)</p>
+                        </div>
+                        <div class="grid-item">
+                            <h4>🛡️ 2. เมทริกซ์ผกผันเทียม Moore-Penrose (Pseudoinverse)</h4>
+                            <p>ใช้คำนวณหา Inverse เทียมด้วยตัวดำเนินการ <code>np.linalg.pinv()</code>:</p>
+                            <pre style="margin: 0.2rem 0;"><code class="language-python"># สูตรคำนวณน้ำหนัก: theta = X^+ * y
+theta_pinv = np.linalg.pinv(X_b) @ y</code></pre>
+                            <p style="margin-top: 0.3rem; font-size: 0.72rem !important;">*คุณลักษณะ: เป็นการคำนวณตรงๆ ด้วยความเสถียรที่สูงกว่าสมการปิดปกติ เหมาะสำหรับการศึกษาโครงสร้างคณิตศาสตร์เชิงเปรียบเทียบในคลาสเรียน</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- กลุ่มสไลด์ย่อย 4: Gradient Descent (แนวตั้ง) -->
+        <section>
+            <!-- 4.1 Intro & Table -->
+            <section class="section-intro">
+                <div class="slide-container" style="text-align: center;">
+                    <span class="lab-badge badge-theory">Part 4</span>
+                    <h2>การปรับตัวแปรตามความชัน (Gradient Descent)</h2>
+                    <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 2rem;">เปรียบเทียบกระบวนการคำนวณและการอัปเดตน้ำหนักของโมเดลตามความลาดชัน 3 ประเภทหลัก</p>
+                    <p style="font-size: 0.85rem; color: var(--accent-primary);">⬇️ กดปุ่มลูกศรลงเพื่อดูรายละเอียดโค้ดแต่ละประเภท ⬇️</p>
+                </div>
+            </section>
+
+            <!-- 4.2 Batch GD -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Batch GD Code</span>
+                    <h2>7. Batch Gradient Descent: อัปเดตด้วยข้อมูลทั้งหมด</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.4rem;">การกวาดหาความชันจากทุกๆ จุดข้อมูลพร้อมกันในแต่ละรอบ (Epoch):</p>
+                    <pre style="margin: 0.2rem 0;"><code class="language-python"># วนลูปทำการเทรนโมเดลแบบ Batch Gradient Descent
+for epoch in range(n_epochs):
+    # คำนวณเวกเตอร์ความชัน (Gradients) จากข้อมูลทั้งหมดในคราวเดียว
+    gradients = 2 / m * X_b.T @ (X_b @ theta - y)
+    # ปรับปรุงพารามิเตอร์ Theta โดยขยับไปในทิศทางตรงกันข้ามกับค่าความชัน
+    theta = theta - eta * gradients</code></pre>
+                    <div class="note-box">
+                        <p><strong>ข้อดี:</strong> ทางเดินนิ่ง เข้าหาจุดต่ำสุดแน่นอน <strong>ข้อเสีย:</strong> ล้นหน่วยความจำแรมได้ง่ายมากหากข้อมูลมีจำนวนหลายล้านจุด</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4.3 Stochastic GD -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Stochastic GD Code</span>
+                    <h2>7.1 Stochastic Gradient Descent: ปรับน้ำหนักทีละจุดข้อมูล</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.4rem;">สุ่มเลือกข้อมูลทีละแถว และใช้กลไกการปรับลดอัตราการเรียนรู้ให้ค่อยๆ แคบลง (Learning Schedule):</p>
+                    <pre style="margin: 0.2rem 0;"><code class="language-python">for epoch in range(n_epochs):
+    for iteration in range(m):
+        # สุ่มหยิบดัชนีของจุดข้อมูลขึ้นมา 1 จุดแบบสุ่ม
+        random_index = np.random.randint(m)
+        xi = X_b[random_index : random_index + 1]
+        yi = y[random_index : random_index + 1]
+        # คำนวณค่าความชันเฉพาะจุดข้อมูลนั้นจุดเดียว (ไม่ต้องหารด้วย m ทั้งหมดเหมือน Batch)
+        gradients = 2 * xi.T @ (xi @ theta - yi)  
+        # คำนวณหาค่า Learning Rate ของสเต็ปปัจจุบันให้ค่อยๆ แคบลง
+        eta = learning_schedule(epoch * m + iteration)
+        theta = theta - eta * gradients</code></pre>
+                </div>
+            </section>
+
+            <!-- 4.4 Mini-batch GD -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Mini-batch GD Code</span>
+                    <h2>7.2 Mini-batch Gradient Descent: อัปเดตข้อมูลเป็นกลุ่มย่อย</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.4rem;">สับเปลี่ยนข้อมูล (Shuffle) ป้องกันการล็อกตำแหน่งและหั่นก้อนย่อยขนาด `minibatch_size`:</p>
+                    <pre style="margin: 0.2rem 0;"><code class="language-python">for epoch in range(n_epochs):
+    # สับเปลี่ยนข้อมูลทั้งหมดแบบสุ่มทุกรอบป้องกันลำดับส่งผลต่อการเรียนรู้
+    shuffled_indices = np.random.permutation(m)
+    X_b_shuffled = X_b[shuffled_indices]
+    y_shuffled = y[shuffled_indices]
+    
+    for iteration in range(0, n_batches_per_epoch):
+        idx = iteration * minibatch_size
+        xi = X_b_shuffled[idx : idx + minibatch_size]
+        yi = y_shuffled[idx : idx + minibatch_size]
+        # คำนวณความชันเฉลี่ยตามขนาดของกลุ่มย่อย
+        gradients = 2 / minibatch_size * xi.T @ (xi @ theta - yi)
+        eta = learning_schedule(epoch * n_batches_per_epoch + iteration)
+        theta = theta - eta * gradients</code></pre>
+                </div>
+            </section>
+        </section>
+
+        <!-- กลุ่มสไลด์ย่อย 5: Polynomial Regression & Pipelines (แนวตั้ง) -->
+        <section>
+            <!-- 5.1 Intro -->
+            <section class="section-intro">
+                <div class="slide-container" style="text-align: center;">
+                    <span class="lab-badge badge-theory">Part 5</span>
+                    <h2>การปรับพหุนามและประเด็นประสิทธิภาพโมเดล</h2>
+                    <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 2rem;">เรียนรู้การเพิ่มดีกรีเส้นโค้งพหุนาม ระบบท่อส่ง Pipeline และทำความเข้าใจปัญหา Underfitting vs Overfitting ของโมเดล</p>
+                    <p style="font-size: 0.85rem; color: var(--accent-primary);">⬇️ กดปุ่มลูกศรลงเพื่อดูรายละเอียด ⬇️</p>
+                </div>
+            </section>
+
+            <!-- 5.2 Polynomial & Overfit -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">ML Concept</span>
+                    <h2>8. การถดถอยพหุนามและกราฟจำลอง Overfitting (ดีกรี 300)</h2>
+                    <div class="grid-container" style="grid-template-columns: 1fr 1fr;">
+                        <div class="grid-item">
+                            <h4>🧩 เพิ่ม Feature ยกกำลัง</h4>
+                            <p>แปลงมิติเชิงเส้นโดยแตกกำลังเป็นฟีเจอร์ใหม่:</p>
+                            <pre style="margin: 0.2rem 0;"><code class="language-python">from sklearn.preprocessing import PolynomialFeatures
+
+poly = PolynomialFeatures(degree=2, include_bias=False)
+X_poly = poly.fit_transform(X)</code></pre>
+                            <h4 style="margin-top: 0.5rem; color: #ef4444;">⚠️ ปัญหาดีกรีสูง (Overfitting)</h4>
+                            <p>ในโค้ดทดลองใช้ระดับกำลังสูงถึง <strong>degree=300</strong> ทำให้เส้นกราฟคดเคี้ยวพยายามลากผ่านข้อมูลทุกจุดที่เห็นในฝั่งขวา</p>
+                        </div>
+                        <div class="grid-item" style="text-align: center;">
+                            <img src="../images/training_linear_models/high_degree_polynomials_plot.png" class="slide-img" style="max-height: 250px;">
+                            <p style="font-size: 0.72rem !important; color: var(--text-muted); margin-top: 0.3rem;">เส้นทึบสีเขียว (300 degrees) แสดงอาการ Overfitting อย่างรุนแรง</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5.3 Pipeline & Scaling -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Pipeline Pattern</span>
+                    <h2>9. ระบบท่อส่งประมวลผล (Pipeline) และปรับสเกล</h2>
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>🧱 ประโยชน์ของ Pipeline</h4>
+                            <pre style="margin: 0.2rem 0;"><code class="language-python">from sklearn.pipeline import make_pipeline
+
+# มัดรวมขั้นตอนเตรียมการและคำนวณโมเดลเข้าด้วยกัน
+polynomial_regression = make_pipeline(
+    PolynomialFeatures(degree=300, include_bias=False),
+    StandardScaler(),
+    LinearRegression()
+)
+polynomial_regression.fit(X, y)</code></pre>
+                            <p style="margin-top: 0.3rem;"><strong>สไตล์ C#:</strong> คล้ายกับระบบ Middleware หรือท่อไหลประมวลผลฟังก์ชันต่อกัน</p>
+                        </div>
+                        <div class="grid-item">
+                            <h4>⚖️ ความสำคัญของ StandardScaler</h4>
+                            <p>การยกกำลังสูงๆ เช่น $x^{300}$ จะผลิตผลลัพธ์มหาศาลทำให้ตัวเลขโอเวอร์โฟลว์ (Numerical Overflow):</p>
+                            <ul>
+                                <li><code>StandardScaler()</code> จัดปรับสัดส่วนข้อมูลให้อยู่ในรูป Z-score (ค่าเฉลี่ยเป็น 0 และความเบี่ยงเบนเป็น 1)</li>
+                                <li>ช่วยกระชับตัวแปรให้คำนวณง่าย ป้องกันระบบ Gradients ระเบิดล้มเหลว</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5.4 สรุปปัญหาหลัก: Underfitting vs Overfitting -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">ML Concept</span>
+                    <h2>10. เปรียบเทียบปัญหา: Underfitting vs Overfitting</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.5rem;">สองปัญหาพื้นฐานคลาสสิกในการประเมินโมเดลการเรียนรู้เชิงลึก:</p>
+                    
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>📉 1. Underfitting (โมเดลเรียนรู้น้อยเกินไป)</h4>
+                            <ul>
+                                <li><strong>คำนิยาม:</strong> โมเดลมีความซับซ้อนต่ำเกินไป (High Bias) ไม่สามารถจับแพทเทิร์นที่แท้จริงของข้อมูลได้</li>
+                                <li><strong>ผลลัพธ์:</strong> มีค่าผิดพลาด (Error) สูงมากทั้งบนข้อมูลที่ใช้สอน (Train) และข้อมูลที่นำมาทดสอบ (Validation/Test)</li>
+                                <li><strong>ตัวอย่างในโค้ด:</strong> พยายามใช้สมการเส้นตรง (Linear Model) ทายแนวโค้งข้อมูลพาราโบลา</li>
+                                <li><strong>แนวทางแก้:</strong> เลือกโมเดลที่ซับซ้อนขึ้น, แตกฟีเจอร์พหุนาม</li>
+                            </ul>
+                        </div>
+                        <div class="grid-item">
+                            <h4>📈 2. Overfitting (โมเดลท่องจำคำตอบ)</h4>
+                            <ul>
+                                <li><strong>คำนิยาม:</strong> โมเดลมีความซับซ้อนสูงจัด (High Variance) จนเผลอไปจำเอา Noise หรือข้อมูลสุ่มแปรปรวนเข้ามาเป็นกฎหลัก</li>
+                                <li><strong>ผลลัพธ์:</strong> ทำนายข้อมูลฝึกสอน (Train) ได้เป๊ะเกือบ 100% แต่พอเจอข้อมูลที่ไม่เคยเห็นกลับทำนายผิดพลาดสูงมาก</li>
+                                <li><strong>ตัวอย่างในโค้ด:</strong> การพล็อตเส้นพหุนามดีกรี 300 วิ่งคดเคี้ยวลากไปโดนจุดสุ่มทุกจุด</li>
+                                <li><strong>แนวทางแก้:</strong> ปรับลดความซับซ้อนตัวแปรด้วย <strong>Regularization</strong>, เพิ่มข้อมูล</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5.5 แผนภาพเปรียบเทียบอาการ Underfitting & Overfitting -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">ML Concept</span>
+                    <h2>10.1 รูปภาพจำลองของอาการ Underfitting & Overfitting</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.3rem;">เปรียบเทียบลักษณะการทำนายของโมเดลที่ระดับความซับซ้อนต่างกัน (จากรูปในโค้ดทดลอง):</p>
+                    
+                    <div class="grid-container" style="grid-template-columns: 1.2fr 0.8fr; align-items: center; gap: 1.5rem;">
+                        <div class="grid-item" style="text-align: center;">
+                            <img src="../images/training_linear_models/high_degree_polynomials_plot.png" class="slide-img" style="max-height: 290px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                            <p style="font-size: 0.72rem !important; color: var(--text-muted); margin-top: 0.4rem;">รูปเปรียบเทียบการปรับความซับซ้อน (ดีกรี 1, 2, และ 300)</p>
+                        </div>
+                        <div class="grid-item">
+                            <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 0.5rem 0.8rem; border-radius: 4px; margin-bottom: 0.6rem; text-align: left;">
+                                <h5 style="color: #ef4444; margin: 0 0 0.1rem 0; font-size: 0.82rem;">🔴 ดีกรี 1 (1 Degree) — Underfitting</h5>
+                                <p style="font-size: 0.72rem; margin: 0; line-height: 1.25; color: #cbd5e1;">เส้นตรงสีแดงทื่อ ไม่สามารถโค้งตามจุดข้อมูลจริงได้ โมเดลเรียบง่ายเกินไป (High Bias)</p>
+                            </div>
+                            <div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 0.5rem 0.8rem; border-radius: 4px; margin-bottom: 0.6rem; text-align: left;">
+                                <h5 style="color: #3b82f6; margin: 0 0 0.1rem 0; font-size: 0.82rem;">🔵 ดีกรี 2 (2 Degrees) — Good Fit</h5>
+                                <p style="font-size: 0.72rem; margin: 0; line-height: 1.25; color: #cbd5e1;">เส้นประสีน้ำเงินโค้งตามแนวโน้มแท้จริงของข้อมูลพาราโบลาได้พอดี มีความเรียบง่ายและทำนายได้ถูกต้องที่สุด</p>
+                            </div>
+                            <div style="background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; padding: 0.5rem 0.8rem; border-radius: 4px; text-align: left;">
+                                <h5 style="color: #10b981; margin: 0 0 0.1rem 0; font-size: 0.82rem;">🟢 ดีกรี 300 (300 Degrees) — Overfitting</h5>
+                                <p style="font-size: 0.72rem; margin: 0; line-height: 1.25; color: #cbd5e1;">เส้นทึบสีเขียวคดเคี้ยวพยายามวิ่งตัดผ่านจุดรบกวน (Noise) ทุกจุด ส่งผลเสียทำให้คำนวณนอกช่วงพลาดสูง (High Variance)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5.6 Learning Curves -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">ML Concept</span>
+                    <h2>10.2 วิเคราะห์ด้วยกราฟการเรียนรู้จริง (Learning Curves)</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.3rem;">การพล็อตเปรียบเทียบ RMSE ของการเทรนจริงในไฟล์โค้ด แสดงให้เห็นรูปร่างความต่างของกราฟชัดเจน:</p>
+                    
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4 style="color: #ef4444;">📉 กราฟ Underfitting (High Bias)</h4>
+                            <p style="margin-bottom: 0.3rem; font-size: 0.72rem !important;">เส้นสีแดง (Train) และสีน้ำเงิน (Valid) วิ่งเข้ามาเจอกันอย่างรวดเร็วในระดับความสูงที่ <strong>Error มากทั้งคู่</strong>:</p>
+                            <div style="text-align: center;">
+                                <img src="../images/training_linear_models/underfitting_learning_curves_plot.png" class="slide-img" style="max-height: 180px;">
+                            </div>
+                        </div>
+                        <div class="grid-item">
+                            <h4 style="color: #06d6a0;">📈 กราฟ Overfitting (High Variance)</h4>
+                            <p style="margin-bottom: 0.3rem; font-size: 0.72rem !important;">เส้นแดง (Train) มีค่าความสูญเสียต่ำมากเกือบศูนย์ แต่เส้นน้ำเงิน (Valid) ดีดตัวสูงค้าง <strong>เกิดช่องว่าง (Gap) กว้าง</strong>:</p>
+                            <div style="text-align: center;">
+                                <img src="../images/training_linear_models/learning_curves_plot.png" class="slide-img" style="max-height: 180px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- กลุ่มสไลด์ย่อย 6: Regularization & Early Stopping (แนวตั้ง) -->
+        <section>
+            <!-- 6.1 Intro -->
+            <section class="section-intro">
+                <div class="slide-container" style="text-align: center;">
+                    <span class="lab-badge badge-theory">Part 6</span>
+                    <h2>Regularization & Early Stopping</h2>
+                    <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 2rem;">บีบควบคุมน้ำหนักโมเดลด้วยบทลงโทษแบบ L1/L2 และเทคนิคสั่งปิดการเรียนรู้ล่วงหน้าเมื่อโมเดลเริ่ม Overfit</p>
+                    <p style="font-size: 0.85rem; color: var(--accent-primary);">⬇️ กดปุ่มลูกศรลงเพื่อดูรายละเอียด ⬇️</p>
+                </div>
+            </section>
+
+            <!-- 6.2 ความหมายและวัตถุประสงค์ -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">ML Concept</span>
+                    <h2>11. Regularization คืออะไร และทำไปทำไม?</h2>
+                    
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>❓ Regularization คืออะไร?</h4>
+                            <p>คือการจงใจเพิ่ม <strong>"โทษปรับ (Penalty)"</strong> เข้าไปในฟังก์ชันประเมินความสูญเสีย (Cost Function) ของโมเดล เมื่อโมเดลพยายามคำนวณค่าน้ำหนักพารามิเตอร์ ($\theta$) ให้มีขนาดใหญ่จนเกินไป</p>
+                            <div class="note-box" style="margin-top: 0.5rem;">
+                                <p>แทนที่โมเดลจะหาจุดที่ฟิตกับข้อมูลฝึกสอน (Training Data) ได้ 100% มันจะถูกบังคับให้เลือกค่าน้ำหนักที่ <strong>"เล็กและเรียบง่ายที่สุด"</strong> ควบคู่ไปด้วย</p>
+                            </div>
+                        </div>
+                        <div class="grid-item">
+                            <h4>🎯 ทำไปเพื่อวัตถุประสงค์อะไร?</h4>
+                            <ul>
+                                <li><strong>แก้ไขปัญหา Overfitting (High Variance)</strong>: ป้องกันไม่ให้โมเดลวาดเส้นคดเคี้ยวไปตาม Noise หรือจุดที่ผิดปกติในข้อมูล</li>
+                                <li><strong>ช่วยให้โมเดลประเมินผลได้ทั่วไปขึ้น (Generalization)</strong>: แม้โมเดลจะมีค่าผิดพลาด (Error) บนข้อมูลฝึกมากขึ้นเล็กน้อย แต่จะสามารถทำนายข้อมูลชุดใหม่ที่ไม่เคยพบมาก่อน (Unseen Data) ได้แม่นยำและมั่นคงขึ้นอย่างมาก</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6.3 3 Regularization Models -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">ML Concept</span>
+                    <h2>11.1 เจาะลึกสูตรบทลงโทษน้ำหนัก (Ridge, Lasso, Elastic Net)</h2>
+                    <div class="triple-grid">
+                        <div class="triple-item">
+                            <h4>🛡️ Ridge Regression (L2)</h4>
+                            <p>บวกรวมน้ำหนักยกกำลังสอง:</p>
+                            $$\alpha \frac{1}{2} \sum \theta^2$$
+                            <ul style="padding-left: 0.6rem; margin-top: 0.2rem;">
+                                <li>บีบพารามิเตอร์น้ำหนักให้มีขนาดเล็กลงพร้อมๆ กัน</li>
+                                <li>รักษาปัจจัยฟีเจอร์ไว้ครบถ้วน ไม่มีตัวใดโดนหักจนเป็น 0</li>
+                                <li><code>Ridge(alpha=0.1)</code></li>
+                            </ul>
+                        </div>
+                        <div class="triple-item">
+                            <h4>🎯 Lasso Regression (L1)</h4>
+                            <p>บวกรวมค่าสัมบูรณ์น้ำหนัก:</p>
+                            $$\alpha \sum |\theta|$$
+                            <ul style="padding-left: 0.6rem; margin-top: 0.2rem;">
+                                <li>บีบพารามิเตอร์และ<strong>ตัดค่าน้ำหนักฟีเจอร์ที่ไม่จำเป็นทิ้งเป็น 0 ทันที</strong></li>
+                                <li>คัดเลือกปัจจัยหลักทิ้งปัจจัยรองอัตโนมัติ (Feature Selection)</li>
+                                <li><code>Lasso(alpha=0.1)</code></li>
+                            </ul>
+                        </div>
+                        <div class="triple-item">
+                            <h4>🔀 Elastic Net</h4>
+                            <p>ผสมผสานรูปแบบ L1 และ L2:</p>
+                            $$r (L1) + (1-r) (L2)$$
+                            <ul style="padding-left: 0.6rem; margin-top: 0.2rem;">
+                                <li>ควบคุมน้ำหนักได้ยืดหยุ่น</li>
+                                <li>เลือกกลุ่มฟีเจอร์ได้สมดุล (Group Selection) เมื่อมีฟีเจอร์ซ้ำซ้อนกันมาก</li>
+                                <li><code>ElasticNet(l1_ratio=0.5)</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6.4 กราฟเปรียบเทียบก่อน-หลังทำ Regularization (NEW!) -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">Visualizing Regularization</span>
+                    <h2>11.2 เปรียบเทียบผลลัพธ์เชิงภาพ: ก่อนทำ vs หลังทำ Regularization</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.4rem;">วิเคราะห์ความยืดหยุ่นที่เปลี่ยนไปของโมเดลเมื่อปรับไฮเปอร์พารามิเตอร์ควบคุมระดับโทษปรับ ($\alpha$):</p>
+                    
+                    <div class="grid-container">
+                        <div class="grid-item" style="text-align: center;">
+                            <h4>🛡️ กราฟผลลัพธ์ของ Ridge Regression</h4>
+                            <img src="../images/training_linear_models/ridge_regression_plot.png" class="slide-img" style="max-height: 200px;">
+                            <p style="font-size: 0.72rem !important; color: var(--text-muted); margin-top: 0.2rem;">
+                                เส้นสีน้ำเงินปะ ($\alpha=0$) สั่นสะเทือนแบบไร้การดึงรั้ง (ก่อนทำ) 
+                                เมื่อเพิ่มค่า $\alpha$ เส้นจะราบเรียบสอดคล้องกับโครงสร้างข้อมูลทั่วไปมากขึ้น (หลังทำ)
+                            </p>
+                        </div>
+                        <div class="grid-item" style="text-align: center;">
+                            <h4>🎯 กราฟผลลัพธ์ของ Lasso Regression</h4>
+                            <img src="../images/training_linear_models/lasso_regression_plot.png" class="slide-img" style="max-height: 200px;">
+                            <p style="font-size: 0.72rem !important; color: var(--text-muted); margin-top: 0.2rem;">
+                                สังเกตเส้นสีแดง ($\alpha=1$): Lasso บีบตัวแปรหนักจนหักระดับสัมประสิทธิ์ของฟีเจอร์พหุนามหลายตัวกลายเป็นศูนย์ ได้รูปเป็นเส้นตรงตัดผ่านเฉลี่ยราบเรียบ
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6.5 แนวทางการเลือกใช้งาน -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">Model Design</span>
+                    <h2>11.3 ทั้ง 3 รูปแบบควรเลือกทำตอนไหน? (Decision Guide)</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.5rem;">แนวทางปฏิบัติในการคัดเลือกสถาปัตยกรรมบทลงโทษให้สอดคล้องกับโจทย์วิศวกรรมข้อมูล:</p>
+                    
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>🛡️ ควรเลือกใช้ Ridge (L2) เมื่อ:</h4>
+                            <ul>
+                                <li><strong>เป็นตัวเลือกตั้งต้นหลัก (Default)</strong>: หากคุณไม่มีความรู้เกี่ยวกับโครงสร้างตัวแปรลึกซึ้ง ให้เริ่มทดลองจาก Ridge ก่อนเสมอ</li>
+                                <li>ฟีเจอร์ส่วนใหญ่คาดว่ามีความสำคัญและส่งผลกระทบต่อคำทำนายทีละเล็กละน้อยเหมือนๆ กัน และไม่ต้องการตัดปัจจัยใดออกไปจากการคำนวณ</li>
+                            </ul>
+                        </div>
+                        <div class="grid-item">
+                            <h4>🎯 ควรเลือกใช้ Lasso (L1) เมื่อ:</h4>
+                            <ul>
+                                <li>คุณมีฟีเจอร์จำนวนมาก (เช่น หลายร้อยตัวแปร) แต่เชื่อว่ามี <strong>ฟีเจอร์หลักเพียงไม่กี่ตัว</strong> เท่านั้นที่ส่งผลจริงต่อผลลัพธ์</li>
+                                <li>ต้องการสร้างโมเดลที่มีความบาง (Sparse Model) ทำงานได้รวดเร็ว ประหยัดหน่วยความจำ และตีความวิเคราะห์ผลได้ง่าย</li>
+                            </ul>
+                        </div>
+                        <div class="grid-item" style="grid-column: span 2; padding: 0.8rem 1.2rem;">
+                            <h4>🔀 ควรเลือกใช้ Elastic Net เมื่อ:</h4>
+                            <ul>
+                                <li>จำนวนคอลัมน์ฟีเจอร์ มีจำนวนมากกว่าจำนวนแถวข้อมูล ($n > m$) ซึ่งทำให้ Lasso เดี่ยวๆ เริ่มทำงานได้ไม่เสถียร</li>
+                                <li>ข้อมูลมีกลุ่มฟีเจอร์ที่มีความสัมพันธ์กันเองสูง (Multicollinearity) เช่น ข้อมูลสรีระนกเพนกวินที่ทั้งน้ำหนัก ขนาดปีก และขนาดปาก มีความแปรผันตามกันหมด Elastic Net จะเลือกทั้งกลุ่มฟีเจอร์ได้ฉลาดกว่า Lasso ที่จะสุ่มหยิบมาเพียงตัวเดียวแล้วตัดตัวอื่นทิ้ง</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6.6 Early Stopping -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Early Stopping</span>
+                    <h2>12. การหยุดเทรนโมเดลก่อนเวลา (Early Stopping)</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.4rem;">การเรียนรู้ไปเรื่อยๆ จนค่าความผิดพลาดบน Validation Set มีจุดต่ำสุดแล้วเริ่มดีดกลับ:</p>
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>⏱️ ตรรกะโค้ดแบบวนลูปสั่งหยุด</h4>
+                            <pre style="margin: 0.2rem 0;"><code class="language-python">for epoch in range(n_epochs):
+    # ปรับจูนโมเดลทีละรอบผ่านข้อมูล Train
+    sgd_reg.partial_fit(X_train_prep, y_train)
+    val_error = get_rmse(X_valid_prep, y_valid)
+    
+    # หากรอบปัจจุบันพบจุด Error ต่ำสุดใหม่
+    if val_error < best_valid_rmse:
+        best_valid_rmse = val_error
+        # ก๊อบปี้เก็บสถานะโมเดลที่ดีที่สุดไว้
+        best_model = deepcopy(sgd_reg)</code></pre>
+                        </div>
+                        <div class="grid-item">
+                            <h4>⚠️ เตือนภัยนักพัฒนา C# เรื่อง References ใน Python!</h4>
+                            <p>ในภาษา Python หากเขียนว่า <code>best_model = sgd_reg</code>:</p>
+                            <ul>
+                                <li>จะเป็นการคัดลอกตำแหน่ง Reference เท่านั้น เมื่อโมเดลรันฝึกฝนต่อใน Epoch ถัดไป ค่าพารามิเตอร์ <code>best_model</code> จะเพี้ยนตามไปด้วย</li>
+                                <li>จึงต้องนำเข้าคลัง <code>copy.deepcopy</code> เพื่อสั่งโคลนข้อมูลออบเจกต์ก้อนใหม่ในแรมโดยสมบูรณ์</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- กลุ่มสไลด์ย่อย 7: Logistic & Softmax Regression (แนวตั้ง) -->
+        <section>
+            <!-- 7.1 Intro -->
+            <section class="section-intro">
+                <div class="slide-container" style="text-align: center;">
+                    <span class="lab-badge badge-theory">Part 7</span>
+                    <h2>การจำแนกประเภท (Classification)</h2>
+                    <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 2rem;">เปลี่ยนจากการทำนายตัวเลขต่อเนื่องเป็นการทำนายประเภทคลาสด้วย Logistic และ Softmax Regression</p>
+                    <p style="font-size: 0.85rem; color: var(--accent-primary);">⬇️ กดปุ่มลูกศรลงเพื่อดูรายละเอียด ⬇️</p>
+                </div>
+            </section>
+
+            <!-- 7.2 Logistic Regression -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">ML Concept</span>
+                    <h2>13. การถดถอยโลจิสติก (Logistic Regression)</h2>
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>📈 ฟังก์ชันซิกมอยด์ (Sigmoid)</h4>
+                            <p>บีบตัวเลขเชิงเส้นดิบๆ ให้อยู่ในช่วงความน่าจะเป็น 0 ถึง 1 เสมอ:</p>
+                            $$\sigma(t) = \frac{1}{1 + e^{-t}}$$
+                            <pre style="margin: 0.2rem 0;"><code class="language-python"># สมการใน NumPy:
+sig = 1 / (1 + np.exp(-t))</code></pre>
+                            <p style="margin-top: 0.3rem;">หากคิดคำนวณโอกาสน่าจะเป็นได้ $\ge 0.5$ ทำนายคลาสเป็น 1</p>
+                        </div>
+                        <div class="grid-item">
+                            <h4>🌸 ขอบเขตการตัดสินใจ (Decision Boundary)</h4>
+                            <p>ตัวอย่างการพยากรณ์คลาสสายพันธุ์ดอกไม้ Iris virginica:</p>
+                            <ul>
+                                <li>วิเคราะห์จาก <strong>ความกว้างกลีบดอก (petal width)</strong></li>
+                                <li>โมเดลวิเคราะห์จุดความกว้างกลีบตัดที่ความน่าจะเป็น 0.5 คือ <strong>1.61 ซม.</strong></li>
+                                <li>หากกลีบกว้างกว่า 1.61 ซม. จะทำนายว่าเป็นพันธุ์ Virginica ทันที</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7.3 Softmax Regression -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-theory">ML Concept</span>
+                    <h2>14. การจำแนกประเภทแบบหลายคลาส (Softmax Regression)</h2>
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <h4>🧮 ฟังก์ชัน Softmax</h4>
+                            <p>คำนวณแจกแจงเปอร์เซ็นต์โอกาสในทุกคลาสรวมกันให้เท่ากับ 1.0:</p>
+                            $$\hat{p}_k = \frac{\exp(s_k(x))}{\sum_{j=1}^K \exp(s_j(x))}$$
+                            <pre style="margin: 0.2rem 0;"><code class="language-python"># เขียนแมนนวลเพื่อความปลอดภัยของมิติ:
+def softmax(logits):
+    exps = np.exp(logits)
+    # keepdims=True รักษาแถวไม่ให้มิติอาร์เรย์พัง
+    sums = exps.sum(axis=1, keepdims=True)
+    return exps / sums</code></pre>
+                        </div>
+                        <div class="grid-item">
+                            <h4>🌸 สไตล์ใช้งานผ่าน Scikit-Learn</h4>
+                            <p>โมเดลจะใช้สถาปัตยกรรม Softmax อัตโนมัติเมื่อคลาสในเฉลยมีมากกว่า 2 ตัวแปร:</p>
+                            <pre style="margin: 0.2rem 0;"><code class="language-python"># ใช้พิกัด 2 มิติทำนาย 3 สายพันธุ์ไอริส
+softmax_reg = LogisticRegression(C=30, random_state=42)
+softmax_reg.fit(X_train, y_train)
+
+# พยากรณ์ดอกไม้ขนาด [ยาว 5 ซม, กว้าง 2 ซม]
+pred_class = softmax_reg.predict([[5, 2]])
+pred_probs = softmax_reg.predict_proba([[5, 2]])</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7.4 Softmax from Scratch 1 -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Numpy Scratch Code</span>
+                    <h2>15. แบบฝึกหัดข้อ 12: การสกัดข้อมูลแมนนวล (One-Hot & Scale)</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.4rem;">การจัดเตรียมโครงสร้างข้อมูลตัวเลขก่อนป้อนลูปคำนวณแมนนวล:</p>
+                    <pre style="margin: 0.2rem 0;"><code class="language-python"># แปลงคลาสประเภท เช่น [2] ให้กลายเป็นเวกเตอร์ความน่าจะเป็น [0, 0, 1]
+def to_one_hot(y):
+    # np.diag สร้างเมทริกซ์เอกลักษณ์ แล้วสไลด์ตัดตำแหน่งแถวตามดัชนีคลาส
+    return np.diag(np.ones(y.max() + 1))[y]
+
+# คำนวณปรับแต่งมิติฟีเจอร์ (Standardization)
+mean = X_train[:, 1:].mean(axis=0)
+std = X_train[:, 1:].std(axis=0)
+X_train[:, 1:] = (X_train[:, 1:] - mean) / std
+X_valid[:, 1:] = (X_valid[:, 1:] - mean) / std</code></pre>
+                </div>
+            </section>
+
+            <!-- 7.5 Softmax from Scratch 2 -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Numpy Scratch Code</span>
+                    <h2>15.1 ลูปคำนวณและอัปเดตความชันแมนนวล (Softmax Loop)</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.4rem;">สูตรการลูปฝึกฝนโมเดลแมนนวลในตอนท้ายของโค้ดสคริปต์:</p>
+                    <pre style="margin: 0.2rem 0;"><code class="language-python">for epoch in range(n_epochs):
+    logits = X_train @ Theta          # หาผลคะแนนดิบ
+    Y_proba = softmax(logits)         # แปลงเป็นโอกาสน่าจะเป็นด้วยฟังก์ชัน Softmax
+    
+    # Gradients = X^T * (คำทำนาย - เฉลยจริง)
+    error = Y_proba - Y_train_one_hot
+    gradients = 1 / m * X_train.T @ error
+    
+    # ขยับปรับปรุงพารามิเตอร์เมทริกซ์ Theta
+    Theta = Theta - eta * gradients</code></pre>
+                </div>
+            </section>
+
+            <!-- 7.6 Softmax from Scratch 3 -->
+            <section>
+                <div class="slide-container">
+                    <span class="lab-badge badge-py">Numpy Scratch Code</span>
+                    <h2>15.2 ระบบบทลงโทษความเข้มข้น L2 & Early Stopping แมนนวล</h2>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.4rem;">การนำเอาโทษปรับความกว้างน้ำหนักมารวมใน Gradients และการดักสัญญาณหยุดเรียนรู้ล่วงหน้า:</p>
+                    <pre style="margin: 0.2rem 0;"><code class="language-python"># 1. บวก Gradients โทษปรับแบบกำลังสอง (ไม่ลงโทษส่วน Bias แถวแรก)
+gradients += np.r_[np.zeros([1, n_outputs]), 1 / C * Theta[1:]]
+
+# 2. คำนวณ Loss บน Validation Set และเช็ค Early Stopping
+Y_proba_valid = softmax(X_valid @ Theta)
+loss = -(Y_valid_one_hot * np.log(Y_proba_valid + epsilon)).sum(axis=1).mean()
+total_loss = loss + 1 / (2 * C) * (Theta[1:] ** 2).sum()
+
+if total_loss < best_loss:
+    best_loss = total_loss
+else:
+    # หากรอบปัจจุบันพบจุด Error กลับมาเพิ่มขึ้น ให้สั่งตัดวงจรหยุดสอนงานทันที!
+    print(epoch, total_loss, "early stopping!")
+    break</code></pre>
+                </div>
+            </section>
+        </section>
+
+        <!-- สไลด์ 17: สรุป Cheat Sheet สำหรับนักเรียน C# (แนวนอน) -->
+        <section data-background-color="#0b132b">
+            <div class="slide-container">
+                <span class="lab-badge badge-cs">C# vs Python ML Cheat Sheet</span>
+                <h2>16. ตารางเปรียบเทียบเทียบความสอดคล้องไลบรารีและคำสั่ง</h2>
+                <p style="font-size: 0.82rem; margin-bottom: 0.5rem;">เทียบโครงสร้างเพื่อเป็นแนวทางต่อยอดสำหรับนักศึกษาที่มีพื้นฐานการพัฒนาซอฟต์แวร์ C# / .NET:</p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">ความต้องการ</th>
+                            <th style="width: 38%;">คลาสฝั่ง Python (NumPy/Scikit-Learn)</th>
+                            <th style="width: 37%;">เทียบเท่าใน C# / .NET (ML.NET Ecosystem)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>คณิตศาสตร์และอาร์เรย์มิติ</strong></td>
+                            <td><code>numpy</code> (เช่น <code>np.linalg.inv</code>)</td>
+                            <td><code>MathNet.Numerics</code> หรือ <code>Microsoft.ML.Numeric</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ฝึกสอนโมเดลเชิงเส้นตรง</strong></td>
+                            <td><code>LinearRegression</code> / <code>SGDRegressor</code></td>
+                            <td><code>MLContext.Regression.Trainers.Ols()</code> / <code>Sgd()</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ท่อประมวลผลข้อมูล</strong></td>
+                            <td><code>make_pipeline()</code> (Pipeline)</td>
+                            <td><code>EstimatorChain</code> (การเชนคำสั่งต่อกันด้วย <code>.Append(...)</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>แสดงผลพล็อตแผนภูมิภาพ</strong></td>
+                            <td><code>matplotlib.pyplot</code> (<code>plt</code>)</td>
+                            <td><code>ScottPlot</code> หรือ <code>OxyPlot</code>ประจำหน้าต่างแอปพลิเคชัน</td>
+                        </tr>
+                        <tr>
+                            <td><strong>การคัดลอกโคลน Object แท้</strong></td>
+                            <td><code>copy.deepcopy()</code></td>
+                            <td>การทำ Serialization หรือเขียนโค้ด Clone Constructor ด้วยตัวเอง</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="note-box" style="margin-top: 0.8rem;">
+                    <p><strong>ข้อสรุปของอาจารย์:</strong> ถึงแม้ภาษาเขียนจะต่างกัน แต่แกนหลักคณิตศาสตร์ของการปรับน้ำหนักโมเดลยังคงเหมือนกัน! เปิดสคริปต์โค้ดแล้วทดลองรันพร้อมจดบันทึกผลได้เลยครับ 🚀</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<!-- Reveal.js & Plugins via CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+<script>
+    // เริ่มต้นใช้งาน Reveal.js และกำหนดการตั้งค่าขนาด Canvas แบบ 16:9
+    Reveal.initialize({
+        width: 1280,
+        height: 720,
+        margin: 0.1,
+        minScale: 0.2,
+        maxScale: 2.0,
+        hash: true,
+        controls: true,
+        progress: true,
+        center: true,
+        transition: 'slide', // แอนิเมชันเปลี่ยนหน้า: slide/fade/convex/concave/zoom
+        plugins: [ RevealHighlight ]
+    });
+</script>
+</body>
+</html>
