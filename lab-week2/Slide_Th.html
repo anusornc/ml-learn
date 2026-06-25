@@ -836,21 +836,28 @@ polynomial_regression.fit(X, y)</code></pre>
                 <div class="slide-container">
                     <span class="lab-badge badge-theory">ML Concept</span>
                     <h2>10.2 วิเคราะห์ด้วยกราฟการเรียนรู้จริง (Learning Curves)</h2>
-                    <p style="font-size: 0.82rem; margin-bottom: 0.3rem;">การพล็อตเปรียบเทียบ RMSE ของการเทรนจริงในไฟล์โค้ด แสดงให้เห็นรูปร่างความต่างของกราฟชัดเจน:</p>
+                    <p style="font-size: 0.82rem; margin-bottom: 0.3rem;">เปรียบเทียบลักษณะ RMSE ระหว่างการเทรนจริง (Train) และทดสอบ (Valid) เพื่อวิเคราะห์ความเหมาะสมของโมเดล:</p>
                     
-                    <div class="grid-container">
-                        <div class="grid-item">
-                            <h4 style="color: #ef4444;">📉 กราฟ Underfitting (High Bias)</h4>
-                            <p style="margin-bottom: 0.3rem; font-size: 0.72rem !important;">เส้นสีแดง (Train) และสีน้ำเงิน (Valid) วิ่งเข้ามาเจอกันอย่างรวดเร็วในระดับความสูงที่ <strong>Error มากทั้งคู่</strong>:</p>
+                    <div class="grid-container" style="grid-template-columns: repeat(3, 1fr); gap: 0.8rem;">
+                        <div class="grid-item" style="padding: 0.7rem;">
+                            <h4 style="color: #ef4444; font-size: 0.95rem; margin-bottom: 0.3rem;">📉 1. Underfitting (High Bias)</h4>
+                            <p style="margin-bottom: 0.4rem; font-size: 0.68rem !important; line-height: 1.3; color: var(--text-muted); height: 2.6rem;">เส้นแดง (Train) และสีน้ำเงิน (Valid) วิ่งเข้าหากันอย่างรวดเร็วและนิ่งคงที่ ณ ระดับที่ <strong>Error สูงมากทั้งคู่</strong></p>
                             <div style="text-align: center;">
-                                <img src="../images/training_linear_models/underfitting_learning_curves_plot.png" class="slide-img" style="max-height: 180px;">
+                                <img src="../images/training_linear_models/underfitting_learning_curves_plot.png" class="slide-img" style="max-height: 150px;">
                             </div>
                         </div>
-                        <div class="grid-item">
-                            <h4 style="color: #06d6a0;">📈 กราฟ Overfitting (High Variance)</h4>
-                            <p style="margin-bottom: 0.3rem; font-size: 0.72rem !important;">เส้นแดง (Train) มีค่าความสูญเสียต่ำมากเกือบศูนย์ แต่เส้นน้ำเงิน (Valid) ดีดตัวสูงค้าง <strong>เกิดช่องว่าง (Gap) กว้าง</strong>:</p>
+                        <div class="grid-item" style="padding: 0.7rem;">
+                            <h4 style="color: #3b82f6; font-size: 0.95rem; margin-bottom: 0.3rem;">🎯 2. Good Fit (การเรียนรู้ที่ดี)</h4>
+                            <p style="margin-bottom: 0.4rem; font-size: 0.68rem !important; line-height: 1.3; color: var(--text-muted); height: 2.6rem;">เส้นแดง (Train) และสีน้ำเงิน (Valid) ลู่เข้าหากันที่ระดับ <strong>Error ต่ำ</strong> และไม่มีช่องว่างหรือมีช่องว่างที่แคบมาก</p>
                             <div style="text-align: center;">
-                                <img src="../images/training_linear_models/learning_curves_plot.png" class="slide-img" style="max-height: 180px;">
+                                <img src="../images/training_linear_models/good_fit_learning_curves_plot.png" class="slide-img" style="max-height: 150px;">
+                            </div>
+                        </div>
+                        <div class="grid-item" style="padding: 0.7rem;">
+                            <h4 style="color: #10b981; font-size: 0.95rem; margin-bottom: 0.3rem;">📈 3. Overfitting (High Variance)</h4>
+                            <p style="margin-bottom: 0.4rem; font-size: 0.68rem !important; line-height: 1.3; color: var(--text-muted); height: 2.6rem;">เส้นแดง (Train) ลู่ลงระดับเกือบศูนย์ แต่เส้นน้ำเงิน (Valid) ยังสูงและ <strong>เกิดช่องว่าง (Gap) กว้างชัดเจน</strong></p>
+                            <div style="text-align: center;">
+                                <img src="../images/training_linear_models/learning_curves_plot.png" class="slide-img" style="max-height: 150px;">
                             </div>
                         </div>
                     </div>
