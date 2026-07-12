@@ -94,7 +94,7 @@
                 การเรียนรู้แบบ PAC (Probably Approximately Correct Learning)
             </h2>
             <p class="text-slate-600 leading-relaxed mb-4">
-                โมเดล **PAC (Probably Approximately Correct)** ถูกเสนอขึ้นโดย Leslie Valiant เพื่ออธิบายว่าเราไม่สามารถรับประกันความถูกต้องของสมมติฐานได้ 100% เสมอไปเนื่องจากปัญหาความน่าจะเป็น (Probably) แต่เราสามารถกำหนดขอบเขตให้ผลลัพธ์นั้น **"ถูกต้องเกือบทั้งหมด" (Approximately Correct)** ได้อย่างมั่นใจ
+                โมเดล <strong>PAC (Probably Approximately Correct)</strong> ถูกเสนอขึ้นโดย Leslie Valiant เพื่ออธิบายว่าเราไม่สามารถรับประกันความถูกต้องของสมมติฐานได้ 100% เสมอไปเนื่องจากปัญหาความน่าจะเป็น (Probably) แต่เราสามารถกำหนดขอบเขตให้ผลลัพธ์นั้น <strong>"ถูกต้องเกือบทั้งหมด" (Approximately Correct)</strong> ได้อย่างมั่นใจ
             </p>
             <p class="text-slate-600 mb-6">
                 โดยกำหนดตัวแปรขอบเขตสำคัญ 2 ตัว:
@@ -114,6 +114,16 @@
             <p class="text-slate-500 text-xs">
                 *สูตรนี้แสดงว่าจำนวนตัวอย่างที่ต้องการจะเป็นสัดส่วนผกผันกับข้อผิดพลาดที่ยอมรับได้ ($\epsilon$) และเพิ่มขึ้นตามขนาดพื้นที่ตัวเลือกสมมติฐาน ($|H|$)*
             </p>
+
+            <div class="mt-6 rounded-xl border border-teal-200 bg-teal-50 p-5">
+                <h3 class="font-bold text-teal-900 text-lg mb-3">ตัวอย่างคำนวณ: ต้องใช้ข้อมูลฝึกอย่างน้อยเท่าไร?</h3>
+                <p class="text-sm text-slate-700 mb-3">สมมติว่าเรามีสมมติฐานให้เลือก $|H| = 100$ แบบ ยอมให้โมเดลผิดได้ไม่เกิน $\epsilon = 0.10$ และต้องการความเชื่อมั่น 95% จึงกำหนด $\delta = 0.05$</p>
+                <div class="bg-white rounded-lg border border-teal-100 p-4 overflow-x-auto text-sm">
+                    $$m \ge \frac{1}{0.10}\left(\ln(100) + \ln\frac{1}{0.05}\right) = 10(4.605 + 2.996) = 76.01$$
+                </div>
+                <p class="mt-3 text-sm text-slate-700"><strong>คำตอบ:</strong> ต้องใช้ข้อมูลอย่างน้อย <strong>77 ตัวอย่าง</strong> (ปัดขึ้นเป็นจำนวนเต็ม) ตามขอบเขตของสูตรนี้</p>
+                <p class="mt-2 text-sm text-teal-900"><strong>แปลแบบง่าย:</strong> เรากำลังขอให้โมเดลผิดได้ไม่เกิน 10% ด้วยความมั่นใจ 95% หากยอมให้ผิดได้เพียง 5% ค่า $\epsilon$ ลดลงครึ่งหนึ่ง จำนวนตัวอย่างขั้นต่ำจะเพิ่มเป็นประมาณ <strong>153 ตัวอย่าง</strong> จึงเห็นได้ว่า “ต้องการแม่นขึ้น” ทำให้ต้องใช้ข้อมูลมากขึ้น</p>
+            </div>
         </section>
 
         <!-- Section 3: VC Dimension -->
@@ -123,7 +133,7 @@
                 มิติ VC (Vapnik-Chervonenkis Dimension)
             </h2>
             <p class="text-slate-600 leading-relaxed mb-4">
-                ในกรณีที่พื้นที่สมมติฐานมีขนาดเป็นอนันต์ (Infinite Hypothesis Space $H$) เช่น ในกรณีที่พารามิเตอร์เป็นเลขจำนวนจริง เราจะไม่สามารถระบุค่า $|H|$ เป็นตัวเลขจำกัดได้ จึงต้องใช้ **มิติ VC (VC Dimension)** เข้ามาทำหน้าที่วัดความสามารถในการกระจายตัวข้อมูลหรือความเป็นไปได้ของการจัดเรียงตัวแบบต่างๆ
+                ในกรณีที่พื้นที่สมมติฐานมีขนาดเป็นอนันต์ (Infinite Hypothesis Space $H$) เช่น ในกรณีที่พารามิเตอร์เป็นเลขจำนวนจริง เราจะไม่สามารถระบุค่า $|H|$ เป็นตัวเลขจำกัดได้ จึงต้องใช้ <strong>มิติ VC (VC Dimension)</strong> เข้ามาทำหน้าที่วัดความสามารถในการกระจายตัวข้อมูลหรือความเป็นไปได้ของการจัดเรียงตัวแบบต่างๆ
             </p>
             <div class="bg-teal-50 p-4 rounded-xl border-l-4 border-teal-500 mb-4">
                 <h3 class="font-bold text-teal-800 mb-2">คำจำกัดความ (Shattering)</h3>
@@ -132,7 +142,7 @@
                 </p>
             </div>
             <p class="text-slate-600 leading-relaxed mb-4">
-                **มิติ VC (VC Dimension)** ของพื้นที่สมมติฐาน $H$ คือจำนวนจุดข้อมูลสูงสุดที่สามารถถูก Shattered ได้โดย $H$ ยกตัวอย่างเช่น:
+                <strong>มิติ VC (VC Dimension)</strong> ของพื้นที่สมมติฐาน $H$ คือจำนวนจุดข้อมูลสูงสุดที่สามารถถูก Shattered ได้โดย $H$ ยกตัวอย่างเช่น:
             </p>
             <ul class="list-disc pl-6 text-slate-600 space-y-2">
                 <li>เส้นตรง 2 มิติ (Linear Separator) มีมิติ VC เท่ากับ 3 จุดข้อมูล (ไม่สามารถ Shattered 4 จุดที่เรียงตัวเป็นรูปกากบาทแบบสลับคลาสได้)</li>

@@ -70,6 +70,38 @@
 
             <p class="mt-4"><a href="index.html" class="text-sm text-gray-600 underline">กลับไปยังสารบัญ</a></p>
         </div>
+
+        <section class="my-8 rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+            <h2 class="text-2xl font-bold text-amber-900 mb-2">ลองคิดก่อนเปิดเฉลย</h2>
+            <p class="text-gray-700 mb-4">ใช้ Confusion Matrix เดียวกับในเอกสาร PDF: แถวคือคลาสจริง และคอลัมน์คือคลาสที่โมเดลทำนาย</p>
+            <div class="overflow-x-auto mb-4">
+                <table class="min-w-full max-w-md bg-white border border-amber-200 text-sm text-gray-700">
+                    <thead>
+                        <tr class="bg-amber-100 text-amber-950"><th class="py-2 px-3 border-b text-left">จริง → ทำนาย</th><th class="py-2 px-3 border-b">A</th><th class="py-2 px-3 border-b">B</th><th class="py-2 px-3 border-b">C</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><th class="py-2 px-3 border-b text-left">A</th><td class="py-2 px-3 border-b text-center">15</td><td class="py-2 px-3 border-b text-center">3</td><td class="py-2 px-3 border-b text-center">2</td></tr>
+                        <tr><th class="py-2 px-3 border-b text-left">B</th><td class="py-2 px-3 border-b text-center">1</td><td class="py-2 px-3 border-b text-center">20</td><td class="py-2 px-3 border-b text-center">4</td></tr>
+                        <tr><th class="py-2 px-3 text-left">C</th><td class="py-2 px-3 text-center">2</td><td class="py-2 px-3 text-center">5</td><td class="py-2 px-3 text-center">18</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                <li>ข้อมูลทั้งหมดมีกี่ตัวอย่าง และโมเดลทำนายถูกทั้งหมดกี่ตัวอย่าง</li>
+                <li>Accuracy ของโมเดลเป็นเท่าไร</li>
+                <li>Recall ของคลาส B เป็นเท่าไร</li>
+                <li>Precision ของคลาส C เป็นเท่าไร</li>
+            </ol>
+            <details class="mt-5 rounded-lg border border-amber-200 bg-white p-4 text-gray-700">
+                <summary class="cursor-pointer font-semibold text-amber-900">เปิดดูเฉลยและวิธีคิด</summary>
+                <ol class="list-decimal list-inside mt-3 space-y-2">
+                    <li>ทั้งหมด <strong>70 ตัวอย่าง</strong> (20 + 25 + 25) และทำนายถูก <strong>53 ตัวอย่าง</strong> (15 + 20 + 18)</li>
+                    <li>Accuracy = 53/70 = <strong>0.757 หรือ 75.7%</strong></li>
+                    <li>Recall(B) = 20/(1 + 20 + 4) = 20/25 = <strong>80%</strong> เพราะดูจากแถว B ซึ่งเป็นข้อมูลจริงคลาส B</li>
+                    <li>Precision(C) = 18/(2 + 4 + 18) = 18/24 = <strong>75%</strong> เพราะดูจากคอลัมน์ C ซึ่งเป็นทุกกรณีที่โมเดลทำนายว่า C</li>
+                </ol>
+            </details>
+        </section>
     
                         <!-- Section: Practical Labs -->
         <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 text-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-slate-800 mt-8">

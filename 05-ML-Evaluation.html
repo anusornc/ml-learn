@@ -742,6 +742,75 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- Worked example: the same observations are used for every regression metric -->
+                    <div class="mt-8 rounded-lg border border-sky-200 bg-sky-50 p-5">
+                        <div class="flex flex-col gap-1 mb-5">
+                            <h4 class="text-xl font-semibold text-slate-800">ตัวอย่างการคำนวณเมตริก Regression จากข้อมูลชุดเดียวกัน</h4>
+                            <p class="text-gray-700">สมมติว่าโมเดลทำนาย <strong>คะแนนสอบ</strong> ของนักศึกษา 4 คน โดยใช้ค่าจริง (y) และค่าที่โมเดลทำนาย (ŷ) ชุดเดียวกันในทุกเมตริกด้านล่าง</p>
+                        </div>
+
+                        <div class="overflow-x-auto mb-5">
+                            <table class="min-w-full bg-white border border-sky-200 text-sm text-gray-700">
+                                <thead>
+                                    <tr class="bg-sky-100 text-slate-800">
+                                        <th class="py-2 px-3 border-b border-sky-200 text-left">นักศึกษา</th>
+                                        <th class="py-2 px-3 border-b border-sky-200 text-right">ค่าจริง y</th>
+                                        <th class="py-2 px-3 border-b border-sky-200 text-right">ค่าทำนาย ŷ</th>
+                                        <th class="py-2 px-3 border-b border-sky-200 text-right">ความคลาดเคลื่อน y − ŷ</th>
+                                        <th class="py-2 px-3 border-b border-sky-200 text-right">|y − ŷ|</th>
+                                        <th class="py-2 px-3 border-b border-sky-200 text-right">(y − ŷ)²</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="py-2 px-3 border-b">1</td><td class="py-2 px-3 border-b text-right">100</td><td class="py-2 px-3 border-b text-right">110</td><td class="py-2 px-3 border-b text-right">−10</td><td class="py-2 px-3 border-b text-right">10</td><td class="py-2 px-3 border-b text-right">100</td></tr>
+                                    <tr><td class="py-2 px-3 border-b">2</td><td class="py-2 px-3 border-b text-right">120</td><td class="py-2 px-3 border-b text-right">115</td><td class="py-2 px-3 border-b text-right">5</td><td class="py-2 px-3 border-b text-right">5</td><td class="py-2 px-3 border-b text-right">25</td></tr>
+                                    <tr><td class="py-2 px-3 border-b">3</td><td class="py-2 px-3 border-b text-right">130</td><td class="py-2 px-3 border-b text-right">140</td><td class="py-2 px-3 border-b text-right">−10</td><td class="py-2 px-3 border-b text-right">10</td><td class="py-2 px-3 border-b text-right">100</td></tr>
+                                    <tr><td class="py-2 px-3 border-b">4</td><td class="py-2 px-3 border-b text-right">150</td><td class="py-2 px-3 border-b text-right">145</td><td class="py-2 px-3 border-b text-right">5</td><td class="py-2 px-3 border-b text-right">5</td><td class="py-2 px-3 border-b text-right">25</td></tr>
+                                    <tr class="bg-slate-50 font-semibold"><td class="py-2 px-3" colspan="4">ผลรวม</td><td class="py-2 px-3 text-right">30</td><td class="py-2 px-3 text-right">250</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <p class="text-gray-700 mb-4">ดังนั้น จำนวนข้อมูล <strong>n = 4</strong>, ผลรวมความคลาดเคลื่อนสัมบูรณ์เท่ากับ <strong>30</strong> และผลรวมความคลาดเคลื่อนกำลังสองเท่ากับ <strong>250</strong></p>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <article class="rounded-lg bg-white border border-blue-200 p-4">
+                                <h5 class="font-semibold text-blue-800 mb-2">1. MSE (Mean Squared Error)</h5>
+                                <p class="text-sm text-gray-700 mb-2">นำค่าคลาดเคลื่อนกำลังสองมารวมกัน แล้วหารด้วยจำนวนข้อมูล</p>
+                                <div class="formula text-sm">$$MSE = \frac{100 + 25 + 100 + 25}{4} = \frac{250}{4} = 62.5$$</div>
+                                <p class="mt-2 text-sm text-gray-700"><strong>คำตอบ:</strong> MSE = <strong>62.5 คะแนน²</strong></p>
+                                <p class="mt-2 text-sm text-blue-900 bg-blue-50 p-2 rounded"><strong>แปลแบบง่าย:</strong> 62.5 <em>ไม่ใช่</em> “ทำนายพลาด 62.5 คะแนน” แต่เป็นค่าเฉลี่ยหลังยกกำลังสองความผิดพลาด จึงทำให้การพลาด 10 คะแนนมีน้ำหนัก 100 ขณะที่พลาด 5 คะแนนมีน้ำหนัก 25 (หนักกว่า 4 เท่า) เหมาะเมื่ออยากให้โมเดลระวังการพลาดไกล ๆ</p>
+                            </article>
+
+                            <article class="rounded-lg bg-white border border-blue-200 p-4">
+                                <h5 class="font-semibold text-blue-800 mb-2">2. RMSE (Root Mean Squared Error)</h5>
+                                <p class="text-sm text-gray-700 mb-2">นำรากที่สองของ MSE เพื่อให้ผลลัพธ์กลับมาเป็นหน่วยคะแนน</p>
+                                <div class="formula text-sm">$$RMSE = \sqrt{62.5} \approx 7.91$$</div>
+                                <p class="mt-2 text-sm text-gray-700"><strong>คำตอบ:</strong> RMSE ≈ <strong>7.91 คะแนน</strong></p>
+                                <p class="mt-2 text-sm text-blue-900 bg-blue-50 p-2 rounded"><strong>แปลแบบง่าย:</strong> ถ้ามองความผิดพลาดโดยให้กรณีพลาดมากสำคัญเป็นพิเศษ โมเดลนี้พลาดราว <strong>7.91 คะแนน</strong> ต่อคน ค่า RMSE มากกว่า MAE เล็กน้อย เพราะข้อมูลชุดนี้มีคนที่พลาดถึง 10 คะแนนอยู่ 2 คน</p>
+                            </article>
+
+                            <article class="rounded-lg bg-white border border-emerald-200 p-4">
+                                <h5 class="font-semibold text-emerald-800 mb-2">3. MAE (Mean Absolute Error)</h5>
+                                <p class="text-sm text-gray-700 mb-2">ตัดเครื่องหมายบวก/ลบของความคลาดเคลื่อนออก แล้วหาค่าเฉลี่ย</p>
+                                <div class="formula text-sm">$$MAE = \frac{10 + 5 + 10 + 5}{4} = \frac{30}{4} = 7.5$$</div>
+                                <p class="mt-2 text-sm text-gray-700"><strong>คำตอบ:</strong> MAE = <strong>7.5 คะแนน</strong></p>
+                                <p class="mt-2 text-sm text-emerald-900 bg-emerald-50 p-2 rounded"><strong>แปลแบบง่าย:</strong> หากสุ่มนักศึกษามา 1 คน โมเดลทำนายคะแนนต่างจากคะแนนจริงโดยเฉลี่ย <strong>7.5 คะแนน</strong> ไม่สนใจว่าทำนายสูงไปหรือต่ำไป จึงเป็นค่าที่อ่านและสื่อสารง่ายที่สุด</p>
+                            </article>
+
+                            <article class="rounded-lg bg-white border border-violet-200 p-4">
+                                <h5 class="font-semibold text-violet-800 mb-2">4. R² (Coefficient of Determination)</h5>
+                                <p class="text-sm text-gray-700 mb-2">เปรียบเทียบความผิดพลาดของโมเดลกับการทำนายทุกคนด้วยค่าเฉลี่ยของค่าจริง</p>
+                                <div class="formula text-sm mb-2">$$\bar{y} = \frac{100 + 120 + 130 + 150}{4} = 125$$</div>
+                                <div class="formula text-sm">$$R^2 = 1 - \frac{250}{(100-125)^2 + (120-125)^2 + (130-125)^2 + (150-125)^2} = 1 - \frac{250}{1300} \approx 0.808$$</div>
+                                <p class="mt-2 text-sm text-gray-700"><strong>คำตอบ:</strong> R² ≈ <strong>0.808</strong> หรือโมเดลอธิบายความแปรปรวนของคะแนนได้ประมาณ <strong>80.8%</strong></p>
+                                <p class="mt-2 text-sm text-violet-900 bg-violet-50 p-2 rounded"><strong>แปลแบบง่าย:</strong> หากไม่ใช้โมเดลเลย เราอาจเดาทุกคนว่าได้ 125 คะแนน (ค่าเฉลี่ย) แต่โมเดลนี้ลดความผิดพลาดแบบกำลังสองจากวิธีเดาง่าย ๆ นั้นได้ประมาณ <strong>80.8%</strong> จึงดีกว่าการเดาด้วยค่าเฉลี่ยมาก <em>ไม่ใช่</em> การทำนายถูก 80.8% ของนักศึกษา</p>
+                            </article>
+                        </div>
+
+                        <p class="mt-5 text-sm text-slate-700 bg-white/70 border-l-4 border-sky-500 p-3 rounded-r"><strong>จำง่ายจากชุดข้อมูลนี้:</strong> ใช้ <strong>MAE = 7.5</strong> เมื่อต้องการตอบว่า “โดยเฉลี่ยพลาดกี่คะแนน”; ใช้ <strong>RMSE ≈ 7.91</strong> เมื่อต้องการให้การพลาดมากมีน้ำหนักเพิ่มขึ้น; ใช้ <strong>MSE = 62.5 คะแนน²</strong> เป็นค่าความผิดพลาดแบบยกกำลังสองสำหรับเปรียบเทียบหรือฝึกโมเดล; และใช้ <strong>R² ≈ 0.808</strong> เพื่อดูว่าโมเดลดีกว่าการเดาทุกคนด้วยคะแนนเฉลี่ยมากเพียงใด</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1234,6 +1303,26 @@
         </ul>
     </div>
 </div>
+
+        <section class="mb-12">
+            <div class="rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+                <h2 class="text-2xl font-bold text-amber-900 mb-2">ลองคิดก่อนดูเฉลย</h2>
+                <p class="text-gray-700 mb-4">ใช้ Confusion Matrix ของชุดข้อมูล Iris ที่อยู่ด้านบน แล้วลองตอบคำถามด้วยตนเองก่อนเปิดเฉลย</p>
+                <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                    <li>มีตัวอย่างจริงที่เป็น <strong>versicolor</strong> แต่โมเดลทำนายเป็น <strong>virginica</strong> กี่ตัวอย่าง และค่านี้นับเป็น FN ของคลาสใด</li>
+                    <li>หากต้องคำนวณ Precision ของคลาส <strong>versicolor</strong> ตัวส่วน (จำนวนที่โมเดลทำนายว่าเป็น versicolor ทั้งหมด) มีค่าเท่าไร</li>
+                    <li>ถ้าโมเดลใช้คัดกรองโรคร้ายแรง และเราไม่ต้องการพลาดผู้ป่วยจริง ควรให้ความสำคัญกับ Precision หรือ Recall มากกว่า</li>
+                </ol>
+                <details class="mt-5 rounded-lg border border-amber-200 bg-white p-4 text-gray-700">
+                    <summary class="cursor-pointer font-semibold text-amber-900">เปิดดูเฉลยและเหตุผล</summary>
+                    <ol class="list-decimal list-inside mt-3 space-y-2">
+                        <li>มี <strong>2 ตัวอย่าง</strong> และเป็น False Negative (FN) ของคลาส versicolor เพราะค่าจริงเป็น versicolor แต่ถูกทำนายเป็นคลาสอื่น</li>
+                        <li>ตัวส่วนเท่ากับ <strong>9</strong> คือค่าทั้งคอลัมน์ versicolor: 0 + 8 + 1 ดังนั้น Precision ของ versicolor คือ 8/9</li>
+                        <li>ให้ความสำคัญกับ <strong>Recall</strong> เพราะ Recall สูงช่วยลด False Negative หรือการพลาดผู้ป่วยที่เป็นโรคจริง</li>
+                    </ol>
+                </details>
+            </div>
+        </section>
 
     
                         <!-- Section: Practical Labs -->

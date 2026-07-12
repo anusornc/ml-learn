@@ -80,7 +80,7 @@
                 การเรียนรู้เซตของกฎ (Learning Set of Rules)
             </h2>
             <p class="text-slate-600 leading-relaxed mb-4">
-                แทนที่จะสร้างรูปแบบโครงสร้างต้นไม้เหมือน Decision Tree อัลกอริทึมกลุ่มนี้จะเลือกดึงข้อมูลออกมาสร้างเป็นกลุ่มของกฎกติกาในรูปแบบ **"ถ้า... แล้ว..." (IF - THEN Rules)** เพื่อให้เกิดความง่ายต่อมนุษย์ในการอ่านทำความเข้าใจและนำไปวิเคราะห์ต่อ
+                แทนที่จะสร้างรูปแบบโครงสร้างต้นไม้เหมือน Decision Tree อัลกอริทึมกลุ่มนี้จะเลือกดึงข้อมูลออกมาสร้างเป็นกลุ่มของกฎกติกาในรูปแบบ <strong>"ถ้า... แล้ว..." (IF - THEN Rules)</strong> เพื่อให้เกิดความง่ายต่อมนุษย์ในการอ่านทำความเข้าใจและนำไปวิเคราะห์ต่อ
             </p>
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-4">
                 <div class="font-mono text-sm text-slate-700">
@@ -90,10 +90,10 @@
             
             <h3 class="font-bold text-slate-800 text-lg mt-6 mb-2">อัลกอริทึม Sequential Covering</h3>
             <p class="text-slate-600 leading-relaxed mb-4 text-sm">
-                เป็นวิธีการหลักในการสร้างกฎ โดยการกำหนดชุดกฎหนึ่งข้อที่จำแนกเป้าหมายได้ถูกต้องที่สุด จากนั้นจะทำการ **"คัดกรองตัวอย่างข้อมูลที่ตรงกับกฎข้อนั้นออกไป" (Covered Cases)** แล้วทำการวนซ้ำสร้างกฎข้อถัดไปเรื่อยๆ จนกระทั่งไม่มีข้อมูลตัวอย่างเหลือในคลังเก็บ
+                เป็นวิธีการหลักในการสร้างกฎ โดยการกำหนดชุดกฎหนึ่งข้อที่จำแนกเป้าหมายได้ถูกต้องที่สุด จากนั้นจะทำการ <strong>"คัดกรองตัวอย่างข้อมูลที่ตรงกับกฎข้อนั้นออกไป" (Covered Cases)</strong> แล้วทำการวนซ้ำสร้างกฎข้อถัดไปเรื่อยๆ จนกระทั่งไม่มีข้อมูลตัวอย่างเหลือในคลังเก็บ
             </p>
             <p class="text-slate-600 leading-relaxed mb-4 text-sm">
-                อัลกอริทึมสร้างกฎที่ได้รับความนิยมคือ **CN2 Algorithm** ซึ่งออกแบบมาแก้ปัญหาเสียงรบกวนในข้อมูลโดยใช้ค่า Entropy หรือหลักความน่าจะเป็นเข้ามาวิเคราะห์เพื่อให้กฎที่สกัดออกมามีความเสถียรยิ่งขึ้น
+                อัลกอริทึมสร้างกฎที่ได้รับความนิยมคือ <strong>CN2 Algorithm</strong> ซึ่งออกแบบมาแก้ปัญหาเสียงรบกวนในข้อมูลโดยใช้ค่า Entropy หรือหลักความน่าจะเป็นเข้ามาวิเคราะห์เพื่อให้กฎที่สกัดออกมามีความเสถียรยิ่งขึ้น
             </p>
         </section>
 
@@ -137,6 +137,29 @@
                 <div class="font-mono text-sm">
                     $$Lift(X \rightarrow Y) = \frac{Confidence(X \rightarrow Y)}{Support(Y)}$$
                 </div>
+            </div>
+
+            <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
+                <h3 class="font-bold text-amber-900 text-lg mb-3">ตัวอย่างคำนวณ: กฎ “ซื้อขนมปัง → ซื้อนม”</h3>
+                <p class="text-sm text-slate-700 mb-3">จากใบเสร็จ 10 ใบ พบว่าซื้อขนมปัง 6 ใบ, ซื้อนม 7 ใบ และซื้อทั้งขนมปังกับนมพร้อมกัน 5 ใบ</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <div class="rounded-lg border border-amber-100 bg-white p-4">
+                        <p class="font-semibold text-slate-800">1. Support</p>
+                        <div class="mt-2 overflow-x-auto">$$\frac{5}{10} = 0.50$$</div>
+                        <p class="mt-2 text-slate-600">ครึ่งหนึ่งของการซื้อทั้งหมดมีทั้งสองสินค้า</p>
+                    </div>
+                    <div class="rounded-lg border border-amber-100 bg-white p-4">
+                        <p class="font-semibold text-slate-800">2. Confidence</p>
+                        <div class="mt-2 overflow-x-auto">$$\frac{5}{6} \approx 0.833$$</div>
+                        <p class="mt-2 text-slate-600">คนที่ซื้อขนมปัง 6 คน มี 5 คนซื้อนมด้วย</p>
+                    </div>
+                    <div class="rounded-lg border border-amber-100 bg-white p-4">
+                        <p class="font-semibold text-slate-800">3. Lift</p>
+                        <div class="mt-2 overflow-x-auto">$$\frac{0.833}{0.70} \approx 1.19$$</div>
+                        <p class="mt-2 text-slate-600">มากกว่า 1: การซื้อขนมปังสัมพันธ์เชิงบวกกับการซื้อนม</p>
+                    </div>
+                </div>
+                <p class="mt-4 text-sm text-amber-900"><strong>ข้อควรจำ:</strong> Confidence สูงเพียงอย่างเดียวอาจหลอกเราได้หากนมเป็นสินค้ายอดนิยมอยู่แล้ว; Lift จึงช่วยเทียบกับโอกาสซื้อนมตามปกติ 70% ว่ากฎนี้เพิ่มโอกาสขึ้นจริงหรือไม่</p>
             </div>
         </section>
 

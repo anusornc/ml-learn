@@ -80,7 +80,7 @@
                 การเรียนรู้เสริมความแกร่ง (Reinforcement Learning)
             </h2>
             <p class="text-slate-600 leading-relaxed mb-4">
-                <strong>การเรียนรู้เสริมความแกร่ง (Reinforcement Learning)</strong> แตกต่างจากแนวทางการเรียนรู้แบบอื่น ๆ เพราะโมเดลไม่ได้ถูกสอนด้วยคู่คำตอบสำเร็จรูป แต่จะใช้วิธีให้โมเดลจำลองตัวตนเป็นตัวแทนกระทำ **(Agent)** ลงไปทดลองแก้ปัญหาในสภาพแวดล้อม **(Environment)** จริง และเรียนรู้ผ่านผลการสะท้อนกลับในรูปของรางวัล **(Reward)** หรือบทลงโทษเชิงคะแนนลบ
+                <strong>การเรียนรู้เสริมความแกร่ง (Reinforcement Learning)</strong> แตกต่างจากแนวทางการเรียนรู้แบบอื่น ๆ เพราะโมเดลไม่ได้ถูกสอนด้วยคู่คำตอบสำเร็จรูป แต่จะใช้วิธีให้โมเดลจำลองตัวตนเป็นตัวแทนกระทำ <strong>(Agent)</strong> ลงไปทดลองแก้ปัญหาในสภาพแวดล้อม <strong>(Environment)</strong> จริง และเรียนรู้ผ่านผลการสะท้อนกลับในรูปของรางวัล <strong>(Reward)</strong> หรือบทลงโทษเชิงคะแนนลบ
             </p>
 
             <div class="border border-slate-200 rounded-xl p-6 bg-slate-50 flex flex-col items-center mb-6">
@@ -104,7 +104,7 @@
                 กระบวนการตัดสินใจแบบมาร์คอฟ (Markov Decision Process หรือ MDP)
             </h2>
             <p class="text-slate-600 leading-relaxed mb-4">
-                ปัญหาใน Reinforcement Learning ส่วนมากจะถูกจำลองให้อยู่ภายใต้กรอบของ **MDP** ซึ่งเป็นโมเดลคณิตศาสตร์สำหรับระบุสภาพแวดล้อม โดยประกอบด้วยองค์ประกอบ:
+                ปัญหาใน Reinforcement Learning ส่วนมากจะถูกจำลองให้อยู่ภายใต้กรอบของ <strong>MDP</strong> ซึ่งเป็นโมเดลคณิตศาสตร์สำหรับระบุสภาพแวดล้อม โดยประกอบด้วยองค์ประกอบ:
             </p>
             <ul class="list-disc pl-6 text-slate-600 space-y-2 mb-6 text-sm">
                 <li><strong>$S$ (State):</strong> เซตของสถานะที่เป็นไปได้ทั้งหมดในสภาพแวดล้อม</li>
@@ -122,7 +122,7 @@
                 ขั้นตอนวิธี Q-Learning
             </h2>
             <p class="text-slate-600 leading-relaxed mb-4">
-                **Q-Learning** เป็นอัลกอริทึมประเภท **Model-Free Reinforcement Learning** ที่มุ่งคำนวณและประเมินค่าฟังก์ชันความคุ้มค่าของการกระทำที่เรียกว่า **Q-Value ($Q(s, a)$)** โดยจะจัดเก็บไว้ในตาราง **Q-Table** เพื่อระบุว่าในสถานะ $s$ ใด ๆ การเลือกทำ $a$ จะคุ้มค่าที่สุดในระยะยาว
+                <strong>Q-Learning</strong> เป็นอัลกอริทึมประเภท <strong>Model-Free Reinforcement Learning</strong> ที่มุ่งคำนวณและประเมินค่าฟังก์ชันความคุ้มค่าของการกระทำที่เรียกว่า <strong>Q-Value ($Q(s, a)$)</strong> โดยจะจัดเก็บไว้ในตาราง <strong>Q-Table</strong> เพื่อระบุว่าในสถานะ $s$ ใด ๆ การเลือกทำ $a$ จะคุ้มค่าที่สุดในระยะยาว
             </p>
 
             <h3 class="font-bold text-slate-800 text-lg mt-6 mb-2">สมการการอัปเดตค่า Q-Value (Q-Table Update)</h3>
