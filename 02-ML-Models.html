@@ -183,6 +183,25 @@
             </div>
         </div>
 
+        <section class="bg-sky-50 border border-sky-200 rounded-2xl p-6 mb-12">
+            <h2 class="text-2xl font-bold text-sky-900 mb-2">ลองจัดประเภทงานก่อนเลือกโมเดล</h2>
+            <p class="text-gray-700 text-sm mb-4">อ่านโจทย์ แล้วตอบในใจก่อนเปิดดูคำอธิบาย จุดสำคัญคือดูว่าเรามี label หรือรางวัลแบบใด ไม่ใช่ดูเพียงชื่ออัลกอริทึม</p>
+            <div class="space-y-3 text-sm text-gray-700">
+                <details class="rounded-lg bg-white border border-sky-100 p-4">
+                    <summary class="cursor-pointer font-semibold text-sky-900">1. มีภาพเอกซเรย์พร้อมผลวินิจฉัยจากแพทย์จำนวนมาก ต้องการทำนายผลของภาพใหม่</summary>
+                    <p class="mt-2"><strong>Supervised Learning:</strong> ภาพเก่ามี label แล้ว (เช่น ปกติ/พบความผิดปกติ) โมเดลจึงเรียนรู้ความสัมพันธ์จาก input ไปสู่คำตอบได้</p>
+                </details>
+                <details class="rounded-lg bg-white border border-sky-100 p-4">
+                    <summary class="cursor-pointer font-semibold text-sky-900">2. มีประวัติการซื้อ แต่ไม่มีฉลากกลุ่มลูกค้า ต้องการแบ่งลูกค้าที่มีพฤติกรรมคล้ายกัน</summary>
+                    <p class="mt-2"><strong>Unsupervised Learning:</strong> ไม่มีคำตอบที่กำหนดไว้ จึงใช้การหาโครงสร้างหรือกลุ่ม (clustering) จากข้อมูลเอง</p>
+                </details>
+                <details class="rounded-lg bg-white border border-sky-100 p-4">
+                    <summary class="cursor-pointer font-semibold text-sky-900">3. หุ่นยนต์ต้องหาทางออกจากเขาวงกต โดยได้รางวัลเมื่อถึงเป้าหมาย</summary>
+                    <p class="mt-2"><strong>Reinforcement Learning:</strong> การกระทำแต่ละครั้งไม่ได้มี label ถูก/ผิดทันที แต่เรียนรู้จากรางวัลสะสมระหว่างการลองทำ</p>
+                </details>
+            </div>
+        </section>
+
                         <!-- Section: Practical Labs -->
         <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 text-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-slate-800 mt-8">
             <div class="mb-4">

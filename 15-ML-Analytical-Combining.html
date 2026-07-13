@@ -89,6 +89,25 @@
                     EBL เป็นขั้นตอนวิธีหลักของกลุ่มนี้ โดยใช้ทฤษฎีโดเมน (Domain Theory) เพื่อสร้าง "คำอธิบายเชิงตรรกะ" ว่าเพราะเหตุใดตัวอย่างข้อมูลนั้นจึงเป็นจริง จากนั้นจะทำการลดรูปคำอธิบายดังกล่าวให้กลายเป็นกฎกติกาอย่างง่าย เพื่อการจำแนกเป้าหมายใหม่ได้อย่างรวดเร็วในอนาคต
                 </p>
             </div>
+
+            <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
+                <h3 class="font-bold text-amber-900 text-lg mb-2">ตัวอย่าง EBL: จาก “นก” หนึ่งตัว สู่กฎที่ใช้ซ้ำได้</h3>
+                <div class="text-sm text-amber-950 space-y-2">
+                    <p><strong>เป้าหมาย:</strong> อธิบายว่าทำไม <code>canFly(นกแก้ว)</code> จึงเป็นจริง</p>
+                    <p><strong>ความรู้เดิม:</strong> <code>bird(x) AND hasWings(x) → canFly(x)</code></p>
+                    <p><strong>ข้อเท็จจริงของตัวอย่าง:</strong> <code>bird(นกแก้ว)</code> และ <code>hasWings(นกแก้ว)</code></p>
+                    <ol class="list-decimal ml-5 space-y-1">
+                        <li>จับคู่ข้อเท็จจริงทั้งสองกับเงื่อนไขของกฎ</li>
+                        <li>อนุมานได้ว่า <code>canFly(นกแก้ว)</code></li>
+                        <li>แทนชื่อเฉพาะ “นกแก้ว” ด้วยตัวแปร <code>x</code> จึงได้กฎทั่วไป <code>bird(x) AND hasWings(x) → canFly(x)</code></li>
+                    </ol>
+                    <p class="font-semibold">สิ่งที่เรียนรู้ไม่ใช่แค่จำตัวอย่าง แต่เป็นเงื่อนไขที่อธิบายได้ว่าต้องมีอะไรจึงได้ผลลัพธ์นั้น</p>
+                </div>
+                <details class="mt-3 rounded-lg bg-white p-3 text-sm text-amber-950">
+                    <summary class="cursor-pointer font-semibold">ลองคิด: ถ้ารู้เพียงว่า <code>bird(นกแก้ว)</code> แต่ไม่รู้ว่า <code>hasWings(นกแก้ว)</code> สรุปได้หรือไม่?</summary>
+                    <p class="mt-2">ยังสรุปไม่ได้ เพราะเงื่อนไขของกฎยังไม่ครบ EBL จึงพึ่งพาความรู้เดิมที่ถูกต้องและครบถ้วนมากกว่าการเดาจากข้อมูล</p>
+                </details>
+            </div>
         </section>
 
         <!-- Section 2: Combining Inductive & Analytical -->
@@ -140,6 +159,11 @@
             <p class="text-slate-600 leading-relaxed mb-4 text-sm">
                 การสร้างระบบ <strong>Hybrid / Combined Learning</strong> ช่วยแก้ปัญหาได้ดีมาก โดยการใช้ทฤษฎีโดเมนเริ่มต้น (Domain Theory) ช่วยปรับแนวคิดเบื้องต้นของโมเดล จากนั้นจึงนำข้อมูลสถิติจำนวนจริงมาคอยปรับแก้หรือถ่วงน้ำหนักข้อผิดพลาดของโมเดลให้สอดคล้องกับสภาพความเป็นจริง (เช่น อัลกอริทึม <strong>KBANN</strong> และ <strong>FOCL</strong>)
             </p>
+            <div class="mt-5 rounded-xl border border-teal-200 bg-teal-50 p-5">
+                <h3 class="font-bold text-teal-900 text-lg mb-2">ภาพรวมการผสมความรู้เดิมกับข้อมูล</h3>
+                <p class="text-sm text-teal-950">สมมติผู้เชี่ยวชาญมีกฎว่า “อ่านหนังสืออย่างน้อย 8 ชั่วโมง → มีแนวโน้มสอบผ่าน” แต่ข้อมูลจริงพบว่านักศึกษาบางคนอ่าน 6 ชั่วโมงแล้วยังผ่าน เพราะมีพื้นฐานเดิมดี</p>
+                <p class="text-sm text-teal-950 mt-2">การเรียนรู้จากข้อมูลช่วยเพิ่มปัจจัยอื่นหรือปรับน้ำหนักความเชื่อของกฎ ขณะที่ EBL ช่วยให้เรายังอธิบายเหตุผลของกฎหลักได้ แทนที่จะลบความรู้เดิมทิ้งโดยไม่ตรวจสอบ</p>
+            </div>
         </section>
 
     
@@ -156,11 +180,11 @@
                 <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between hover:border-indigo-900 transition">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 font-semibold">ใบงานหลัก (Main Lab)</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 font-semibold">ใบงานต่อยอด (Concept Extension)</span>
                             <span class="text-[10px] font-medium text-slate-500 font-mono">Repo: handson-ml3</span>
                         </div>
                         <h4 class="text-sm font-bold text-slate-200 bg-slate-950/40 p-2 rounded border border-slate-800 font-mono mb-2">11_training_deep_neural_networks.ipynb</h4>
-                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">ฝึกฝนทักษะการเรียนรู้เชิงลึกระดับสูง การแก้ปัญหา Vanishing/Exploding Gradients และการทำ Transfer Learning โดยใช้โมเดลที่พรีเทรนมาก่อน</p>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">ดูตัวอย่างการนำความรู้จากโมเดลเดิมไปต่อยอดกับงานใหม่ (ไม่ใช่ implementation EBL โดยตรง)</p>
                     </div>
                     <div class="flex gap-2 mt-4">
                         <a href="https://github.com/anusornc/handson-ml3/blob/main/11_training_deep_neural_networks.ipynb" target="_blank" rel="noopener" class="flex-1 text-center bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 px-3 rounded-lg border border-slate-700 transition">

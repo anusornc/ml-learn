@@ -148,6 +148,27 @@
                 <li>เส้นตรง 2 มิติ (Linear Separator) มีมิติ VC เท่ากับ 3 จุดข้อมูล (ไม่สามารถ Shattered 4 จุดที่เรียงตัวเป็นรูปกากบาทแบบสลับคลาสได้)</li>
                 <li>ไฮเปอร์เพลน $N$ มิติ มีมิติ VC เท่ากับ $N + 1$</li>
             </ul>
+
+            <div class="mt-6 rounded-xl border border-cyan-200 bg-cyan-50 p-5">
+                <h3 class="font-bold text-cyan-900 text-lg mb-2">เห็น VC Dimension ด้วยเส้น threshold หนึ่งมิติ</h3>
+                <p class="text-sm text-slate-700">ให้สมมติฐานของเรามีรูปเดียว: $h_t(x)=1$ เมื่อ $x\ge t$ และเป็น 0 เมื่อ $x&lt;t$ ลองวางจุดสองจุดโดย $x_1&lt;x_2$</p>
+                <div class="overflow-x-auto mt-3">
+                    <table class="w-full text-sm text-left bg-white rounded-lg overflow-hidden">
+                        <thead class="bg-cyan-100 text-cyan-950"><tr><th class="p-2">ป้ายของ $(x_1,x_2)$</th><th class="p-2">ทำได้หรือไม่</th><th class="p-2">เลือก $t$ อย่างไร</th></tr></thead>
+                        <tbody class="text-slate-700">
+                            <tr class="border-t"><td class="p-2">(0, 0)</td><td class="p-2 text-green-700 font-semibold">ได้</td><td class="p-2">วาง $t$ ไว้ทางขวาของ $x_2$</td></tr>
+                            <tr class="border-t"><td class="p-2">(0, 1)</td><td class="p-2 text-green-700 font-semibold">ได้</td><td class="p-2">วาง $t$ ระหว่าง $x_1$ และ $x_2$</td></tr>
+                            <tr class="border-t"><td class="p-2">(1, 1)</td><td class="p-2 text-green-700 font-semibold">ได้</td><td class="p-2">วาง $t$ ไว้ทางซ้ายของ $x_1$</td></tr>
+                            <tr class="border-t"><td class="p-2">(1, 0)</td><td class="p-2 text-red-700 font-semibold">ไม่ได้</td><td class="p-2">threshold ที่หันไปทางขวาทำให้จุดขวาเป็น 1 แต่จุดซ้ายเป็น 0 เท่านั้น</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mt-3 text-sm text-cyan-950">เมื่อยังมี labeling หนึ่งแบบที่ทำไม่ได้ เราจึง <strong>shatter จุด 2 จุดไม่ได้</strong> แต่ shatter จุดเดียวได้ ดังนั้น hypothesis class นี้มี $VC(H)=1$</p>
+                <details class="mt-3 rounded-lg bg-white p-3 text-sm text-cyan-950">
+                    <summary class="cursor-pointer font-semibold">ลองตอบ: ทำไม labeling (1, 0) จึงเป็นตัวที่ทำให้ shatter ไม่ได้?</summary>
+                    <p class="mt-2">เพราะกฎของเราบังคับว่า เมื่อจุดที่อยู่ทางซ้ายเป็น 1 แล้วทุกจุดที่อยู่ทางขวาก็ต้องเป็น 1 ด้วย จึงไม่สามารถให้ $x_1=1$ แต่ $x_2=0$ ได้</p>
+                </details>
+            </div>
         </section>
 
     

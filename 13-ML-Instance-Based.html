@@ -172,6 +172,10 @@
                         <div class="bg-white p-4 rounded-xl border border-slate-200 text-xs space-y-2">
                             <div class="font-bold text-slate-800 text-sm mb-1">ผลการลงมติ:</div>
                             <div id="vote-output" class="text-slate-500 italic">กรุณาวางจุดสีเขียวบนกระดาน...</div>
+                            <div class="pt-2 border-t border-slate-100">
+                                <div class="font-semibold text-slate-700 mb-1">ระยะห่างของเพื่อนบ้านที่เลือก:</div>
+                                <div id="distance-output" class="text-slate-500 italic">วางจุด Query เพื่อดูระยะห่าง</div>
+                            </div>
                         </div>
 
                         <button id="clear-btn" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">
@@ -193,6 +197,7 @@
                     const kSlider = document.getElementById("k-slider");
                     const kDisplay = document.getElementById("k-display");
                     const voteOutput = document.getElementById("vote-output");
+                    const distanceOutput = document.getElementById("distance-output");
                     const clearBtn = document.getElementById("clear-btn");
 
                     let points = [
@@ -298,8 +303,12 @@
                                 <div class="font-bold text-slate-800 text-sm">คลาส B (ชมพู): <span class="text-pink-500">${pinkVotes}</span></div>
                                 <div class="mt-2 pt-2 border-t border-slate-100 font-semibold text-slate-700">คำทำนาย: <span class="${orangeVotes > pinkVotes ? 'text-orange-600' : 'text-pink-600'}">${winner}</span></div>
                             `;
+                            distanceOutput.innerHTML = nearest.map((n, index) => `
+                                <div class="flex justify-between gap-2 text-slate-600"><span>${index + 1}. คลาส ${n.type === 'orange' ? 'A (ส้ม)' : 'B (ชมพู)'}</span><span class="font-mono">d = ${n.dist.toFixed(1)}</span></div>
+                            `).join('');
                         } else {
                             voteOutput.textContent = "กรุณาวางจุดอย่างน้อย 1 จุด...";
+                            distanceOutput.textContent = "วางจุด Query เพื่อดูระยะห่าง";
                         }
                     }
 

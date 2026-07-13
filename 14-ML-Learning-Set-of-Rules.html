@@ -161,6 +161,34 @@
                 </div>
                 <p class="mt-4 text-sm text-amber-900"><strong>ข้อควรจำ:</strong> Confidence สูงเพียงอย่างเดียวอาจหลอกเราได้หากนมเป็นสินค้ายอดนิยมอยู่แล้ว; Lift จึงช่วยเทียบกับโอกาสซื้อนมตามปกติ 70% ว่ากฎนี้เพิ่มโอกาสขึ้นจริงหรือไม่</p>
             </div>
+
+            <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-5">
+                <h3 class="font-bold text-emerald-900 text-lg mb-2">Apriori แบบทีละรอบ: ตัดสิ่งที่ไม่ถี่ออกก่อน</h3>
+                <p class="text-sm text-slate-700">กำหนด minimum support count = 3 จากธุรกรรม 5 รายการ</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 text-sm">
+                    <div class="rounded-lg border border-emerald-100 bg-white p-4 text-slate-700">
+                        <p><strong>T1</strong>: ขนมปัง, นม</p>
+                        <p><strong>T2</strong>: ขนมปัง, ผ้าอ้อม, เบียร์, ไข่</p>
+                        <p><strong>T3</strong>: นม, ผ้าอ้อม, เบียร์</p>
+                        <p><strong>T4</strong>: ขนมปัง, นม, ผ้าอ้อม, เบียร์</p>
+                        <p><strong>T5</strong>: ขนมปัง, นม, ผ้าอ้อม</p>
+                    </div>
+                    <div class="rounded-lg border border-emerald-100 bg-white p-4 text-slate-700">
+                        <p><strong>รอบ L1:</strong> ขนมปัง 4, นม 4, ผ้าอ้อม 4, เบียร์ 3 ผ่านเกณฑ์</p>
+                        <p class="mt-1 text-red-700"><strong>ไข่ 1</strong> ไม่ผ่าน จึงตัดทิ้ง</p>
+                        <p class="mt-2"><strong>รอบ L2 ที่ผ่าน:</strong> {ขนมปัง,นม}=3, {ขนมปัง,ผ้าอ้อม}=3, {นม,ผ้าอ้อม}=3, {ผ้าอ้อม,เบียร์}=3</p>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-emerald-950 space-y-1">
+                    <p>คู่ {ขนมปัง,เบียร์}=2 และ {นม,เบียร์}=2 ไม่ผ่าน จึงไม่ต้องนำไปสร้างชุด 3 รายการ</p>
+                    <p>ผู้สมัคร {ขนมปัง,นม,ผ้าอ้อม} มี support = 2 (พบใน T4,T5) จึงไม่ผ่านเช่นกัน</p>
+                    <p class="font-semibold">ใจความของ Apriori: ถ้า subset ไม่ถี่แล้ว superset ที่มีมันอยู่ก็ไม่อาจถี่ได้ — ประหยัดการนับหลายชุดมาก</p>
+                </div>
+                <details class="mt-3 rounded-lg bg-white p-3 text-sm text-emerald-950">
+                    <summary class="cursor-pointer font-semibold">ลองตอบ: ทำไมเราไม่ต้องนับ {ขนมปัง,เบียร์,ผ้าอ้อม}?</summary>
+                    <p class="mt-2">เพราะ subset คือ {ขนมปัง,เบียร์} มี support เพียง 2 และไม่ผ่านเกณฑ์ 3 แล้ว ตามหลัก Apriori ชุดที่ใหญ่กว่าซึ่งมี subset นี้อยู่จึงตัดทิ้งได้ทันที</p>
+                </details>
+            </div>
         </section>
 
     

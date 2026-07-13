@@ -427,6 +427,27 @@
             </div>
         </section>
 
+        <section class="mb-12">
+            <div class="bg-violet-50 border border-violet-200 rounded-xl p-6">
+                <h2 class="text-2xl font-bold mb-2 text-violet-900">มินิชาเลนจ์: โจทย์นี้เป็น Regression หรือ Classification?</h2>
+                <p class="text-gray-700 text-sm mb-4">ให้เริ่มจาก “รูปแบบของผลลัพธ์ที่ต้องการ” แล้วจึงเลือกโมเดล</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-gray-700">
+                    <details class="bg-white border border-violet-100 rounded-lg p-4">
+                        <summary class="cursor-pointer font-semibold text-violet-900">ทำนายค่าไฟเดือนหน้าเป็นกี่บาท</summary>
+                        <p class="mt-2"><strong>Regression</strong> เพราะคำตอบเป็นตัวเลขต่อเนื่อง เช่น 1,842.50 บาท</p>
+                    </details>
+                    <details class="bg-white border border-violet-100 rounded-lg p-4">
+                        <summary class="cursor-pointer font-semibold text-violet-900">ทำนายว่าอีเมลเป็นสแปมหรือไม่</summary>
+                        <p class="mt-2"><strong>Classification</strong> เพราะผลลัพธ์ที่นำไปตัดสินใจเป็นกลุ่ม เช่น spam / not spam</p>
+                    </details>
+                    <details class="bg-white border border-violet-100 rounded-lg p-4">
+                        <summary class="cursor-pointer font-semibold text-violet-900">โมเดลให้ “โอกาสผิดนัดชำระ” 0.82 ควรเรียกอะไร?</summary>
+                        <p class="mt-2">โดยทั่วไปเป็น <strong>Classification</strong> ที่รายงานคะแนนความน่าจะเป็นก่อนใช้ threshold ตัดสินเป็น “เสี่ยง/ไม่เสี่ยง”; อย่าสับสนระหว่างค่าความน่าจะเป็นกับงาน regression</p>
+                    </details>
+                </div>
+            </div>
+        </section>
+
         <!-- Conclusion Section -->
         <section class="mb-12">
             <div class="bg-white rounded-xl shadow-md p-6">

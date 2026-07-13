@@ -138,6 +138,17 @@
                 </ul>
             </div>
 
+            <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
+                <h3 class="font-bold text-amber-900 text-lg mb-2">คำนวณ Q-update หนึ่งครั้งก่อนกด Train</h3>
+                <p class="text-sm text-slate-700">สมมติค่าเดิม $Q(s,a)=0$, $\alpha=0.2$, ได้รางวัลทันที $r=100$, และสถานะถัดไปยังไม่มีความรู้จึงมี $\max Q(s',a')=0$</p>
+                <div class="mt-3 overflow-x-auto rounded-lg bg-white border border-amber-100 p-3 text-sm text-amber-950">$$Q_{new}=0+0.2\left(100+0.9\times0-0\right)=20$$</div>
+                <p class="mt-3 text-sm text-amber-950">ค่า 20 ไม่ได้แปลว่ารางวัลจริงมีแค่ 20 แต่เป็นการขยับจากค่าเดิมทีละ 20% เพื่อเก็บหลักฐานว่าการกระทำนี้ดี เมื่อฝึกซ้ำและสถานะถัดไปมีค่า Q แล้ว รางวัลในอนาคตจะค่อย ๆ ส่งย้อนกลับมาด้วย</p>
+                <details class="mt-3 rounded-lg bg-white p-3 text-sm text-amber-950">
+                    <summary class="cursor-pointer font-semibold">ลองตอบ: ถ้าได้รางวัล $-100$ และค่าอื่นเท่าเดิม ค่าใหม่จะเป็นเท่าไร?</summary>
+                    <p class="mt-2">$Q_{new}=0+0.2(-100)=-20$ จึงเป็นสัญญาณว่าไม่ควรเลือกการกระทำนี้ในสถานการณ์เดิม</p>
+                </details>
+            </div>
+
             <!-- Interactive Q-learning Visualizer -->
             <div class="mt-8 p-6 bg-slate-50 border border-slate-200 rounded-2xl">
                 <h3 class="font-bold text-emerald-900 text-lg mb-4 text-center">🤖 เครื่องจำลองการเรียนรู้ Q-Learning Gridworld</h3>

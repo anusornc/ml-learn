@@ -91,6 +91,18 @@
                 <li><strong>Crossover (การผสมข้ามสายพันธุ์):</strong> นำโครโมโซมพ่อและแม่มาแลกเปลี่ยนยีนเพื่อสร้างโครโมโซมลูกตัวใหม่</li>
                 <li><strong>Mutation (การกลายพันธุ์):</strong> สุ่มเปลี่ยนแปลงยีนบางตำแหน่งเพื่อป้องกันความจำเจและขยายขอบเขตการค้นหาข้อมูลใหม่</li>
             </ul>
+
+            <div class="rounded-xl border border-rose-200 bg-rose-50 p-5">
+                <h3 class="font-bold text-rose-900 text-lg mb-2">ตัวอย่าง GA หนึ่งรุ่น: หาสตริง 4 บิตที่มีเลข 1 มากที่สุด</h3>
+                <p class="text-sm text-slate-700 mb-3">ให้ Fitness = จำนวนเลข 1 ในโครโมโซม ดังนั้นยิ่งมี 1 มาก ยิ่งดี</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-700">
+                    <div class="rounded-lg bg-white border border-rose-100 p-4"><p class="font-semibold text-rose-900">1. Selection</p><p class="mt-2">พ่อ A = <code>1100</code>, Fitness 2<br>แม่ B = <code>1011</code>, Fitness 3</p><p class="mt-2 text-xs">B มีโอกาสถูกเลือกมากกว่า แต่ GA ยังรักษาความหลากหลายไว้</p></div>
+                    <div class="rounded-lg bg-white border border-rose-100 p-4"><p class="font-semibold text-rose-900">2. Crossover</p><p class="mt-2">ตัดหลังบิตที่ 2</p><p><code>11|00</code> + <code>10|11</code></p><p class="mt-2">ลูกตัวที่ 1 = <code>11|11</code> = <strong>1111</strong>, Fitness 4</p></div>
+                    <div class="rounded-lg bg-white border border-rose-100 p-4"><p class="font-semibold text-rose-900">3. Mutation</p><p class="mt-2">ลูกอีกตัว <code>1000</code> อาจกลายพันธุ์ที่บิตสุดท้ายเป็น <code>1001</code></p><p class="mt-2 text-xs">การกลายพันธุ์เปิดโอกาสให้เจอคำตอบใหม่ แม้พ่อแม่ยังไม่มีรูปแบบนั้น</p></div>
+                </div>
+                <p class="mt-3 text-sm text-rose-950"><strong>แปลผล:</strong> crossover รวมส่วนดีจากพ่อแม่ได้ในตัวอย่างนี้ แต่หนึ่งรุ่นไม่รับประกันว่าดีขึ้นเสมอไป จึงต้องประเมินและทำซ้ำหลายรุ่น</p>
+                <details class="mt-3 rounded-lg bg-white p-3 text-sm text-rose-950"><summary class="cursor-pointer font-semibold">ลองตอบ: Fitness ของ <code>0101</code> เป็นเท่าไร?</summary><p class="mt-2">เท่ากับ 2 เพราะมีเลข 1 อยู่สองตำแหน่ง</p></details>
+            </div>
         </section>
 
         <!-- Section 2: PSO -->
@@ -171,6 +183,11 @@
                                 Reset Swarm
                             </button>
                         </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 text-xs space-y-1">
+                            <div><span class="font-semibold text-slate-700">รอบจำลอง:</span> <span id="pso-iteration" class="font-mono text-rose-700">0</span></div>
+                            <div><span class="font-semibold text-slate-700">ระยะของ gbest ที่เคยพบ:</span> <span id="gbest-distance" class="font-mono text-rose-700">กำลังค้นหา...</span></div>
+                            <p class="pt-1 text-slate-500">ค่า gbest จะดีขึ้นหรือคงเดิม ไม่ย้อนแย่ลงจนกว่าจะย้ายเป้าหมายหรือกด Reset</p>
+                        </div>
                     </div>
 
                     <!-- Canvas Area -->
@@ -192,12 +209,34 @@
                     const c2Display = document.getElementById("c2-display");
                     const psoPlayBtn = document.getElementById("pso-play-btn");
                     const psoResetBtn = document.getElementById("pso-reset-btn");
+                    const psoIteration = document.getElementById("pso-iteration");
+                    const gbestDistance = document.getElementById("gbest-distance");
 
                     let target = { x: 240, y: 160 };
                     let particles = [];
                     const numParticles = 30;
                     let animationId = null;
                     let isPlaying = true;
+                    let gbestX = target.x;
+                    let gbestY = target.y;
+                    let gbestVal = Infinity;
+                    let iteration = 0;
+
+                    function updatePsoStats() {
+                        psoIteration.textContent = iteration;
+                        gbestDistance.textContent = Number.isFinite(gbestVal) ? Math.sqrt(gbestVal).toFixed(1) : "กำลังค้นหา...";
+                    }
+
+                    function resetBestKnowledge() {
+                        gbestX = target.x;
+                        gbestY = target.y;
+                        gbestVal = Infinity;
+                        particles.forEach(p => {
+                            p.pbestX = p.x;
+                            p.pbestY = p.y;
+                            p.pbestVal = Infinity;
+                        });
+                    }
 
                     // Initialize particles
                     function initParticles() {
@@ -215,6 +254,9 @@
                                 pbestVal: Infinity
                             });
                         }
+                        iteration = 0;
+                        resetBestKnowledge();
+                        updatePsoStats();
                     }
 
                     function updateSwarm() {
@@ -222,12 +264,8 @@
                         const c1 = parseFloat(c1Slider.value);
                         const c2 = parseFloat(c2Slider.value);
 
-                        // Find global best (gbest)
-                        let gbestX = target.x;
-                        let gbestY = target.y;
-                        let gbestVal = Infinity;
-
-                        // Evaluate fitness and update pbest
+                        // Evaluate fitness and remember each particle's best position.
+                        // gbest is also historical: it never becomes worse while target is fixed.
                         particles.forEach(p => {
                             const dx = p.x - target.x;
                             const dy = p.y - target.y;
@@ -239,20 +277,22 @@
                                 p.pbestY = p.y;
                             }
 
-                            if (dist < gbestVal) {
-                                gbestVal = dist;
-                                gbestX = p.x;
-                                gbestY = p.y;
+                            if (p.pbestVal < gbestVal) {
+                                gbestVal = p.pbestVal;
+                                gbestX = p.pbestX;
+                                gbestY = p.pbestY;
                             }
                         });
 
                         // Update velocities and positions
                         particles.forEach(p => {
-                            const r1 = Math.random();
-                            const r2 = Math.random();
+                            const r1x = Math.random();
+                            const r2x = Math.random();
+                            const r1y = Math.random();
+                            const r2y = Math.random();
 
-                            p.vx = w * p.vx + c1 * r1 * (p.pbestX - p.x) + c2 * r2 * (gbestX - p.x);
-                            p.vy = w * p.vy + c1 * r2 * (p.pbestY - p.y) + c2 * r2 * (gbestY - p.y);
+                            p.vx = w * p.vx + c1 * r1x * (p.pbestX - p.x) + c2 * r2x * (gbestX - p.x);
+                            p.vy = w * p.vy + c1 * r1y * (p.pbestY - p.y) + c2 * r2y * (gbestY - p.y);
 
                             // Clamp velocity to prevent particles flying off too fast
                             const maxV = 15;
@@ -265,6 +305,8 @@
                             p.x += p.vx;
                             p.y += p.vy;
                         });
+                        iteration++;
+                        updatePsoStats();
                     }
 
                     function draw() {
@@ -320,6 +362,9 @@
                         const scaleY = canvas.height / rect.height;
                         target.x = (e.clientX - rect.left) * scaleX;
                         target.y = (e.clientY - rect.top) * scaleY;
+                        iteration = 0;
+                        resetBestKnowledge();
+                        updatePsoStats();
                         if (!isPlaying) {
                             draw();
                         }
@@ -393,11 +438,11 @@
                 <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between hover:border-indigo-900 transition">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 font-semibold">ใบงานหลัก (Main Lab)</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 font-semibold">ใบงานต่อยอด (Concept Extension)</span>
                             <span class="text-[10px] font-medium text-slate-500 font-mono">Repo: handson-ml3</span>
                         </div>
                         <h4 class="text-sm font-bold text-slate-200 bg-slate-950/40 p-2 rounded border border-slate-800 font-mono mb-2">extra_gradient_descent_comparison.ipynb</h4>
-                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">เปรียบเทียบประสิทธิภาพและการทำงานของวิธีการหาค่าที่เหมาะสมที่สุด (Optimization) แบบต่างๆ ในการฝึกฝนโมเดล</p>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">เปรียบเทียบแนวคิด Optimization ทั่วไปในการฝึกโมเดล (ไม่ใช่ implementation GA/PSO โดยตรง)</p>
                     </div>
                     <div class="flex gap-2 mt-4">
                         <a href="https://github.com/anusornc/handson-ml3/blob/main/extra_gradient_descent_comparison.ipynb" target="_blank" rel="noopener" class="flex-1 text-center bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 px-3 rounded-lg border border-slate-700 transition">
