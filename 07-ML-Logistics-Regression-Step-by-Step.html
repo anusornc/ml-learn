@@ -230,6 +230,70 @@
             color: var(--secondary);
         }
 
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            border: 1px solid #dbeafe;
+            border-top: 4px solid var(--primary);
+            border-radius: 8px;
+            padding: 16px;
+            background: #f8fbff;
+        }
+
+        .metric-card h4 {
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            color: var(--primary);
+            font-size: 1.35rem;
+            font-weight: 700;
+        }
+
+        .confusion-matrix {
+            max-width: 680px;
+            margin: 20px auto;
+        }
+
+        .confusion-matrix td {
+            font-weight: 600;
+        }
+
+        .cm-tn { background: #e0f2fe !important; }
+        .cm-tp { background: #dcfce7 !important; }
+        .cm-fp { background: #fee2e2 !important; }
+        .cm-fn { background: #fef3c7 !important; }
+
+        .threshold-compare td:first-child {
+            font-weight: 700;
+        }
+
+        .self-check details {
+            margin-top: 12px;
+            background: white;
+            border: 1px solid #bae6fd;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .self-check summary {
+            cursor: pointer;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .evaluation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
     </style>
 
     <!-- KaTeX for beautiful math rendering -->
@@ -298,7 +362,7 @@
                 <p><strong>แนวคิดหลัก:</strong></p>
                 <ul>
                     <li><strong>ฟังก์ชัน Sigmoid</strong>: แมปค่าตัวเลขจริงใดๆ ให้อยู่ระหว่าง 0 ถึง 1</li>
-                    <li><strong>ฟังก์ชันต้นทุน</strong>: วัดประสิทธิภาพของโมเดลของเรา (log loss)</li>
+                    <li><strong>ฟังก์ชันต้นทุน</strong>: วัดความคลาดเคลื่อนที่โมเดลพยายามลดระหว่างการฝึก (log loss)</li>
                     <li><strong>Gradient Descent</strong>: อัลกอริทึมการเพิ่มประสิทธิภาพเพื่อลดต้นทุน</li>
                 </ul>
             </div>
@@ -779,7 +843,7 @@
             </table>
             
             <div class="note">
-                <p><strong>หมายเหตุ:</strong> ต้นทุนลดลงจาก 0.6947 เป็น 0.6671 แสดงให้เห็นว่าโมเดลของเราเรียนรู้แล้ว!</p>
+                <p><strong>หมายเหตุ:</strong> ต้นทุนลดลงจาก 0.6947 เป็น 0.6671 แสดงว่าโมเดลกำลังเรียนรู้ในทิศทางที่ลด Log Loss แต่ยังต้องดู Accuracy, Precision และ Recall เพิ่มเติมว่าผลการจำแนกดีขึ้นหรือไม่</p>
             </div>
         </div>
         
@@ -816,6 +880,117 @@
                 </div>
             </div>
         </div>
+
+        <div class="section" id="model-evaluation">
+            <h2>ประเมินประสิทธิภาพของโมเดลด้วยข้อมูลชุดเดิม</h2>
+
+            <div class="important">
+                <p><strong>ขอบเขตของตัวอย่างนี้:</strong> เพื่อให้เห็นการคำนวณต่อจากขั้นตอนก่อนหน้า เราจะนำข้อมูล 4 ตัวอย่างที่ใช้ฝึกโมเดลมาประเมินด้วยพารามิเตอร์หลังรอบที่ 2 จึงเป็น <strong>ผลบนข้อมูลฝึก (training data)</strong> ไม่ใช่ผลทดสอบจริง ในงานจริงควรคำนวณเมตริกบน validation/test set ที่โมเดลไม่เคยเห็น</p>
+            </div>
+
+            <h3>ขั้นตอนที่ 1: เปลี่ยนความน่าจะเป็นเป็นคลาส</h3>
+            <p>กำหนด <strong>threshold = 0.5</strong>: ถ้า ŷ ≥ 0.5 ให้ทำนายคลาส 1; ถ้า ŷ &lt; 0.5 ให้ทำนายคลาส 0</p>
+            <table>
+                <caption>ผลทำนายของข้อมูล 4 ตัวอย่างด้วยพารามิเตอร์หลังรอบที่ 2</caption>
+                <tr>
+                    <th>ตัวอย่าง</th>
+                    <th>Y จริง</th>
+                    <th>z</th>
+                    <th>ŷ = sigmoid(z)</th>
+                    <th>ทำนายที่ threshold 0.5</th>
+                    <th>ผลลัพธ์</th>
+                </tr>
+                <tr><td>1</td><td>0</td><td>0.1378</td><td>0.5344</td><td>1</td><td>FP</td></tr>
+                <tr><td>2</td><td>0</td><td>0.2883</td><td>0.5716</td><td>1</td><td>FP</td></tr>
+                <tr><td>3</td><td>1</td><td>0.4148</td><td>0.6022</td><td>1</td><td>TP</td></tr>
+                <tr><td>4</td><td>1</td><td>0.5653</td><td>0.6377</td><td>1</td><td>TP</td></tr>
+            </table>
+            <div class="explanation">
+                <p><strong>อ่านตัวย่อ:</strong> TP (ทาย 1 ถูก), TN (ทาย 0 ถูก), FP (ทายว่า 1 แต่จริงเป็น 0) และ FN (ทายว่า 0 แต่จริงเป็น 1)</p>
+                <p>ในรอบนี้ ŷ ของทุกตัวอย่างสูงกว่า 0.5 ดังนั้นโมเดลจึงทำนายทุกตัวอย่างเป็นคลาส 1</p>
+            </div>
+
+            <h3>ขั้นตอนที่ 2: สร้าง Confusion Matrix</h3>
+            <table class="confusion-matrix">
+                <caption>แถวคือค่าจริง และคอลัมน์คือคลาสที่โมเดลทำนาย</caption>
+                <tr>
+                    <th rowspan="2" scope="col">ค่าจริง ↓<br>ทำนาย →</th>
+                    <th colspan="2" scope="colgroup">โมเดลทำนาย</th>
+                </tr>
+                <tr>
+                    <th scope="col">0</th>
+                    <th scope="col">1</th>
+                </tr>
+                <tr>
+                    <th scope="row">0</th>
+                    <td class="cm-tn">TN = 0</td>
+                    <td class="cm-fp">FP = 2</td>
+                </tr>
+                <tr>
+                    <th scope="row">1</th>
+                    <td class="cm-fn">FN = 0</td>
+                    <td class="cm-tp">TP = 2</td>
+                </tr>
+            </table>
+
+            <h3>ขั้นตอนที่ 3: แทนค่าในเมตริกแต่ละตัว</h3>
+            <div class="evaluation-grid">
+                <div class="metric-card">
+                    <h4>Accuracy</h4>
+                    <div class="formula">Accuracy = (TP + TN) / จำนวนทั้งหมด = (2 + 0) / 4 = 0.50</div>
+                    <p class="metric-value">50%</p>
+                    <p>โมเดลทายถูก 2 จาก 4 ตัวอย่าง โดยนับทั้งคลาส 0 และคลาส 1</p>
+                </div>
+                <div class="metric-card">
+                    <h4>Precision ของคลาส 1</h4>
+                    <div class="formula">Precision = TP / (TP + FP) = 2 / (2 + 2) = 0.50</div>
+                    <p class="metric-value">50%</p>
+                    <p>เมื่อโมเดลบอกว่าเป็นคลาส 1 จะถูกจริงเพียงครึ่งเดียว เพราะมี FP อยู่ 2 ตัวอย่าง</p>
+                </div>
+                <div class="metric-card">
+                    <h4>Recall ของคลาส 1</h4>
+                    <div class="formula">Recall = TP / (TP + FN) = 2 / (2 + 0) = 1.00</div>
+                    <p class="metric-value">100%</p>
+                    <p>โมเดลไม่พลาดตัวอย่างที่เป็นคลาส 1 จริงเลย เพราะ FN เท่ากับ 0</p>
+                </div>
+                <div class="metric-card">
+                    <h4>F1-score ของคลาส 1</h4>
+                    <div class="formula">F1 = 2TP / (2TP + FP + FN) = 4 / (4 + 2 + 0) = 0.667</div>
+                    <p class="metric-value">66.7%</p>
+                    <p>F1 รวม Precision และ Recall เข้าด้วยกัน จึงสะท้อนว่าถึง Recall ดี แต่ Precision ยังต่ำ</p>
+                </div>
+            </div>
+
+            <div class="note">
+                <p><strong>ข้อสังเกตสำคัญ:</strong> Log Loss ลดลงเป็น 0.6671 แต่ Accuracy ที่ threshold 0.5 ยังเป็น 50% ได้ เพราะ Log Loss วัดคุณภาพของความน่าจะเป็นอย่างต่อเนื่อง ขณะที่ Accuracy เปลี่ยนแบบเป็นขั้นเมื่อความน่าจะเป็นข้าม threshold</p>
+            </div>
+
+            <h3>ขั้นตอนที่ 4: ลองเปลี่ยน threshold แล้วเกิดอะไรขึ้น?</h3>
+            <p>จากตารางข้างต้น ถ้าใช้ threshold = 0.60 ผลทำนายจะเป็น 0, 0, 1, 1 ซึ่งตรงกับ Y จริงทุกแถว</p>
+            <table class="threshold-compare">
+                <tr>
+                    <th>Threshold</th>
+                    <th>ผลทำนาย 4 ตัวอย่าง</th>
+                    <th>Accuracy</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1-score</th>
+                </tr>
+                <tr><td>0.50</td><td>1, 1, 1, 1</td><td>50%</td><td>50%</td><td>100%</td><td>66.7%</td></tr>
+                <tr><td>0.60</td><td>0, 0, 1, 1</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td></tr>
+            </table>
+            <div class="important">
+                <p><strong>อย่าเพิ่งสรุปว่าโมเดลเก่ง 100%:</strong> ตารางนี้เลือก threshold หลังเห็นข้อมูลฝึกชุดเดิม จึงมีโอกาสทำให้ผลดูดีเกินจริง การเลือก threshold ที่ใช้จริงควรอิง validation set และต้นทุนของความผิดพลาด เช่น งานคัดกรองโรคร้ายแรงมักยอมรับ FP มากขึ้นเพื่อหลีกเลี่ยง FN</p>
+            </div>
+
+            <div class="self-check explanation">
+                <p><strong>ลองคิดก่อนดูเฉลย:</strong> หากโจทย์เป็นการคัดกรองโรคและการพลาดผู้ป่วยจริงมีความเสี่ยงสูง ควรติดตาม Precision หรือ Recall เป็นพิเศษ เพราะอะไร?</p>
+                <details>
+                    <summary>เปิดดูเฉลย</summary>
+                    <p><strong>Recall</strong> เพราะ Recall สูงช่วยลด False Negative (FN) หรือกรณีที่ผู้ป่วยจริงถูกทำนายว่าไม่เป็นโรค แม้ในการใช้งานจริงยังต้องพิจารณาผลเสียของ FP ร่วมด้วย</p>
+                </details>
+            </div>
+        </div>
         
         <div class="section">
             <h2>ข้อคิดสำคัญ</h2>
@@ -835,7 +1010,7 @@
             </div>
             
             <div class="explanation">
-                <p><strong>3. พฤติกรรมของฟังก์ชันต้นทุน:</strong> เมื่อการฝึกอบรมดำเนินไป ต้นทุนควรลดลง แสดงถึงประสิทธิภาพของโมเดลที่ดีขึ้น</p>
+                <p><strong>3. พฤติกรรมของฟังก์ชันต้นทุน:</strong> เมื่อการฝึกอบรมดำเนินไป ต้นทุนควรลดลง ซึ่งเป็นสัญญาณว่าความน่าจะเป็นที่โมเดลทำนายดีขึ้น แต่ควรตรวจ Accuracy, Precision, Recall และ F1-score บนข้อมูลที่โมเดลไม่เคยเห็นด้วยเสมอ</p>
             </div>
             
             <div class="important">
