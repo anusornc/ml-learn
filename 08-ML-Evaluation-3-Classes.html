@@ -8,6 +8,9 @@
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap">
 </head>
 <body>
@@ -60,19 +63,63 @@
     </header>
 
     <main class="container mx-auto px-4 py-8 max-w-4xl">
-        <div class="bg-white rounded-lg shadow p-4">
-            <p class="mb-4 text-gray-700">ถ้าเอกสารไม่โหลด ให้คลิกที่ลิงก์ดาวน์โหลดด้านล่าง</p>
-            <div class="w-full" style="height:80vh;">
-                <embed src="08-ML-การคำนวณค่าประเมินประสิทธิภาพสำหรับปัญหา Classification 3 คลาส.pdf" type="application/pdf" width="100%" height="100%">
-                <!-- Fallback -->
-                <p class="mt-4">ถ้าเบราว์เซอร์ของคุณไม่รองรับการฝัง PDF, <a href="08-ML-การคำนวณค่าประเมินประสิทธิภาพสำหรับปัญหา Classification 3 คลาส.pdf" class="text-blue-600 underline" target="_blank" rel="noopener">คลิกเพื่อดาวน์โหลด/เปิดไฟล์ PDF</a>.</p>
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3 font-semibold text-lg">1</span>
+                ทำไมต้องประเมินโมเดลหลายคลาส?
+            </h2>
+            <p class="text-slate-600 leading-relaxed">Accuracy บอกภาพรวมว่าโมเดลทายถูกกี่ส่วน แต่ไม่ได้บอกว่าโมเดลพลาดคลาสใดเป็นพิเศษ สำหรับงาน 3 คลาส เราจึงดู Precision, Recall และ F1-score ของแต่ละคลาส แล้วเลือกวิธีเฉลี่ยที่สอดคล้องกับโจทย์</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5 text-sm text-slate-700">
+                <div class="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                    <h3 class="font-bold text-indigo-900 mb-2">เมตริกที่ใช้ในบทนี้</h3>
+                    <ul class="space-y-1 list-disc list-inside">
+                        <li><strong>Accuracy</strong> — ถูกต้องโดยรวม</li>
+                        <li><strong>Precision</strong> — สิ่งที่ทายว่าเป็นคลาสนี้ ถูกจริงกี่ส่วน</li>
+                        <li><strong>Recall</strong> — คลาสจริงนี้ ถูกจับเจอกี่ส่วน</li>
+                        <li><strong>F1-score</strong> — สมดุลระหว่าง Precision และ Recall</li>
+                        <li><strong>ROC AUC</strong> — ความสามารถในการจัดอันดับ/แยกคลาสจากคะแนนความน่าจะเป็น</li>
+                    </ul>
+                </div>
+                <div class="rounded-xl border border-indigo-100 bg-white p-4">
+                    <h3 class="font-bold text-indigo-900 mb-2">หลักคิดสำคัญ</h3>
+                    <p>เมื่อคำนวณเมตริกของคลาส A ให้ถือ A เป็น positive และรวม B กับ C เป็น negative; จากนั้นทำซ้ำแบบเดียวกันกับ B และ C</p>
+                    <p class="mt-2 text-xs text-slate-500">แนวทางนี้เรียกว่า one-vs-rest และทำให้สูตร TP, FP, FN, TN เดิมใช้กับ multiclass ได้</p>
+                </div>
             </div>
+        </section>
 
-            <p class="mt-4"><a href="index.html" class="text-sm text-gray-600 underline">กลับไปยังสารบัญ</a></p>
-        </div>
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3 font-semibold text-lg">2</span>
+                Confusion Matrix: ข้อมูลชุดเดียวที่ใช้คำนวณทุกเมตริก
+            </h2>
+            <p class="text-slate-600 mb-4">แถวคือ <strong>คลาสจริง</strong> และคอลัมน์คือ <strong>คลาสที่โมเดลทำนาย</strong> ค่าบนเส้นทแยงมุมคือสิ่งที่ทายถูก</p>
+            <div class="overflow-x-auto">
+                <table class="min-w-full max-w-xl mx-auto border border-indigo-200 text-sm text-slate-700">
+                    <caption class="caption-top text-left font-semibold text-indigo-900 pb-2">Confusion Matrix สำหรับคลาส A, B, C</caption>
+                    <thead><tr class="bg-indigo-100 text-indigo-950"><th class="p-3 text-left">จริง ↓ / ทำนาย →</th><th class="p-3">A</th><th class="p-3">B</th><th class="p-3">C</th><th class="p-3">รวมแถว</th></tr></thead>
+                    <tbody>
+                        <tr class="border-t"><th class="p-3 text-left bg-indigo-50">A</th><td class="p-3 text-center font-bold text-emerald-700">15</td><td class="p-3 text-center">3</td><td class="p-3 text-center">2</td><td class="p-3 text-center font-semibold">20</td></tr>
+                        <tr class="border-t"><th class="p-3 text-left bg-indigo-50">B</th><td class="p-3 text-center">1</td><td class="p-3 text-center font-bold text-emerald-700">20</td><td class="p-3 text-center">4</td><td class="p-3 text-center font-semibold">25</td></tr>
+                        <tr class="border-t"><th class="p-3 text-left bg-indigo-50">C</th><td class="p-3 text-center">2</td><td class="p-3 text-center">5</td><td class="p-3 text-center font-bold text-emerald-700">18</td><td class="p-3 text-center font-semibold">25</td></tr>
+                        <tr class="border-t bg-slate-50"><th class="p-3 text-left">รวมคอลัมน์</th><td class="p-3 text-center font-semibold">18</td><td class="p-3 text-center font-semibold">28</td><td class="p-3 text-center font-semibold">24</td><td class="p-3 text-center font-bold">70</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="overflow-x-auto mt-5">
+                <table class="min-w-full text-sm text-slate-700 border border-slate-200">
+                    <thead><tr class="bg-slate-100 text-slate-800"><th class="p-2 text-left">เมื่อมองคลาส...</th><th class="p-2">TP</th><th class="p-2">FP</th><th class="p-2">FN</th><th class="p-2">TN</th><th class="p-2 text-left">วิธีคิดย่อ</th></tr></thead>
+                    <tbody>
+                        <tr class="border-t"><th class="p-2 text-left">A</th><td class="p-2 text-center">15</td><td class="p-2 text-center">3</td><td class="p-2 text-center">5</td><td class="p-2 text-center">47</td><td class="p-2">FP = 1+2, FN = 3+2</td></tr>
+                        <tr class="border-t"><th class="p-2 text-left">B</th><td class="p-2 text-center">20</td><td class="p-2 text-center">8</td><td class="p-2 text-center">5</td><td class="p-2 text-center">37</td><td class="p-2">FP = 3+5, FN = 1+4</td></tr>
+                        <tr class="border-t"><th class="p-2 text-left">C</th><td class="p-2 text-center">18</td><td class="p-2 text-center">6</td><td class="p-2 text-center">7</td><td class="p-2 text-center">39</td><td class="p-2">FP = 2+4, FN = 2+5</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
         <section class="my-8 rounded-xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
-            <h2 class="text-2xl font-bold text-indigo-900 mb-2">สรุปแบบอ่านบนเว็บ: คำนวณหนึ่งคลาสก่อน</h2>
+            <h2 class="text-2xl font-bold text-indigo-900 mb-2">ภาพรวมก่อนคำนวณทีละขั้น</h2>
             <p class="text-gray-700 mb-4">ไม่ต้องจำทุกสูตรพร้อมกัน: ใน multiclass ให้เลือกคลาสหนึ่งเป็น “positive” แล้วมองคลาสอื่นรวมเป็น “not that class”</p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-gray-700">
                 <div class="rounded-lg bg-white border border-indigo-100 p-4">
@@ -95,9 +142,129 @@
             <p class="mt-4 text-sm text-indigo-900"><strong>จำง่าย:</strong> Precision ถามว่า “ที่ทายว่าเป็น B นั้น ถูกจริงกี่ส่วน?” ส่วน Recall ถามว่า “B จริงทั้งหมด เราจับเจอแล้วกี่ส่วน?”</p>
         </section>
 
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3 font-semibold text-lg">3</span>
+                Accuracy: ทายถูกโดยรวมกี่ส่วน?
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+                <div>
+                    <p class="text-slate-600">Accuracy ใช้เฉพาะค่าบนเส้นทแยงมุม เพราะเป็นกรณีที่คลาสจริงและคลาสที่ทำนายตรงกัน</p>
+                    <div class="mt-4 rounded-xl bg-slate-50 border border-slate-100 p-4 overflow-x-auto">$$Accuracy = \frac{TP_A+TP_B+TP_C}{N}$$</div>
+                    <ol class="list-decimal list-inside mt-4 space-y-2 text-sm text-slate-700">
+                        <li>รวมที่ทายถูก: $15+20+18=53$</li>
+                        <li>รวมจำนวนตัวอย่างทั้งหมด: $N=70$</li>
+                        <li>$Accuracy=\frac{53}{70}=0.757$ หรือ <strong>75.7%</strong></li>
+                    </ol>
+                </div>
+                <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+                    <h3 class="font-bold mb-2">ตีความให้ถูก</h3>
+                    <p>75.7% หมายถึง ในตัวอย่าง 70 รายการ โมเดลทายถูก 53 รายการ ไม่ได้หมายความว่าโมเดลทำได้ดีเท่ากันทุกคลาส</p>
+                    <p class="mt-2">เมื่อข้อมูลไม่สมดุล เช่น คลาสหนึ่งมี 95% ของข้อมูล Accuracy อาจดูสูงแม้โมเดลแทบไม่จับคลาสส่วนน้อยได้ จึงต้องดู Precision, Recall และ F1 ร่วมด้วย</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3 font-semibold text-lg">4</span>
+                Precision และ Recall: ดูความผิดพลาดคนละด้าน
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="rounded-xl border-l-4 border-sky-500 bg-sky-50 p-5">
+                    <h3 class="font-bold text-sky-900">Precision — ดูจากคอลัมน์</h3>
+                    <p class="text-sm text-slate-700 mt-2">เมื่อโมเดลพูดว่า “เป็นคลาสนี้” มันพูดถูกกี่ส่วน จึงสนใจ False Positive</p>
+                    <div class="mt-3 overflow-x-auto text-sm">$$Precision_i=\frac{TP_i}{TP_i+FP_i}$$</div>
+                    <p class="text-sm text-slate-700 mt-3">ตัวอย่างคลาส B: $TP_B=20$, $FP_B=3+5=8$</p>
+                    <p class="font-semibold text-sky-950 mt-1">$Precision(B)=\frac{20}{20+8}=0.714$ หรือ 71.4%</p>
+                </div>
+                <div class="rounded-xl border-l-4 border-emerald-500 bg-emerald-50 p-5">
+                    <h3 class="font-bold text-emerald-900">Recall — ดูจากแถว</h3>
+                    <p class="text-sm text-slate-700 mt-2">จากตัวอย่างที่เป็นคลาสนี้จริงทั้งหมด โมเดลจับเจอแล้วกี่ส่วน จึงสนใจ False Negative</p>
+                    <div class="mt-3 overflow-x-auto text-sm">$$Recall_i=\frac{TP_i}{TP_i+FN_i}$$</div>
+                    <p class="text-sm text-slate-700 mt-3">ตัวอย่างคลาส B: $TP_B=20$, $FN_B=1+4=5$</p>
+                    <p class="font-semibold text-emerald-950 mt-1">$Recall(B)=\frac{20}{20+5}=0.800$ หรือ 80.0%</p>
+                </div>
+            </div>
+            <div class="overflow-x-auto mt-6">
+                <table class="min-w-full text-sm text-slate-700 border border-slate-200">
+                    <thead><tr class="bg-slate-100 text-slate-800"><th class="p-3 text-left">คลาส</th><th class="p-3">Precision: $TP/(TP+FP)$</th><th class="p-3">Recall: $TP/(TP+FN)$</th><th class="p-3 text-left">อ่านอย่างไร</th></tr></thead>
+                    <tbody>
+                        <tr class="border-t"><th class="p-3 text-left">A</th><td class="p-3 text-center">$15/18=0.833$</td><td class="p-3 text-center">$15/20=0.750$</td><td class="p-3">ทาย A แล้วมักถูก แต่ยังพลาด A จริง 5 รายการ</td></tr>
+                        <tr class="border-t"><th class="p-3 text-left">B</th><td class="p-3 text-center">$20/28=0.714$</td><td class="p-3 text-center">$20/25=0.800$</td><td class="p-3">จับ B ได้ดี แต่ที่ทาย B มีบางส่วนเป็น A หรือ C</td></tr>
+                        <tr class="border-t"><th class="p-3 text-left">C</th><td class="p-3 text-center">$18/24=0.750$</td><td class="p-3 text-center">$18/25=0.720$</td><td class="p-3">Recall ต่ำสุดในสามคลาส จึงควรตรวจเหตุที่ C ถูกสับสน</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3 font-semibold text-lg">5</span>
+                F1-score และการเฉลี่ยผลหลายคลาส
+            </h2>
+            <p class="text-slate-600">F1 เป็นค่าเฉลี่ยแบบ harmonic mean จึงสูงได้ก็ต่อเมื่อทั้ง Precision และ Recall สูง ไม่ยอมให้ด้านหนึ่งดีมากกลบอีกด้านที่ต่ำมาก</p>
+            <div class="mt-4 rounded-xl bg-slate-50 border border-slate-100 p-4 overflow-x-auto">$$F1_i=2\times\frac{Precision_i\times Recall_i}{Precision_i+Recall_i}=\frac{2TP_i}{2TP_i+FP_i+FN_i}$$</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5 text-sm text-slate-700">
+                <div class="rounded-lg border border-violet-100 bg-violet-50 p-4"><h3 class="font-bold text-violet-900">คลาส A</h3><p class="mt-2">$F1_A=\frac{30}{30+3+5}=0.789$</p></div>
+                <div class="rounded-lg border border-violet-100 bg-violet-50 p-4"><h3 class="font-bold text-violet-900">คลาส B</h3><p class="mt-2">$F1_B=\frac{40}{40+8+5}=0.755$</p></div>
+                <div class="rounded-lg border border-violet-100 bg-violet-50 p-4"><h3 class="font-bold text-violet-900">คลาส C</h3><p class="mt-2">$F1_C=\frac{36}{36+6+7}=0.735$</p></div>
+            </div>
+            <div class="overflow-x-auto mt-6">
+                <table class="min-w-full text-sm text-slate-700 border border-slate-200">
+                    <thead><tr class="bg-slate-100 text-slate-800"><th class="p-3 text-left">วิธีเฉลี่ย</th><th class="p-3 text-left">วิธีคิด</th><th class="p-3">ค่าจากตารางนี้</th><th class="p-3 text-left">เหมาะเมื่อ</th></tr></thead>
+                    <tbody>
+                        <tr class="border-t"><th class="p-3 text-left">Macro</th><td class="p-3">เฉลี่ยค่าแต่ละคลาสเท่ากัน</td><td class="p-3 text-center">Macro Precision = 0.766<br>Macro Recall = 0.757<br>Macro F1 = 0.760</td><td class="p-3">ทุกคลาสสำคัญเท่ากัน หรืออยากเห็นผลต่อคลาสส่วนน้อย</td></tr>
+                        <tr class="border-t"><th class="p-3 text-left">Micro</th><td class="p-3">รวม TP, FP, FN ก่อน แล้วคำนวณครั้งเดียว</td><td class="p-3 text-center">Precision = Recall = F1 = 0.757</td><td class="p-3">งาน single-label ที่ต้องการภาพรวมตามจำนวนตัวอย่างทั้งหมด</td></tr>
+                        <tr class="border-t"><th class="p-3 text-left">Weighted</th><td class="p-3">เฉลี่ยโดยถ่วงน้ำหนักด้วย support ของแต่ละคลาส</td><td class="p-3 text-center">Weighted F1 = 0.757</td><td class="p-3">ต้องการสะท้อนสัดส่วนข้อมูลจริง แต่ไม่อยากให้คลาสใหญ่ครอบงำทั้งหมด</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="mt-3 text-xs text-slate-500">Weighted F1 คำนวณจากค่าจริงก่อนปัดเศษ: $(20\times0.78947+25\times0.75472+25\times0.73469)/70\approx0.7575$ จึงอาจต่างเล็กน้อยหากนำค่า F1 ที่ปัดเศษแล้วมาคิดต่อ</p>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3 font-semibold text-lg">6</span>
+                ROC AUC สำหรับงาน 3 คลาส
+            </h2>
+            <p class="text-slate-600">ROC วาดความสัมพันธ์ระหว่าง True Positive Rate กับ False Positive Rate เมื่อเลื่อน threshold ของ <strong>คะแนนความน่าจะเป็น</strong> ส่วน AUC คือพื้นที่ใต้เส้น ROC — ค่าใกล้ 1 แปลว่าโมเดลแยกคลาสได้ดี</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5 text-sm text-slate-700">
+                <div class="rounded-xl border border-sky-200 bg-sky-50 p-5">
+                    <h3 class="font-bold text-sky-900">One-vs-Rest (OvR)</h3>
+                    <ul class="mt-2 list-disc list-inside space-y-1"><li>คำนวณ A vs not-A, B vs not-B, C vs not-C</li><li>จึงได้ ROC/AUC <strong>3 เส้น</strong></li><li>อาจสรุปด้วย Macro AUC: $\frac{AUC_A+AUC_B+AUC_C}{3}$</li></ul>
+                </div>
+                <div class="rounded-xl border border-violet-200 bg-violet-50 p-5">
+                    <h3 class="font-bold text-violet-900">One-vs-One (OvO)</h3>
+                    <ul class="mt-2 list-disc list-inside space-y-1"><li>เปรียบเทียบคู่ A-B, A-C และ B-C</li><li>สำหรับ 3 คลาส มี <strong>3 คู่</strong>: $\binom{3}{2}=3$</li><li>เหมาะเมื่ออยากดูว่าโมเดลสับสนระหว่างคู่ใดเป็นพิเศษ</li></ul>
+                </div>
+            </div>
+            <div class="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"><strong>ข้อจำกัดของตารางนี้:</strong> Confusion Matrix เกิดจาก threshold ที่เลือกแล้ว จึงคำนวณ AUC จริงไม่ได้ ต้องมี score/probability ของแต่ละตัวอย่างหลาย threshold ก่อน</div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-800 mb-4 border-b-2 border-indigo-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3 font-semibold text-lg">7</span>
+                เลือกเมตริกให้ตรงกับผลกระทบของความผิดพลาด
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-slate-700 border border-slate-200">
+                    <thead><tr class="bg-indigo-100 text-indigo-950"><th class="p-3 text-left">เมตริก</th><th class="p-3 text-left">ข้อดี</th><th class="p-3 text-left">ระวัง</th><th class="p-3 text-left">เลือกใช้เมื่อ</th></tr></thead>
+                    <tbody>
+                        <tr class="border-t"><th class="p-3">Accuracy</th><td class="p-3">เข้าใจง่าย เห็นภาพรวมเร็ว</td><td class="p-3">หลอกได้เมื่อข้อมูลไม่สมดุล</td><td class="p-3">คลาสสมดุล และต้องการผลประเมินเบื้องต้น</td></tr>
+                        <tr class="border-t"><th class="p-3">Precision</th><td class="p-3">ช่วยลด False Positive</td><td class="p-3">อาจพลาด positive จริงมาก</td><td class="p-3">เช่น ตรวจจับสแปม หรือการแจ้งเตือนที่ผิดพลาดมีต้นทุนสูง</td></tr>
+                        <tr class="border-t"><th class="p-3">Recall</th><td class="p-3">ช่วยลด False Negative</td><td class="p-3">อาจเตือนเกินและได้ false alarm มาก</td><td class="p-3">เช่น คัดกรองโรคหรือภัยคุกคาม ที่ไม่อยากพลาดกรณีจริง</td></tr>
+                        <tr class="border-t"><th class="p-3">F1 / Macro F1</th><td class="p-3">บังคับให้พิจารณา Precision และ Recall พร้อมกัน</td><td class="p-3">ไม่บอกต้นทุนของ FP/FN ที่ต่างกัน</td><td class="p-3">ข้อมูลไม่สมดุล หรือทุกคลาสสำคัญ</td></tr>
+                        <tr class="border-t"><th class="p-3">ROC AUC</th><td class="p-3">เปรียบเทียบความสามารถในการแยกคลาสโดยไม่ยึด threshold เดียว</td><td class="p-3">ต้องมี probability score และอธิบายยากกว่า</td><td class="p-3">เปรียบเทียบโมเดลหลายตัวก่อนตัดสิน threshold ใช้งานจริง</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="mt-5 text-sm text-indigo-900"><strong>แนวทางสรุป:</strong> อย่าตัดสินโมเดลด้วยตัวเลขเดียว หากข้อมูลไม่สมดุล ให้รายงาน per-class Precision/Recall/F1 พร้อม Macro average; หากมี score ให้ดู ROC AUC เพิ่ม และเลือก threshold ตามต้นทุนจริงของ FP กับ FN</p>
+        </section>
+
         <section class="my-8 rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
             <h2 class="text-2xl font-bold text-amber-900 mb-2">ลองคิดก่อนเปิดเฉลย</h2>
-            <p class="text-gray-700 mb-4">ใช้ Confusion Matrix เดียวกับในเอกสาร PDF: แถวคือคลาสจริง และคอลัมน์คือคลาสที่โมเดลทำนาย</p>
+            <p class="text-gray-700 mb-4">ใช้ Confusion Matrix เดียวกับในบทนี้: แถวคือคลาสจริง และคอลัมน์คือคลาสที่โมเดลทำนาย</p>
             <div class="overflow-x-auto mb-4">
                 <table class="min-w-full max-w-md bg-white border border-amber-200 text-sm text-gray-700">
                     <thead>
