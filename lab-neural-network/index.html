@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Neural Network Sandbox - Perceptron & MLP</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Sarabun', 'Outfit', 'sans-serif'],
+                        heading: ['Outfit', 'Sarabun', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        darkbg: '#090d16',
+                        cardbg: '#111827',
+                        cardborder: '#1f2937',
+                        accentCyan: '#06b6d4',
+                        accentPurple: '#8b5cf6',
+                        accentPink: '#ec4899',
+                        accentGreen: '#10b981',
+                        accentYellow: '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #090d16;
+            color: #f3f4f6;
+            font-family: 'Sarabun', 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-panel-glow {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.15);
+        }
+
+        /* Pulse animation for data flow */
+        @keyframes pulseLine {
+            0% { stroke-dashoffset: 24; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        .flow-line {
+            stroke-dasharray: 6, 6;
+            animation: pulseLine 0.8s linear infinite;
+        }
+
+        /* Drag & Drop Canvas Items */
+        .node-item {
+            cursor: grab;
+            user-select: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .node-item:active {
+            cursor: grabbing;
+            transform: scale(1.08);
+        }
+        .node-item:hover {
+            box-shadow: 0 0 18px rgba(139, 92, 246, 0.5);
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header & Navigation -->
+    <header class="border-b border-slate-800 bg-slate-950/80 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <a href="../index.html" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition text-xs font-semibold flex items-center gap-1.5 border border-slate-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    <span>หน้าหลัก ML Learn</span>
+                </a>
+                <div class="h-6 w-px bg-slate-800"></div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 font-heading">
+                        Neural Network Interactive Sandbox
+                    </h1>
+                    <p class="text-xs text-slate-400 font-light">เครื่องมือเรียนรู้ Perceptron & Multi-Layer Perceptron (MLP) ด้วยภาพจำลองเรียลไทม์</p>
+                </div>
+            </div>
+
+            <!-- Mode Selector Presets -->
+            <div class="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 text-xs font-medium">
+                <button id="preset-perceptron" onclick="selectPreset('perceptron')" class="px-3.5 py-1.5 rounded-xl transition font-semibold bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/20">
+                    ⚡ Perceptron (1 Layer)
+                </button>
+                <button id="preset-mlp" onclick="selectPreset('mlp')" class="px-3.5 py-1.5 rounded-xl transition text-slate-300 hover:text-white">
+                    🧠 MLP (2-2-1 XOR)
+                </button>
+                <button id="preset-builder" onclick="selectPreset('builder')" class="px-3.5 py-1.5 rounded-xl transition text-slate-300 hover:text-white">
+                    🛠️ Drag & Drop Builder
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Controls Toolbar (Top Banner across columns) -->
+        <div class="lg:col-span-12 glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 border border-slate-800 shadow-xl">
+            <!-- Left: Dataset Selection -->
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Dataset (ชุดข้อมูล):</span>
+                <div class="flex gap-2">
+                    <button onclick="setDataset('AND')" id="ds-AND" class="px-3 py-1.5 text-xs font-bold rounded-lg border transition bg-indigo-600 border-indigo-400 text-white shadow-md shadow-indigo-500/20">AND Gate</button>
+                    <button onclick="setDataset('OR')" id="ds-OR" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">OR Gate</button>
+                    <button onclick="setDataset('XOR')" id="ds-XOR" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">XOR Gate</button>
+                </div>
+            </div>
+
+            <!-- Middle: Hyperparameters -->
+            <div class="flex flex-wrap items-center gap-6 text-xs">
+                <!-- Learning Rate -->
+                <div class="flex items-center gap-2">
+                    <label for="lr-range" class="text-slate-400 font-mono">Learning Rate (η): <span id="lr-val" class="font-bold text-cyan-400">0.10</span></label>
+                    <input type="range" id="lr-range" min="0.01" max="3.0" step="0.05" value="0.10" oninput="updateHyperparams()" class="w-24 accent-cyan-400 cursor-pointer">
+                </div>
+
+                <!-- Epoch Limit -->
+                <div class="flex items-center gap-2">
+                    <label for="epochs-range" class="text-slate-400 font-mono">Epochs: <span id="epochs-val" class="font-bold text-purple-400">200</span></label>
+                    <input type="range" id="epochs-range" min="20" max="3000" step="20" value="200" oninput="updateHyperparams()" class="w-24 accent-purple-400 cursor-pointer">
+                </div>
+
+                <!-- Speed -->
+                <div class="flex items-center gap-2">
+                    <label for="speed-select" class="text-slate-400 font-mono">ความเร็ว:</label>
+                    <select id="speed-select" class="bg-slate-800 text-slate-200 border border-slate-700 rounded-lg px-2 py-1 focus:outline-none text-xs">
+                        <option value="1">ช้า (1x)</option>
+                        <option value="5" selected>ปกติ (5x)</option>
+                        <option value="20">เร็ว (20x)</option>
+                        <option value="100">เร็วมาก (100x)</option>
+                    </select>
+                </div>
+
+                <!-- MLP seed (Python seed=42 often plateaus; sandbox uses its own PRNG) -->
+                <div id="seed-control" class="hidden flex items-center gap-2">
+                    <label for="seed-input" class="text-slate-400 font-mono">Seed:</label>
+                    <input type="number" id="seed-input" value="0" min="0" step="1" class="w-16 bg-slate-800 text-slate-200 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono" onchange="updateHyperparams()">
+                    <button type="button" onclick="applySeed(0)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-mono">0</button>
+                    <button type="button" onclick="applySeed(42)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-mono">42</button>
+                </div>
+            </div>
+
+            <!-- Right: Action Buttons -->
+            <div class="flex items-center gap-2">
+                <button id="btn-train" onclick="toggleTraining()" class="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/20 transition flex items-center gap-1.5 active:scale-95">
+                    <svg id="icon-play" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <span id="txt-train">เริ่มการสร้าง & เทรน (Train)</span>
+                </button>
+
+                <button onclick="stepEpoch()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition active:scale-95">
+                    ⏭️ ทีละ Epoch
+                </button>
+
+                <button onclick="resetTraining()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-rose-900/50 hover:text-rose-300 text-slate-300 border border-slate-700 transition active:scale-95">
+                    🔄 รีเซ็ต
+                </button>
+            </div>
+        </div>
+
+        <!-- Left Column: Interactive Network Diagram & Drag-and-Drop Canvas (7 Cols) -->
+        <div class="lg:col-span-7 flex flex-col gap-4">
+
+            <!-- Network Visualizer Glass Box -->
+            <div class="glass-panel-glow rounded-3xl p-5 relative overflow-hidden flex-1 flex flex-col min-h-[460px]">
+
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+                        <h2 class="text-sm font-bold text-slate-200 font-heading">ไดอะแกรมผังการประมวลผล (Input ➔ Sum | Activation ➔ Output)</h2>
+                    </div>
+                    <span id="arch-badge" class="text-[10px] font-mono uppercase bg-cyan-950/80 text-cyan-300 px-2.5 py-1 rounded-full border border-cyan-800/50">
+                        Perceptron: Input ➔ Sum | Activation ➔ Output
+                    </span>
+                </div>
+
+                <!-- SVG Canvas & Drag Drop Zone for Drawing Connections and Nodes -->
+                <div id="diagram-container"
+                     ondragover="handleDragOver(event)"
+                     ondragleave="handleDragLeave(event)"
+                     ondrop="handleDrop(event)"
+                     class="relative flex-1 w-full h-full rounded-2xl bg-slate-950/70 border border-slate-800/80 p-2 overflow-hidden transition-all duration-300">
+
+                    <svg id="network-svg" class="w-full h-full absolute inset-0 z-0 pointer-events-none">
+                        <!-- Dynamic Connection Lines rendered by JS -->
+                    </svg>
+
+                    <!-- Interactive HTML Layer for Nodes -->
+                    <div id="nodes-layer" class="relative z-10 w-full h-full flex justify-between items-center px-4 md:px-8 py-4">
+                        <!-- Rendered by JavaScript -->
+                    </div>
+
+                    <!-- Builder Drop Zone Overlay Notice (visible when dragging in builder mode) -->
+                    <div id="drop-overlay" class="hidden absolute inset-0 z-20 pointer-events-none flex flex-col items-center justify-center bg-purple-950/40 backdrop-blur-sm border-2 border-dashed border-purple-400 rounded-2xl transition">
+                        <span class="text-2xl mb-1">📥</span>
+                        <span class="text-sm font-bold text-purple-200 font-heading">ปล่อยโหนดตรงนี้เพื่อวางในโครงข่าย</span>
+                        <span class="text-xs text-purple-300/80 mt-1 font-mono">Drop node here to append to architecture</span>
+                    </div>
+                </div>
+
+                <!-- Palette Bar for Drag & Drop / Click-to-add Mode -->
+                <div id="builder-palette" class="hidden mt-3 p-3 bg-slate-900/90 rounded-2xl border border-dashed border-purple-500/50 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-purple-300 font-bold font-mono">🧱 เครื่องมือลากและวาง (Drag & Drop Palette):</span>
+                        <span class="text-[10px] text-slate-400">(ลากใส่กล่อง หรือ คลิกเพื่อเพิ่ม)</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <!-- Input Node Badge -->
+                        <div class="node-item bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/60 text-xs px-3 py-1.5 rounded-xl font-mono flex items-center gap-1.5 shadow-md active:scale-95"
+                             draggable="true"
+                             ondragstart="handleDragStart(event, 'input')"
+                             onclick="addNode('input')">
+                            <span>🔵 Input Node (x)</span>
+                            <span class="text-[10px] bg-cyan-500/20 px-1.5 py-0.5 rounded text-cyan-200">+เพิ่ม</span>
+                        </div>
+                        <!-- Hidden Neuron Badge -->
+                        <div class="node-item bg-purple-950/80 hover:bg-purple-900 text-purple-300 border border-purple-500/60 text-xs px-3 py-1.5 rounded-xl font-mono flex items-center gap-1.5 shadow-md active:scale-95"
+                             draggable="true"
+                             ondragstart="handleDragStart(event, 'hidden')"
+                             onclick="addNode('hidden')">
+                            <span>🟣 Hidden Neuron (∑ | σ)</span>
+                            <span class="text-[10px] bg-purple-500/20 px-1.5 py-0.5 rounded text-purple-200">+เพิ่ม</span>
+                        </div>
+                        <!-- Output Neuron Badge -->
+                        <div class="node-item bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/60 text-xs px-3 py-1.5 rounded-xl font-mono flex items-center gap-1.5 shadow-md active:scale-95"
+                             draggable="true"
+                             ondragstart="handleDragStart(event, 'output')"
+                             onclick="addNode('output')">
+                            <span>🟢 Output Neuron (ŷ)</span>
+                            <span class="text-[10px] bg-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-200">1 โหนด</span>
+                        </div>
+                        <!-- Clear Custom Nodes -->
+                        <button onclick="resetBuilderNodes()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-900/60 text-rose-300 border border-slate-700 text-xs font-mono transition">
+                            🗑️ ล้างทั้งหมด
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Footer Status & Live Parameters Inspector -->
+                <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap justify-between items-center text-xs font-mono text-slate-400 gap-2">
+                    <div class="flex items-center gap-4">
+                        <div>Weights (w): <span id="weights-display" class="text-cyan-400 font-bold">w1=0.00, w2=0.00</span></div>
+                        <div>Bias (b): <span id="bias-display" class="text-purple-400 font-bold">b=0.00</span></div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span>สถานะ:</span>
+                        <span id="train-status" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-300 border border-slate-700">พร้อมทำงาน (Idle)</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Mathematical Explanation & Textbook Perceptron Anatomy Box -->
+            <div class="glass-panel rounded-2xl p-4 border border-slate-800">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-300">
+                        <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>ลำดับการทำงาน: Input ➔ Sum (∑) ➔ Activation (f) ➔ Output (ŷ)</span>
+                    </div>
+                    <button id="btn-auto-xor" onclick="tuneForXOR()" class="hidden px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-mono transition">
+                        ⚡ ปรับแต่งค่าสำหรับ XOR อัตโนมัติ (LR=2.0, Epochs=1000)
+                    </button>
+                </div>
+                <div id="explanation-text" class="text-xs text-slate-400 leading-relaxed font-light space-y-1">
+                    <p>• <strong class="text-cyan-300 font-normal">1. Inputs (xᵢ, b):</strong> ค่าอินพุตส่งคูณกับ Weights (wᵢ) และ Bias (b) เข้าสู่บล็อก Summation</p>
+                    <p>• <strong class="text-purple-300 font-normal">2. Summation (∑):</strong> คำนวณผลรวมถ่วงน้ำหนัก z = b + Σ wᵢ xᵢ</p>
+                    <p>• <strong class="text-emerald-300 font-normal">3. Activation (f(z)):</strong> ส่ง z ผ่านฟังก์ชันกระตุ้น Step(z) หรือ Sigmoid(z) ได้เป็นเอาต์พุต ŷ</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Live Decision Boundary, Loss Chart & Truth Table (5 Cols) -->
+        <div class="lg:col-span-5 flex flex-col gap-4">
+
+            <!-- Top Row: Decision Boundary & Loss Curve in Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <!-- Decision Boundary 2D Canvas -->
+                <div class="glass-panel rounded-2xl p-3 flex flex-col items-center border border-slate-800">
+                    <div class="w-full flex justify-between items-center mb-2 px-1">
+                        <span class="text-xs font-bold text-slate-300 font-heading">🎯 Decision Boundary (2D)</span>
+                        <span class="text-[10px] text-slate-400 font-mono">x1 vs x2</span>
+                    </div>
+                    <div class="relative w-[180px] h-[180px] rounded-xl overflow-hidden border border-slate-700 bg-slate-950">
+                        <canvas id="canvas-boundary" width="180" height="180" class="w-full h-full block"></canvas>
+                    </div>
+                    <div class="flex items-center gap-3 mt-2 text-[10px] font-mono text-slate-400">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-500"></span> Class 0</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> Class 1</span>
+                    </div>
+                </div>
+
+                <!-- Live Loss Curve Canvas -->
+                <div class="glass-panel rounded-2xl p-3 flex flex-col justify-between border border-slate-800">
+                    <div class="w-full flex justify-between items-center mb-2 px-1">
+                        <span class="text-xs font-bold text-slate-300 font-heading">📈 Live Loss Curve</span>
+                        <span id="loss-val" class="text-[10px] font-mono font-bold text-rose-400">Loss: 0.00</span>
+                    </div>
+                    <div class="relative w-full h-[180px] rounded-xl overflow-hidden border border-slate-700 bg-slate-950 p-1">
+                        <canvas id="canvas-loss" width="200" height="180" class="w-full h-full block"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Truth Table & Live Predictions Matrix -->
+            <div class="glass-panel rounded-2xl p-4 border border-slate-800 flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-200 font-heading">📊 ตารางเปรียบเทียบผลการทำนาย (Truth Table vs Prediction)</span>
+                        </div>
+                        <div id="accuracy-badge" class="px-2.5 py-1 rounded-full text-xs font-bold font-mono bg-emerald-950 text-emerald-400 border border-emerald-800/60">
+                            Accuracy: 0%
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/60">
+                        <table class="w-full text-left text-xs font-mono">
+                            <thead class="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-[11px]">
+                                <tr>
+                                    <th class="p-2.5">x1</th>
+                                    <th class="p-2.5">x2</th>
+                                    <th class="p-2.5 text-indigo-300">Target (y)</th>
+                                    <th class="p-2.5 text-cyan-300">Output (ŷ)</th>
+                                    <th class="p-2.5 text-purple-300">Class</th>
+                                    <th class="p-2.5 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="truth-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Code Link & Python Reference Card -->
+                <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
+                    <span class="text-slate-400">ใบงาน 1 epoch:
+                        <a href="Perceptron_MLP_1_Epoch_TH.xlsx" class="text-amber-300 hover:text-amber-200 font-semibold">โจทย์</a>
+                        /
+                        <a href="Perceptron_MLP_1_Epoch_TH_Solved.xlsx" class="text-amber-300 hover:text-amber-200 font-semibold">เฉลย</a>
+                        · เทียบโค้ด:</span>
+                    <a id="code-link" href="perceptron.py" target="_blank" class="text-cyan-400 hover:text-cyan-300 font-mono font-semibold flex items-center gap-1 transition">
+                        <span>🐍 ดูโค้ด perceptron.py</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Bottom Educational Code Snippet Viewer -->
+    <footer class="max-w-7xl w-full mx-auto px-4 pb-8">
+        <div class="glass-panel rounded-2xl p-5 border border-slate-800">
+            <div class="flex flex-wrap justify-between items-center gap-4 mb-3 border-b border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-200 font-heading">💻 ซอร์สโค้ดอ้างอิงภาษา Python (Python Scratch Code Equivalent)</h3>
+                    <p class="text-xs text-slate-400">โค้ดส่วนสำคัญที่ทำงานตรงกันข้ามกับไดอะแกรมที่แสดงด้านบน</p>
+                </div>
+                <div class="flex gap-2 font-mono text-xs">
+                    <button onclick="showCodeTab('perceptron')" id="tab-perceptron" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold">perceptron.py</button>
+                    <button onclick="showCodeTab('mlp')" id="tab-mlp" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700">mlp_xor.py</button>
+                </div>
+            </div>
+
+            <!-- Code Container -->
+            <pre id="code-snippet-container" class="bg-slate-950 p-4 rounded-xl text-xs font-mono text-slate-300 overflow-x-auto border border-slate-800/80 leading-relaxed">
+<code id="code-snippet">
+# กฎการเรียนรู้ของ Perceptron (Perceptron Learning Rule)
+def fit(self, X, y):
+    for epoch in range(self.n_epochs):
+        errors = 0
+        for xi, yi in zip(X, y):
+            y_hat = self.predict(xi)   # (1) ทำนายคลาส 0 หรือ 1
+            error = yi - y_hat         # (2) คำนวณข้อผิดพลาด
+            if error != 0:
+                for j in range(len(self.weights)):
+                    self.weights[j] += self.learning_rate * error * xi[j] # (3) อัปเดต Weight
+                self.bias += self.learning_rate * error                   # (4) อัปเดต Bias
+</code>
+            </pre>
+        </div>
+    </footer>
+
+
+    <!-- Interactive Logic & Training Engine JavaScript -->
+    <script>
+        // --- State Variables ---
+        let currentPreset = 'perceptron'; // 'perceptron' | 'mlp' | 'builder'
+        let currentDataset = 'AND'; // 'AND' | 'OR' | 'XOR'
+        let learningRate = 0.10;
+        let maxEpochs = 200;
+        let mlpSeed = 0;
+        let rngState = 0;
+        let currentEpoch = 0;
+        let isTraining = false;
+        let timerId = null;
+        let lossHistory = [];
+
+        // Custom Drag & Drop Architecture State (Default 2 Inputs, 2 Hidden Neurons, 1 Output)
+        let builderState = {
+            inputs: [
+                { id: 'node-x1', label: 'x₁' },
+                { id: 'node-x2', label: 'x₂' }
+            ],
+            hiddens: [
+                { id: 'node-h1', label: 'h₁' },
+                { id: 'node-h2', label: 'h₂' }
+            ],
+            outputs: [
+                { id: 'node-out', label: 'ŷ' }
+            ]
+        };
+
+        // Data definitions for Logic Gates
+        const datasets = {
+            AND: {
+                X: [[0, 0], [0, 1], [1, 0], [1, 1]],
+                y: [0, 0, 0, 1]
+            },
+            OR: {
+                X: [[0, 0], [0, 1], [1, 0], [1, 1]],
+                y: [0, 1, 1, 1]
+            },
+            XOR: {
+                X: [[0, 0], [0, 1], [1, 0], [1, 1]],
+                y: [0, 1, 1, 0]
+            }
+        };
+
+        // --- Model States ---
+        // Single Perceptron Parameters
+        let percWeights = [0.0, 0.0];
+        let percBias = 0.0;
+
+        // MLP Parameters
+        let mlpWeightsH = [[0.5, -0.5], [-0.5, 0.5]];
+        let mlpBiasH = [0.0, 0.0];
+        let mlpWeightsO = [[0.5, 0.5]];
+        let mlpBiasO = [0.0];
+
+        // Helper Math Functions
+        function sigmoid(z) {
+            return 1.0 / (1.0 + Math.exp(-z));
+        }
+
+        function sigmoidDeriv(a) {
+            return a * (1.0 - a);
+        }
+
+        function seedRng(seed) {
+            rngState = (seed >>> 0) || 1;
+        }
+
+        function nextRandom() {
+            // mulberry32 — deterministic in the sandbox (not the same stream as Python random)
+            rngState |= 0;
+            rngState = (rngState + 0x6D2B79F5) | 0;
+            let t = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        }
+
+        function applySeed(seed) {
+            document.getElementById('seed-input').value = String(seed);
+            mlpSeed = seed;
+            resetTraining();
+            showToast(seed === 42
+                ? 'ใช้ seed=42 ใน Python (mlp_xor.py) มักค้าง ~75% — ใน sandbox นี้เป็น PRNG คนละตัว ลองเทียบกันดู'
+                : 'ตั้ง seed=' + seed + ' แล้วสุ่มน้ำหนักใหม่');
+        }
+
+        // Toast Notification System
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-mono shadow-xl transition-all duration-300 transform translate-y-2 opacity-0';
+            toast.innerText = msg;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // --- Initialization on Load ---
+        window.addEventListener('DOMContentLoaded', () => {
+            initNetworkUI();
+            resetTraining();
+            drawDecisionBoundary();
+            drawLossChart();
+            updateExplanationBox();
+        });
+
+        // --- Preset Selection ---
+        function selectPreset(preset) {
+            currentPreset = preset;
+
+            // UI Button Active States
+            ['perceptron', 'mlp', 'builder'].forEach(p => {
+                const btn = document.getElementById(`preset-${p}`);
+                if (p === preset) {
+                    btn.className = "px-3.5 py-1.5 rounded-xl transition font-semibold bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/20";
+                } else {
+                    btn.className = "px-3.5 py-1.5 rounded-xl transition text-slate-300 hover:text-white hover:bg-slate-800";
+                }
+            });
+
+            const badge = document.getElementById('arch-badge');
+            const palette = document.getElementById('builder-palette');
+            const seedControl = document.getElementById('seed-control');
+
+            if (preset === 'perceptron') {
+                badge.innerText = 'Perceptron: Inputs ➔ ∑ Summation | Step Activation ➔ Output (ŷ)';
+                palette.classList.add('hidden');
+                seedControl.classList.add('hidden');
+                document.getElementById('code-link').href = "perceptron.py";
+                showCodeTab('perceptron');
+            } else if (preset === 'mlp') {
+                badge.innerText = 'MLP Architecture: Inputs ➔ Hidden (∑ | σ) ➔ Output (∑ | σ) ➔ Output (ŷ)';
+                palette.classList.add('hidden');
+                seedControl.classList.remove('hidden');
+                document.getElementById('code-link').href = "mlp_xor.py";
+                showCodeTab('mlp');
+                if (currentDataset === 'AND') setDataset('XOR');
+            } else if (preset === 'builder') {
+                badge.innerText = `Custom Builder: ${builderState.inputs.length} In ➔ ${builderState.hiddens.length} Hidden ➔ 1 Out`;
+                palette.classList.remove('hidden');
+                seedControl.classList.remove('hidden');
+            }
+
+            resetTraining();
+            initNetworkUI();
+            updateExplanationBox();
+        }
+
+        // --- Dataset Selector ---
+        function setDataset(ds) {
+            currentDataset = ds;
+            ['AND', 'OR', 'XOR'].forEach(d => {
+                const btn = document.getElementById(`ds-${d}`);
+                if (d === ds) {
+                    btn.className = "px-3 py-1.5 text-xs font-bold rounded-lg border transition bg-indigo-600 border-indigo-400 text-white shadow-md shadow-indigo-500/20";
+                } else {
+                    btn.className = "px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+                }
+            });
+
+            // Auto tune learning rate & epochs for XOR if selecting XOR
+            if (ds === 'XOR' && (currentPreset === 'mlp' || (currentPreset === 'builder' && builderState.hiddens.length >= 2))) {
+                if (parseFloat(document.getElementById('lr-range').value) < 1.0) {
+                    document.getElementById('lr-range').value = "2.00";
+                    document.getElementById('epochs-range').value = "1000";
+                    updateHyperparams();
+                    showToast('⚡ ปรับแต่ง Learning Rate=2.00 และ Epochs=1000 อัตโนมัติสำหรับ XOR');
+                }
+            }
+
+            resetTraining();
+            updateExplanationBox();
+        }
+
+        function tuneForXOR() {
+            document.getElementById('lr-range').value = "2.00";
+            document.getElementById('epochs-range').value = "1000";
+            updateHyperparams();
+
+            if (currentPreset === 'builder' && builderState.hiddens.length < 2) {
+                builderState.hiddens = [
+                    { id: 'node-h1', label: 'h₁' },
+                    { id: 'node-h2', label: 'h₂' }
+                ];
+                initNetworkUI();
+            }
+
+            showToast('⚡ ตั้งค่า Hyperparameters & 2 Hidden Neurons สำเร็จสำหรับ XOR!');
+            resetTraining();
+            updateExplanationBox();
+        }
+
+        // --- Update Hyperparameters from Sliders ---
+        function updateHyperparams() {
+            learningRate = parseFloat(document.getElementById('lr-range').value);
+            maxEpochs = parseInt(document.getElementById('epochs-range').value);
+            const seedEl = document.getElementById('seed-input');
+            if (seedEl) {
+                const parsed = parseInt(seedEl.value, 10);
+                mlpSeed = Number.isFinite(parsed) ? parsed : 0;
+            }
+            document.getElementById('lr-val').innerText = learningRate.toFixed(2);
+            document.getElementById('epochs-val').innerText = maxEpochs;
+        }
+
+        // --- Dynamic Explanation & XOR Insight Box ---
+        function updateExplanationBox() {
+            const expDiv = document.getElementById('explanation-text');
+            const autoBtn = document.getElementById('btn-auto-xor');
+
+            const isBuilder = currentPreset === 'builder';
+            const numH = isBuilder ? builderState.hiddens.length : (currentPreset === 'mlp' ? 2 : 0);
+
+            if (currentDataset === 'XOR') {
+                autoBtn.classList.remove('hidden');
+                if (numH < 2) {
+                    expDiv.innerHTML = `
+                        <div class="p-2.5 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-200 space-y-1">
+                            <p class="font-bold flex items-center gap-1 text-rose-300">
+                                ⚠️ ปัญหา XOR ไม่สามารถแยกด้วยเส้นตรงเดียวได้ (Non-linearly separable)!
+                            </p>
+                            <p class="text-[11px] leading-relaxed">
+                                โครงข่ายปัจจุบันมี Hidden Neurons <strong>${numH} โหนด</strong> ซึ่งไม่เพียงพอ! ในพื้นที่ 2 มิติ เส้นตรงเส้นเดียวไม่สามารถแยกคลาส (0,0),(1,1) ออกจาก (0,1),(1,0) ได้ สัดส่วนการทำนายจึงหยุดอยู่ที่ 50%-75%
+                            </p>
+                            <p class="text-[11px] font-bold text-amber-300 pt-1">
+                                ➔ วิธีแก้: คลิกหรือลากเพิ่ม Hidden Neuron ให้มีอย่างน้อย 2 โหนด (h₁, h₂) และใช้ Learning Rate 1.5 - 2.0
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    expDiv.innerHTML = `
+                        <div class="p-2.5 rounded-xl bg-cyan-950/40 border border-cyan-800/60 text-cyan-200 space-y-1">
+                            <p class="font-bold flex items-center gap-1 text-cyan-300">
+                                ✅ โครงสร้างพร้อมเรียนรู้ XOR! (มี Hidden Neurons ${numH} โหนด)
+                            </p>
+                            <p class="text-[11px] leading-relaxed">
+                                โหนดชั้นซ่อน ${numH} โหนดจะสร้างเส้นแบ่ง 2 เส้นขนานในพื้นที่อินพุต เพื่อแปลงพื้นที่ภายในใหม่ให้เอาต์พุตแยกได้เชิงเส้น!
+                            </p>
+                            <p class="text-[11px] font-mono text-purple-300 pt-1">
+                                • แนะนำ: ปรับ Learning Rate (η) 1.50 - 2.00 และ Epochs ≥ 1000 เพื่อให้การลู่เข้าหลุดจาก Loss Plateau
+                            </p>
+                        </div>
+                    `;
+                }
+            } else {
+                autoBtn.classList.add('hidden');
+                expDiv.innerHTML = `
+                    <p>• <strong class="text-cyan-300 font-normal">1. Inputs (xᵢ, b):</strong> ค่าอินพุตส่งคูณกับ Weights (wᵢ) และ Bias (b) เข้าสู่บล็อก Summation</p>
+                    <p>• <strong class="text-purple-300 font-normal">2. Summation (∑):</strong> คำนวณผลรวมถ่วงน้ำหนัก z = b + Σ wᵢ xᵢ</p>
+                    <p>• <strong class="text-emerald-300 font-normal">3. Activation (f(z)):</strong> ส่ง z ผ่านฟังก์ชันกระตุ้น Step(z) หรือ Sigmoid(z) ได้เป็นเอาต์พุต ŷ</p>
+                `;
+            }
+        }
+
+        // --- Reset Training State ---
+        function resetTraining() {
+            stopTraining();
+            currentEpoch = 0;
+            lossHistory = [];
+
+            const numIn = currentPreset === 'builder' ? builderState.inputs.length : 2;
+            const numH = currentPreset === 'builder' ? builderState.hiddens.length : (currentPreset === 'mlp' ? 2 : 0);
+
+            // Reset Perceptron parameters
+            percWeights = new Array(numIn).fill(0.0);
+            percBias = 0.0;
+
+            // Reset MLP parameters with seeded non-zero init (breaks hidden-unit symmetry)
+            if (numH > 0) {
+                seedRng(mlpSeed);
+                mlpWeightsH = [];
+                for (let h = 0; h < numH; h++) {
+                    const row = [];
+                    for (let i = 0; i < numIn; i++) {
+                        row.push((nextRandom() - 0.5) * 2.0);
+                    }
+                    mlpWeightsH.push(row);
+                }
+                mlpBiasH = new Array(numH).fill(0.0);
+
+                mlpWeightsO = [[]];
+                for (let h = 0; h < numH; h++) {
+                    mlpWeightsO[0].push((nextRandom() - 0.5) * 2.0);
+                }
+                mlpBiasO = [0.0];
+            }
+
+            document.getElementById('train-status').innerText = 'พร้อมทำงาน (Idle)';
+            document.getElementById('train-status').className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-300 border border-slate-700';
+
+            updateNetworkDiagram();
+            updateTruthTable();
+            drawDecisionBoundary();
+            drawLossChart();
+        }
+
+        // --- Single Epoch Step Logic ---
+        function stepEpoch() {
+            if (currentEpoch >= maxEpochs) return;
+
+            currentEpoch++;
+            const data = datasets[currentDataset];
+            let epochLoss = 0;
+            let errorsCount = 0;
+
+            const numH = currentPreset === 'builder' ? builderState.hiddens.length : (currentPreset === 'mlp' ? 2 : 0);
+            const numIn = currentPreset === 'builder' ? builderState.inputs.length : 2;
+
+            if (numH === 0) {
+                // Perceptron Learning Rule (Variable inputs)
+                for (let i = 0; i < data.X.length; i++) {
+                    const x = data.X[i].slice(0, numIn);
+                    const y = data.y[i];
+
+                    let z = percBias;
+                    for (let j = 0; j < numIn; j++) {
+                        z += percWeights[j] * (x[j] !== undefined ? x[j] : 0);
+                    }
+
+                    const y_hat = z >= 0 ? 1 : 0;
+                    const err = y - y_hat;
+
+                    if (err !== 0) {
+                        errorsCount++;
+                        for (let j = 0; j < numIn; j++) {
+                            percWeights[j] += learningRate * err * (x[j] !== undefined ? x[j] : 0);
+                        }
+                        percBias += learningRate * err;
+                    }
+                }
+                epochLoss = errorsCount;
+            } else {
+                // MLP Training via Backpropagation (Variable hidden neurons)
+                for (let idx = 0; idx < data.X.length; idx++) {
+                    const x = data.X[idx].slice(0, numIn);
+                    const y = data.y[idx];
+
+                    // 1. Forward Pass (Hidden Layer)
+                    const h_a = [];
+                    for (let h = 0; h < numH; h++) {
+                        let z_h = mlpBiasH[h];
+                        for (let j = 0; j < numIn; j++) {
+                            z_h += mlpWeightsH[h][j] * (x[j] !== undefined ? x[j] : 0);
+                        }
+                        h_a.push(sigmoid(z_h));
+                    }
+
+                    // Forward Pass (Output Layer)
+                    let z_out = mlpBiasO[0];
+                    for (let h = 0; h < numH; h++) {
+                        z_out += mlpWeightsO[0][h] * h_a[h];
+                    }
+                    const out_a = sigmoid(z_out);
+
+                    // Loss accumulation (MSE)
+                    const err = out_a - y;
+                    epochLoss += 0.5 * err * err;
+
+                    // 2. Backward Pass (Deltas)
+                    const delta_out = err * sigmoidDeriv(out_a);
+                    const delta_h = [];
+                    for (let h = 0; h < numH; h++) {
+                        delta_h.push((mlpWeightsO[0][h] * delta_out) * sigmoidDeriv(h_a[h]));
+                    }
+
+                    // 3. Weight Updates
+                    for (let h = 0; h < numH; h++) {
+                        mlpWeightsO[0][h] -= learningRate * delta_out * h_a[h];
+                    }
+                    mlpBiasO[0] -= learningRate * delta_out;
+
+                    for (let h = 0; h < numH; h++) {
+                        for (let j = 0; j < numIn; j++) {
+                            mlpWeightsH[h][j] -= learningRate * delta_h[h] * (x[j] !== undefined ? x[j] : 0);
+                        }
+                        mlpBiasH[h] -= learningRate * delta_h[h];
+                    }
+                }
+                epochLoss /= data.X.length;
+            }
+
+            lossHistory.push(epochLoss);
+
+            // Update UI elements
+            updateNetworkDiagram();
+            updateTruthTable();
+            drawDecisionBoundary();
+            drawLossChart();
+
+            // Check Convergence
+            if (numH === 0 && errorsCount === 0) {
+                stopTraining();
+                document.getElementById('train-status').innerText = 'ลู่เข้าสมบูรณ์ (Converged!)';
+                document.getElementById('train-status').className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-950 text-emerald-300 border border-emerald-700';
+            } else if (currentEpoch >= maxEpochs) {
+                stopTraining();
+                document.getElementById('train-status').innerText = 'ครบรอบ Epoch สิ้นสุด';
+            }
+        }
+
+        // --- Toggle Training Loop ---
+        function toggleTraining() {
+            if (isTraining) {
+                stopTraining();
+            } else {
+                startTraining();
+            }
+        }
+
+        function startTraining() {
+            isTraining = true;
+            document.getElementById('txt-train').innerText = 'หยุดชั่วคราว (Pause)';
+            document.getElementById('btn-train').className = "px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5 active:scale-95";
+            document.getElementById('icon-play').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+            document.getElementById('train-status').innerText = 'กำลังประมวลผล (Training...)';
+            document.getElementById('train-status').className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-cyan-950 text-cyan-300 border border-cyan-700 animate-pulse';
+
+            const speedMultiplier = parseInt(document.getElementById('speed-select').value);
+
+            function loop() {
+                if (!isTraining) return;
+                for (let i = 0; i < speedMultiplier; i++) {
+                    stepEpoch();
+                    if (!isTraining) break;
+                }
+                if (isTraining) {
+                    timerId = requestAnimationFrame(loop);
+                }
+            }
+            loop();
+        }
+
+        function stopTraining() {
+            isTraining = false;
+            if (timerId) cancelAnimationFrame(timerId);
+            document.getElementById('txt-train').innerText = 'เริ่มการสร้าง & เทรน (Train)';
+            document.getElementById('btn-train').className = "px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/20 transition flex items-center gap-1.5 active:scale-95";
+            document.getElementById('icon-play').innerHTML = '<path d="M8 5v14l11-7z"/>';
+        }
+
+        // --- Render UI Network Diagram (Inputs ➔ Sum | Activation ➔ Output Flow) ---
+        function initNetworkUI() {
+            const container = document.getElementById('nodes-layer');
+            container.innerHTML = '';
+
+            const isBuilder = currentPreset === 'builder';
+
+            const inputNodes = isBuilder ? builderState.inputs : [
+                { id: 'node-x1', label: 'x₁' },
+                { id: 'node-x2', label: 'x₂' }
+            ];
+
+            const hiddenNodes = isBuilder ? builderState.hiddens : (
+                currentPreset === 'mlp' ? [
+                    { id: 'node-h1', label: 'h₁' },
+                    { id: 'node-h2', label: 'h₂' }
+                ] : []
+            );
+
+            // 1. Render Input Column
+            const colIn = document.createElement('div');
+            colIn.className = 'flex flex-col justify-around h-full gap-4';
+
+            inputNodes.forEach(node => {
+                const wrap = document.createElement('div');
+                wrap.className = 'flex items-center gap-2 group relative';
+                wrap.innerHTML = `
+                    <div id="${node.id}" class="w-12 h-12 rounded-2xl bg-slate-900 border-2 border-cyan-500 flex items-center justify-center font-mono font-bold text-cyan-300 shadow-lg shadow-cyan-500/20">${node.label}</div>
+                    <span class="text-[11px] font-mono text-slate-400">Input</span>
+                    ${isBuilder && inputNodes.length > 1 ? `<button onclick="removeNode('input', '${node.id}')" class="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-rose-600 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition shadow">✕</button>` : ''}
+                `;
+                colIn.appendChild(wrap);
+            });
+
+            // Bias Node for Perceptron / Single Layer
+            if (hiddenNodes.length === 0) {
+                const wrapB = document.createElement('div');
+                wrapB.className = 'flex items-center gap-2';
+                wrapB.innerHTML = `
+                    <div id="node-b" class="w-10 h-10 rounded-xl bg-slate-900 border border-purple-500 flex items-center justify-center font-mono font-bold text-purple-300 text-xs shadow">+1</div>
+                    <span class="text-[11px] font-mono text-slate-400">Bias</span>
+                `;
+                colIn.appendChild(wrapB);
+            }
+            container.appendChild(colIn);
+
+            if (hiddenNodes.length === 0) {
+                // --- Single Perceptron Architecture: Inputs ➔ Sum | Activation ➔ Output ---
+
+                // Column 2: Neuron Processing Unit (Summation | Activation)
+                const colProc = document.createElement('div');
+                colProc.className = 'flex flex-col justify-center items-center h-full';
+                colProc.innerHTML = `
+                    <div id="node-proc" class="p-3 rounded-2xl bg-slate-900 border-2 border-indigo-500 flex items-center gap-3 shadow-xl shadow-indigo-500/20">
+                        <!-- Summation Unit (∑) -->
+                        <div id="subnode-sum" class="flex flex-col items-center px-3 py-1.5 bg-slate-950 rounded-xl border border-cyan-500/50 shadow">
+                            <span class="text-sm font-mono font-bold text-cyan-300">∑</span>
+                            <span class="text-[9px] font-mono text-slate-300">Sum (z)</span>
+                        </div>
+
+                        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+
+                        <!-- Activation Unit (Step) -->
+                        <div id="subnode-act" class="flex flex-col items-center px-3 py-1.5 bg-slate-950 rounded-xl border border-emerald-500/50 shadow">
+                            <span class="text-xs font-mono font-bold text-emerald-300">Step(z)</span>
+                            <span class="text-[9px] font-mono text-slate-300">Activation</span>
+                        </div>
+                    </div>
+                    <span class="text-[11px] font-mono text-indigo-300 font-semibold mt-2">Neuron (Sum | Activation)</span>
+                `;
+                container.appendChild(colProc);
+
+                // Column 3: Output Node (ŷ)
+                const colOut = document.createElement('div');
+                colOut.className = 'flex flex-col justify-center items-center h-full';
+                colOut.innerHTML = `
+                    <div id="node-out" class="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-emerald-400 flex flex-col items-center justify-center shadow-lg shadow-emerald-500/20">
+                        <span class="text-sm font-mono font-bold text-emerald-300">ŷ</span>
+                        <span class="text-[9px] font-mono text-slate-400">Class 0/1</span>
+                    </div>
+                    <span class="text-[11px] font-mono text-slate-300 font-semibold mt-2">Output Node</span>
+                `;
+                container.appendChild(colOut);
+
+            } else {
+                // --- Multi-Layer Architecture (MLP): Inputs ➔ Hidden (Sum | Act) ➔ Output (Sum | Act) ➔ Output (ŷ) ---
+
+                // Column 2: Hidden Column (Sum | Act)
+                const colH = document.createElement('div');
+                colH.className = 'flex flex-col justify-around h-full gap-4';
+
+                hiddenNodes.forEach(node => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'flex items-center gap-2 group relative';
+                    wrap.innerHTML = `
+                        <div id="${node.id}" class="px-2.5 py-1.5 rounded-2xl bg-slate-900 border-2 border-purple-500 flex items-center gap-2 shadow">
+                            <div id="${node.id}-sum" class="flex flex-col items-center">
+                                <span class="text-[10px] font-mono font-bold text-purple-300">${node.label} (∑)</span>
+                                <span class="text-[7px] font-mono text-slate-400">Sum</span>
+                            </div>
+                            <div class="h-5 w-px bg-slate-800"></div>
+                            <div id="${node.id}-act" class="flex flex-col items-center">
+                                <span class="text-[9px] font-mono font-bold text-purple-200">σ(z)</span>
+                                <span class="text-[7px] font-mono text-slate-400">Act</span>
+                            </div>
+                        </div>
+                        ${isBuilder ? `<button onclick="removeNode('hidden', '${node.id}')" class="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-rose-600 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition shadow">✕</button>` : ''}
+                    `;
+                    colH.appendChild(wrap);
+                });
+                container.appendChild(colH);
+
+                // Column 3: Output Neuron (Sum | Act) & Output Node (ŷ)
+                const colOut = document.createElement('div');
+                colOut.className = 'flex flex-col justify-center items-center h-full gap-2';
+                colOut.innerHTML = `
+                    <div id="node-out-proc" class="px-3 py-2 rounded-2xl bg-slate-900 border-2 border-emerald-400 flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                        <div id="subnode-out-sum" class="flex flex-col items-center">
+                            <span class="text-xs font-mono font-bold text-purple-300">∑</span>
+                            <span class="text-[8px] font-mono text-slate-400">Sum</span>
+                        </div>
+                        <div class="h-5 w-px bg-slate-700"></div>
+                        <div id="subnode-out-act" class="flex flex-col items-center">
+                            <span class="text-xs font-mono font-bold text-emerald-300">σ(z)</span>
+                            <span class="text-[8px] font-mono text-slate-400">Act</span>
+                        </div>
+                    </div>
+                    <div id="node-out" class="w-12 h-10 rounded-xl bg-slate-950 border border-emerald-500 flex items-center justify-center shadow">
+                        <span class="text-xs font-mono font-bold text-emerald-300">Output ŷ</span>
+                    </div>
+                `;
+                container.appendChild(colOut);
+            }
+
+            setTimeout(updateNetworkDiagram, 50);
+        }
+
+        // --- Update Network SVG Connection Lines ---
+        function updateNetworkDiagram() {
+            const svg = document.getElementById('network-svg');
+            if (!svg) return;
+            svg.innerHTML = '';
+
+            const containerRect = document.getElementById('diagram-container').getBoundingClientRect();
+
+            function getCenter(id) {
+                const el = document.getElementById(id);
+                if (!el) return { x: 0, y: 0 };
+                const r = el.getBoundingClientRect();
+                return {
+                    x: r.left + r.width / 2 - containerRect.left,
+                    y: r.top + r.height / 2 - containerRect.top
+                };
+            }
+
+            function drawLine(fromId, toId, weightVal, label) {
+                const p1 = getCenter(fromId);
+                const p2 = getCenter(toId);
+                if (p1.x === 0 && p1.y === 0) return;
+
+                const absW = Math.abs(weightVal || 0);
+                const strokeWidth = Math.min(Math.max(absW * 2.5, 1.5), 6);
+                const strokeColor = (weightVal || 0) >= 0 ? '#06b6d4' : '#ec4899';
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', p1.x);
+                line.setAttribute('y1', p1.y);
+                line.setAttribute('x2', p2.x);
+                line.setAttribute('y2', p2.y);
+                line.setAttribute('stroke', strokeColor);
+                line.setAttribute('stroke-width', strokeWidth);
+                line.setAttribute('opacity', '0.75');
+
+                if (isTraining) {
+                    line.setAttribute('class', 'flow-line');
+                }
+                svg.appendChild(line);
+
+                // Weight Label Text
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                const midX = (p1.x + p2.x) / 2;
+                const midY = (p1.y + p2.y) / 2;
+                text.setAttribute('x', midX);
+                text.setAttribute('y', midY - 6);
+                text.setAttribute('fill', '#94a3b8');
+                text.setAttribute('font-size', '9');
+                text.setAttribute('font-family', 'Fira Code');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = `${label}=${(weightVal || 0).toFixed(2)}`;
+                svg.appendChild(text);
+            }
+
+            const isBuilder = currentPreset === 'builder';
+
+            const inputNodes = isBuilder ? builderState.inputs : [
+                { id: 'node-x1', label: 'x₁' },
+                { id: 'node-x2', label: 'x₂' }
+            ];
+
+            const hiddenNodes = isBuilder ? builderState.hiddens : (
+                currentPreset === 'mlp' ? [
+                    { id: 'node-h1', label: 'h₁' },
+                    { id: 'node-h2', label: 'h₂' }
+                ] : []
+            );
+
+            if (hiddenNodes.length === 0) {
+                // Inputs ➔ Summation (subnode-sum) ➔ Activation (subnode-act) ➔ Output (node-out)
+                inputNodes.forEach((node, idx) => {
+                    drawLine(node.id, 'subnode-sum', percWeights[idx] || 0, `w${idx + 1}`);
+                });
+                drawLine('node-b', 'subnode-sum', percBias, 'b');
+
+                // Connect Activation to Output
+                drawLine('subnode-act', 'node-out', 1.0, 'z');
+
+                document.getElementById('weights-display').innerText = inputNodes.map((_, i) => `w${i+1}=${(percWeights[i] || 0).toFixed(2)}`).join(', ');
+                document.getElementById('bias-display').innerText = `b=${percBias.toFixed(2)}`;
+            } else {
+                // Inputs ➔ Hidden Summation
+                hiddenNodes.forEach((hNode, hIdx) => {
+                    inputNodes.forEach((inNode, iIdx) => {
+                        const wVal = (mlpWeightsH[hIdx] && mlpWeightsH[hIdx][iIdx] !== undefined) ? mlpWeightsH[hIdx][iIdx] : 0;
+                        drawLine(inNode.id, `${hNode.id}-sum`, wVal, `w${hIdx + 1}${iIdx + 1}`);
+                    });
+                });
+
+                // Hidden Activation ➔ Output Summation
+                hiddenNodes.forEach((hNode, hIdx) => {
+                    const wVal = (mlpWeightsO[0] && mlpWeightsO[0][hIdx] !== undefined) ? mlpWeightsO[0][hIdx] : 0;
+                    drawLine(`${hNode.id}-act`, 'subnode-out-sum', wVal, `v${hIdx + 1}`);
+                });
+
+                // Output Activation ➔ Final Output Node
+                drawLine('subnode-out-act', 'node-out', 1.0, 'ŷ');
+
+                document.getElementById('weights-display').innerText = `H: ${hiddenNodes.length} units, Out: ${mlpWeightsO[0] ? mlpWeightsO[0].length : 0} weights`;
+                document.getElementById('bias-display').innerText = `H_b=[${mlpBiasH.map(b => b.toFixed(1)).join(', ')}]`;
+            }
+        }
+
+        // --- Update Truth Table & Accuracy Badge ---
+        function updateTruthTable() {
+            const tbody = document.getElementById('truth-table-body');
+            tbody.innerHTML = '';
+            const data = datasets[currentDataset];
+            let correctCount = 0;
+
+            const isBuilder = currentPreset === 'builder';
+            const numIn = isBuilder ? builderState.inputs.length : 2;
+            const numH = isBuilder ? builderState.hiddens.length : (currentPreset === 'mlp' ? 2 : 0);
+
+            data.X.forEach((xArr, i) => {
+                const x = xArr.slice(0, numIn);
+                const target = data.y[i];
+                let rawScore = 0;
+                let predClass = 0;
+
+                if (numH === 0) {
+                    let z = percBias;
+                    for (let j = 0; j < numIn; j++) {
+                        z += (percWeights[j] || 0) * (x[j] !== undefined ? x[j] : 0);
+                    }
+                    rawScore = z;
+                    predClass = z >= 0 ? 1 : 0;
+                } else {
+                    const h_a = [];
+                    for (let h = 0; h < numH; h++) {
+                        let z_h = mlpBiasH[h] || 0;
+                        for (let j = 0; j < numIn; j++) {
+                            z_h += (mlpWeightsH[h] ? mlpWeightsH[h][j] || 0 : 0) * (x[j] !== undefined ? x[j] : 0);
+                        }
+                        h_a.push(sigmoid(z_h));
+                    }
+
+                    let z_out = mlpBiasO[0] || 0;
+                    for (let h = 0; h < numH; h++) {
+                        z_out += (mlpWeightsO[0] ? mlpWeightsO[0][h] || 0 : 0) * h_a[h];
+                    }
+                    const out_a = sigmoid(z_out);
+                    rawScore = out_a;
+                    predClass = out_a >= 0.5 ? 1 : 0;
+                }
+
+                const isCorrect = predClass === target;
+                if (isCorrect) correctCount++;
+
+                const tr = document.createElement('tr');
+                tr.className = isCorrect ? 'hover:bg-slate-900/40' : 'bg-rose-950/20 hover:bg-rose-950/30';
+                tr.innerHTML = `
+                    <td class="p-2.5 font-bold">${x[0] !== undefined ? x[0] : 0}</td>
+                    <td class="p-2.5 font-bold">${x[1] !== undefined ? x[1] : 0}</td>
+                    <td class="p-2.5 font-bold text-indigo-400">${target}</td>
+                    <td class="p-2.5 text-cyan-300">${rawScore.toFixed(3)}</td>
+                    <td class="p-2.5 font-bold ${predClass === 1 ? 'text-purple-400' : 'text-slate-400'}">${predClass}</td>
+                    <td class="p-2.5 text-right font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}">
+                        ${isCorrect ? '✓ ถูกต้อง' : '✗ ผิด'}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const acc = (correctCount / data.X.length) * 100;
+            const badge = document.getElementById('accuracy-badge');
+            badge.innerText = `Accuracy: ${acc.toFixed(0)}% (${correctCount}/${data.X.length})`;
+            badge.className = acc === 100
+                ? "px-2.5 py-1 rounded-full text-xs font-bold font-mono bg-emerald-950 text-emerald-400 border border-emerald-800/60"
+                : "px-2.5 py-1 rounded-full text-xs font-bold font-mono bg-rose-950 text-rose-400 border border-rose-800/60";
+        }
+
+        // --- Render 2D Decision Boundary Canvas ---
+        function drawDecisionBoundary() {
+            const canvas = document.getElementById('canvas-boundary');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            const imgData = ctx.createImageData(w, h);
+            const data = imgData.data;
+
+            const isBuilder = currentPreset === 'builder';
+            const numIn = isBuilder ? builderState.inputs.length : 2;
+            const numH = isBuilder ? builderState.hiddens.length : (currentPreset === 'mlp' ? 2 : 0);
+
+            // Map canvas pixel (px, py) to feature space x1, x2 in [-0.2, 1.2]
+            for (let py = 0; py < h; py++) {
+                for (let px = 0; px < w; px++) {
+                    const x1 = (px / w) * 1.4 - 0.2;
+                    const x2 = (1 - py / h) * 1.4 - 0.2;
+
+                    let score = 0;
+                    if (numH === 0) {
+                        const z = percBias + (percWeights[0] || 0) * x1 + (percWeights[1] || 0) * x2;
+                        score = z >= 0 ? 1 : 0;
+                    } else {
+                        const h_a = [];
+                        for (let hIdx = 0; hIdx < numH; hIdx++) {
+                            const z_h = (mlpBiasH[hIdx] || 0) +
+                                        (mlpWeightsH[hIdx] ? mlpWeightsH[hIdx][0] || 0 : 0) * x1 +
+                                        (mlpWeightsH[hIdx] ? mlpWeightsH[hIdx][1] || 0 : 0) * x2;
+                            h_a.push(sigmoid(z_h));
+                        }
+                        let z_out = mlpBiasO[0] || 0;
+                        for (let hIdx = 0; hIdx < numH; hIdx++) {
+                            z_out += (mlpWeightsO[0] ? mlpWeightsO[0][hIdx] || 0 : 0) * h_a[hIdx];
+                        }
+                        score = sigmoid(z_out);
+                    }
+
+                    const idx = (py * w + px) * 4;
+                    if (score >= 0.5) {
+                        // Class 1 (Purple region)
+                        data[idx] = 139;     // R
+                        data[idx + 1] = 92;  // G
+                        data[idx + 2] = 246; // B
+                        data[idx + 3] = Math.floor(score * 160 + 40);
+                    } else {
+                        // Class 0 (Cyan region)
+                        data[idx] = 6;       // R
+                        data[idx + 1] = 182; // G
+                        data[idx + 2] = 212; // B
+                        data[idx + 3] = Math.floor((1 - score) * 160 + 40);
+                    }
+                }
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+
+            // Draw Data Points on top
+            const ds = datasets[currentDataset];
+            ds.X.forEach((pt, i) => {
+                const target = ds.y[i];
+                const cx = ((pt[0] + 0.2) / 1.4) * w;
+                const cy = (1 - (pt[1] + 0.2) / 1.4) * h;
+
+                ctx.beginPath();
+                ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+                ctx.fillStyle = target === 1 ? '#c084fc' : '#22d3ee';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                // Point Label
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '9px Fira Code';
+                ctx.fillText(`(${pt[0]},${pt[1]})`, cx - 12, cy - 9);
+            });
+        }
+
+        // --- Render Real-time Loss Chart ---
+        function drawLossChart() {
+            const canvas = document.getElementById('canvas-loss');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Background Grid Lines
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for (let y = 20; y < h; y += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+
+            if (lossHistory.length === 0) return;
+
+            const lastLoss = lossHistory[lossHistory.length - 1];
+            document.getElementById('loss-val').innerText = `Loss: ${lastLoss.toFixed(4)}`;
+
+            // Draw Loss Curve Line
+            ctx.beginPath();
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 2;
+
+            const maxL = Math.max(...lossHistory, 1.0);
+
+            lossHistory.forEach((l, i) => {
+                const x = (i / Math.max(lossHistory.length - 1, 1)) * w;
+                const y = h - (l / maxL) * (h - 20) - 10;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+        }
+
+        // --- Drag & Drop Handlers ---
+        function handleDragStart(e, nodeType) {
+            e.dataTransfer.setData('text/plain', nodeType);
+            e.dataTransfer.effectAllowed = 'copy';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            const overlay = document.getElementById('drop-overlay');
+            if (overlay) overlay.classList.remove('hidden');
+        }
+
+        function handleDragLeave(e) {
+            const overlay = document.getElementById('drop-overlay');
+            if (overlay) overlay.classList.add('hidden');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            handleDragLeave(e);
+            const nodeType = e.dataTransfer.getData('text/plain');
+            if (nodeType) {
+                addNode(nodeType);
+            }
+        }
+
+        // Add node via Click or Drag Drop
+        function addNode(type) {
+            if (currentPreset !== 'builder') {
+                selectPreset('builder');
+            }
+
+            if (type === 'input') {
+                if (builderState.inputs.length >= 2) {
+                    showToast('⚠️ ชุดข้อมูล AND/OR/XOR มีแค่ 2 มิติ — เพิ่ม input ที่ 3 ไม่มีคอลัมน์ให้เรียน');
+                    return;
+                }
+                const num = builderState.inputs.length + 1;
+                const label = num === 1 ? 'x₁' : 'x₂';
+                builderState.inputs.push({ id: `node-x${num}`, label });
+                showToast(`✅ เพิ่ม Input Node (${label}) สำเร็จ!`);
+            } else if (type === 'hidden') {
+                if (builderState.hiddens.length >= 4) {
+                    showToast('⚠️ สามารถเพิ่ม Hidden Neuron ได้สูงสุด 4 โหนด');
+                    return;
+                }
+                const num = builderState.hiddens.length + 1;
+                const label = `h${num === 1 ? '₁' : (num === 2 ? '₂' : (num === 3 ? '₃' : '₄'))}`;
+                builderState.hiddens.push({ id: `node-h${num}`, label });
+                showToast(`✅ เพิ่ม Hidden Neuron (${label}) สำเร็จ!`);
+            } else if (type === 'output') {
+                showToast('ℹ️ โครงข่ายจำลองใช้ 1 Output Neuron อยู่แล้ว');
+                return;
+            }
+
+            document.getElementById('arch-badge').innerText = `Custom Builder: ${builderState.inputs.length} In ➔ ${builderState.hiddens.length} Hidden ➔ 1 Out`;
+            resetTraining();
+            initNetworkUI();
+            updateExplanationBox();
+        }
+
+        function removeNode(type, id) {
+            if (type === 'input') {
+                if (builderState.inputs.length <= 2) {
+                    showToast('⚠️ ชุดข้อมูลนี้ใช้ 2 input (x₁, x₂) ตลอด');
+                    return;
+                }
+                builderState.inputs = builderState.inputs.filter(n => n.id !== id);
+                showToast('🗑️ ลบ Input Node เรียบร้อย');
+            } else if (type === 'hidden') {
+                builderState.hiddens = builderState.hiddens.filter(n => n.id !== id);
+                showToast('🗑️ ลบ Hidden Neuron เรียบร้อย');
+            }
+            document.getElementById('arch-badge').innerText = `Custom Builder: ${builderState.inputs.length} In ➔ ${builderState.hiddens.length} Hidden ➔ 1 Out`;
+            resetTraining();
+            initNetworkUI();
+            updateExplanationBox();
+        }
+
+        function resetBuilderNodes() {
+            builderState = {
+                inputs: [{ id: 'node-x1', label: 'x₁' }, { id: 'node-x2', label: 'x₂' }],
+                hiddens: [{ id: 'node-h1', label: 'h₁' }, { id: 'node-h2', label: 'h₂' }],
+                outputs: [{ id: 'node-out', label: 'ŷ' }]
+            };
+            showToast('🔄 ล้างโครงข่ายคัสตอมแล้ว');
+            resetTraining();
+            initNetworkUI();
+            updateExplanationBox();
+        }
+
+        // --- Code Tab Switcher ---
+        function showCodeTab(tab) {
+            const btnP = document.getElementById('tab-perceptron');
+            const btnM = document.getElementById('tab-mlp');
+            const codeEl = document.getElementById('code-snippet');
+
+            if (tab === 'perceptron') {
+                btnP.className = "px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold";
+                btnM.className = "px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700";
+                codeEl.textContent = `# perceptron.py: กฎการเรียนรู้ของ Perceptron
+def fit(self, X, y):
+    for epoch in range(1, self.n_epochs + 1):
+        errors = 0
+        for xi, yi in zip(X, y):
+            y_hat = self.predict(xi)   # (1) ทายผลลัพธ์ 0 หรือ 1 จาก Step Function
+            error = yi - y_hat         # (2) คำนวณข้อผิดพลาด
+            if error != 0:
+                for j in range(len(self.weights)):
+                    self.weights[j] += self.learning_rate * error * xi[j] # (3) อัปเดต Weights
+                self.bias += self.learning_rate * error                   # (4) ปรับ Bias`;
+            } else {
+                btnM.className = "px-3 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-semibold";
+                btnP.className = "px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700";
+                codeEl.textContent = `# mlp_xor.py: Backpropagation ใน Multi-Layer Perceptron (MLP)
+def backward(self, activations, y):
+    # 1. ชั้นเอาต์พุต (Output Layer Delta)
+    a_out = activations[-1]
+    deltas = [[(a - y) * sigmoid_derivative(a) for a in a_out]]
+
+    # 2. ชั้นซ่อน (Hidden Layer Deltas ด้วย Chain Rule)
+    for l in range(len(self.weights) - 2, -1, -1):
+        w_next = self.weights[l + 1]
+        delta_next = deltas[0]
+        a = activations[l + 1]
+        deltas.insert(0, [
+            sigmoid_derivative(a_j) * sum(w_next[k][j] * delta_next[k] for k in range(len(delta_next)))
+            for j, a_j in enumerate(a)
+        ])
+    return deltas`;
+            }
+        }
+    </script>
+</body>
+</html>
