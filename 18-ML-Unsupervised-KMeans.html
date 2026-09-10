@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บทที่ 18: การเรียนรู้แบบไม่มีผู้สอน และ K-Means Clustering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f8fafc;
+        }
+        .math-font {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+</head>
+<body class="text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Floating Smart Navigator -->
+    <div class="fixed top-4 left-4 z-50 flex items-center space-x-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-2.5 py-1 rounded-full shadow-lg border border-slate-200 transition-all duration-300 hover:shadow-indigo-500/10">
+        <a href="17-ML-Evolutionary-PSO.html" class="p-1.5 text-slate-600 hover:text-indigo-650 hover:bg-slate-100 rounded-full transition flex items-center" title="บทก่อนหน้า (บทที่ 17: Evolutionary & PSO)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <a href="index.html" class="p-1.5 text-slate-600 hover:text-indigo-650 hover:bg-slate-100 rounded-full transition flex items-center" title="กลับหน้าแรกสารบัญ">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <span class="p-1.5 text-slate-300 cursor-not-allowed flex items-center" title="บทเรียนล่าสุดของหลักสูตร">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </span>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <button onclick="toggleSlideshow()" class="p-1.5 text-slate-600 hover:text-indigo-650 hover:bg-indigo-50 rounded-full transition flex items-center" title="โหมดนำเสนอ Slide (Canva Style)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Header Hero -->
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white py-14 shadow-xl relative overflow-hidden border-b border-indigo-900/40">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-40"></div>
+        <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 border-emerald-800/40 px-3.5 py-1.5 rounded-full border font-mono">
+                Unsupervised Learning &bull; Clustering &bull; บทที่ 18
+            </span>
+            <h1 class="text-3xl md:text-5xl font-extrabold mt-4 tracking-tight">การเรียนรู้แบบไม่มีผู้สอน และ K-Means Clustering</h1>
+            <p class="text-slate-300 text-sm md:text-base mt-3 font-light max-w-2xl mx-auto leading-relaxed">
+                การค้นพบโครงสร้างและรูปแบบที่ซ่อนอยู่ภายในข้อมูลโดยปราศจากป้ายกำกับเฉลย, กลไกของ Lloyd's Algorithm, ฟังก์ชันเป้าหมาย WCSS, และเทคนิคการเลือกค่า K ที่เหมาะสม
+            </p>
+            <div class="flex flex-wrap justify-center gap-2 mt-6">
+                <a href="#sandbox-section" class="text-xs font-semibold px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-md transition flex items-center space-x-1.5">
+                    <span>⚡ ไปยังแบบจำลองโต้ตอบสด (Sandbox)</span>
+                </a>
+                <a href="#lab-download-section" class="text-xs font-semibold px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl transition flex items-center space-x-1.5">
+                    <span>📝 ใบงานคำนวณ Excel & โค้ด Python</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="container mx-auto px-4 py-10 max-w-4xl">
+
+        <!-- Section 1: Introduction to Unsupervised Learning -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-900 mb-4 border-b border-slate-100 pb-3 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mr-3 font-bold text-sm">1</span>
+                ภาพรวมของการเรียนรู้แบบไม่มีผู้สอน (Unsupervised Learning)
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4 text-sm md:text-base">
+                ในบทเรียนก่อนหน้า (เช่น Regression, Classification, และ Neural Networks) เราทำงานภายใต้กรอบของ <strong>Supervised Learning</strong> ที่ชุดข้อมูลทุกตัวอย่างมี <em>"คำตอบเฉลย (Ground Truth Label $y$)"</em> กำกับอยู่เสมอ แต่ในโลกความเป็นจริง ข้อมูลส่วนใหญ่ที่ถูกบันทึกมักจะ<strong>ไม่มีป้ายกำกับ (Unlabeled Data)</strong> เนื่องจากต้นทุนในการให้มนุษย์มานั่งติดป้ายกำกับมีมูลค่ามหาศาล
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+                <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-100">
+                    <h3 class="font-bold text-indigo-900 text-sm mb-1 flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-indigo-600 mr-2"></span>
+                        Supervised Learning (มีผู้สอน)
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed font-light">
+                        ชุดข้อมูลอยู่ในรูป $\{(x_1, y_1), (x_2, y_2), ..., (x_n, y_n)\}$ เป้าหมายคือการเรียนรู้ฟังก์ชันส่งผ่าน $f(x) \approx y$ เพื่อทำนายคำตอบของข้อมูลใหม่ในอนาคต เช่น การจำแนกสแปมอีเมล หรือการทำนายราคาบ้าน
+                    </p>
+                </div>
+                <div class="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
+                    <h3 class="font-bold text-emerald-900 text-sm mb-1 flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-emerald-600 mr-2"></span>
+                        Unsupervised Learning (ไม่มีผู้สอน)
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed font-light">
+                        ชุดข้อมูลอยู่ในรูป $\{x_1, x_2, ..., x_n\}$ โดยไม่มีคำตอบ $y$ ใดๆ โมเดลต้อง<strong>ค้นหาโครงสร้าง ความสัมพันธ์ หรือการกระจายตัวที่ซ่อนอยู่ (Hidden Patterns)</strong> ภายในข้อมูลด้วยตนเอง
+                    </p>
+                </div>
+            </div>
+
+            <h3 class="font-bold text-slate-800 text-base mt-6 mb-3">ประเภทงานหลักของ Unsupervised Learning:</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <span class="font-bold text-slate-900 block mb-1">1. การจัดกลุ่มข้อมูล (Clustering)</span>
+                    <p class="text-slate-500 font-light leading-relaxed">การแบ่งกลุ่มข้อมูลออกเป็นกลุ่มย่อยโดยให้จุดที่คล้ายกันอยู่กลุ่มเดียวกัน และจุดที่ต่างกันอยู่คนละกลุ่ม (เช่น K-Means, DBSCAN, Hierarchical)</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <span class="font-bold text-slate-900 block mb-1">2. การลดทอนมิติ (Dimensionality Reduction)</span>
+                    <p class="text-slate-500 font-light leading-relaxed">การลดจำนวนตัวแปร (Features) ให้น้อยลงโดยยังคงสาระสำคัญของข้อมูลไว้ (เช่น PCA, t-SNE, UMAP) นิยมใช้เพื่อลดต้นทุนการประมวลผลและการแสดงผลข้อมูล</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <span class="font-bold text-slate-900 block mb-1">3. การตรวจจับจุดผิดปกติ (Anomaly Detection)</span>
+                    <p class="text-slate-500 font-light leading-relaxed">การตรวจหาข้อมูลที่แปลกแยกอย่างมีนัยสำคัญจากพฤติกรรมปกติ (เช่น ตรวจจับการทุจริตบัตรเครดิต, การตรวจจับข้อบกพร่องในเครื่องจักรโรงงาน)</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <span class="font-bold text-slate-900 block mb-1">4. กฎความสัมพันธ์ (Association Rule Learning)</span>
+                    <p class="text-slate-500 font-light leading-relaxed">การค้นหากฎความสัมพันธ์ระหว่างไอเท็มที่มักเกิดขึ้นร่วมกันในชุดธุรกรรม (เช่น ตะกร้าสินค้า: คนที่ซื้อขนมปังมักจะซื้อเนยด้วย)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: What is Clustering? -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-900 mb-4 border-b border-slate-100 pb-3 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mr-3 font-bold text-sm">2</span>
+                การจัดกลุ่มข้อมูล (Clustering) คืออะไร?
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4 text-sm md:text-base">
+                <strong>Clustering</strong> คือกระบวนการแบ่งชุดข้อมูลที่ไม่มีป้ายกำกับออกเป็น $K$ กลุ่ม โดยมีเป้าหมายเชิงคุณภาพสองประการ:
+            </p>
+            <ul class="list-disc list-inside text-sm text-slate-600 space-y-1.5 mb-5 pl-2 font-light">
+                <li><strong>ความคล้ายคลึงภายในกลุ่มสูง (High Intra-cluster Similarity):</strong> ข้อมูลที่สังกัดกลุ่มเดียวกันต้องอยู่ใกล้ชิดกันมากที่สุด</li>
+                <li><strong>ความแตกต่างระหว่างกลุ่มสูง (Low Inter-cluster Similarity):</strong> กลุ่มที่ต่างกันต้องแยกห่างจากกันให้ชัดเจนที่สุด</li>
+            </ul>
+
+            <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 mb-5 text-xs text-amber-900 leading-relaxed">
+                <strong class="font-bold block mb-1">💡 ความท้าทายหลักของ Clustering:</strong>
+                เนื่องจากไม่มี "เฉลยที่ถูกต้องแน่นอน" (No Ground Truth) จึงไม่มีค่า Accuracy หรือ F1-Score แบบดั้งเดิม การประเมินผลจึงต้องอาศัยตัวชี้วัดเชิงเรขาคณิต (Geometric Metrics เช่น WCSS หรือ Silhouette) หรือการตรวจสอบประโยชน์ในบริบททางธุรกิจจริง
+            </div>
+
+            <h3 class="font-bold text-slate-800 text-base mb-3">ตัวอย่างการประยุกต์ใช้งานในโลกจริง:</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                    <span class="font-bold text-indigo-700 block mb-1">🎯 การแบ่งส่วนตลาดลูกค้า (Customer Segmentation)</span>
+                    <p class="text-slate-500 font-light">แบ่งกลุ่มลูกค้าตามพฤติกรรมการซื้อ เพื่อยิงแคมเปญการตลาดที่ตรงใจ เช่น กลุ่มลูกค้า VIP กำลังซื้อสูง vs กลุ่มอ่อนไหวต่อราคา</p>
+                </div>
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                    <span class="font-bold text-emerald-700 block mb-1">🖼️ การบีบอัดภาพ (Color Quantization)</span>
+                    <p class="text-slate-500 font-light">ลดจำนวนสีในภาพนับล้านสีลงเหลือเพียง $K$ สีหลัก (เช่น 16 หรือ 64 สี) โดยใช้ Centroid แทนค่าสี ทำให้ประหยัดขนาดไฟล์อย่างมาก</p>
+                </div>
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                    <span class="font-bold text-purple-700 block mb-1">📰 การจัดหมวดหมู่เอกสารข่าว (Document Topic Discovery)</span>
+                    <p class="text-slate-500 font-light">จัดกลุ่มบทความข่าวหลายแสนชิ้นเข้าสู่หมวดหมู่ กีฬา, เศรษฐกิจ, บันเทิง โดยอัตโนมัติจากความถี่คำศัพท์ (TF-IDF / Embeddings)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: K-Means Algorithm & Math -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-900 mb-4 border-b border-slate-100 pb-3 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mr-3 font-bold text-sm">3</span>
+                ขั้นตอนวิธี K-Means (Lloyd's Algorithm) และคณิตศาสตร์เบื้องหลัง
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4 text-sm md:text-base">
+                <strong>K-Means</strong> ได้รับการคิดค้นโดย Stuart Lloyd (1957) และเผยแพร่อย่างเป็นทางการในปี 1982 เป็นอัลกอริทึมประเภท <em>Centroid-based Clustering</em> ที่นิยมใช้มากที่สุดเนื่องจากมีความเรียบง่าย คำนวณรวดเร็ว และมีรากฐานทางคณิตศาสตร์ที่ชัดเจน
+            </p>
+
+            <div class="bg-slate-900 text-slate-100 p-5 rounded-2xl mb-6 shadow-inner border border-slate-800">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 font-mono mb-2">
+                    ฟังก์ชันเป้าหมาย: WCSS (Within-Cluster Sum of Squares) หรือ Inertia
+                </h3>
+                <p class="text-xs text-slate-300 font-light leading-relaxed mb-3">
+                    K-Means ต้องการหาตำแหน่งของจุดศูนย์กลาง $\mu_1, \mu_2, ..., \mu_K$ และการแบ่งกลุ่ม $S = \{S_1, S_2, ..., S_K\}$ ที่ทำให้<strong>ผลรวมระยะห่างกำลังสองภายในทุกกลุ่มมีค่าน้อยที่สุด</strong>:
+                </p>
+                <div class="text-center py-2 text-base md:text-lg text-emerald-400 font-mono">
+                    $$J = \sum_{k=1}^{K} \sum_{x_i \in S_k} ||x_i - \mu_k||^2$$
+                </div>
+                <div class="text-[11px] text-slate-400 mt-2 space-y-1 font-light border-t border-slate-800 pt-2">
+                    <p>&bull; $K$ คือ จำนวนกลุ่มที่ผู้ใช้กำหนดขึ้นล่วงหน้า</p>
+                    <p>&bull; $S_k$ คือ เซตของจุดข้อมูลที่สังกัดอยู่ในคลัสเตอร์ $k$</p>
+                    <p>&bull; $\mu_k$ คือ เวกเตอร์จุดศูนย์กลาง (Centroid) ของคลัสเตอร์ $k$</p>
+                    <p>&bull; $||x_i - \mu_k||^2$ คือ ระยะทางแบบยุคลิดยกกำลังสอง (Squared Euclidean Distance)</p>
+                </div>
+            </div>
+
+            <h3 class="font-bold text-slate-800 text-base mb-3">2 ขั้นตอนหลักของการวนซ้ำสลับกัน (Iterative Two-Step Optimization):</h3>
+            <div class="space-y-4 text-sm">
+                <!-- Step 1 -->
+                <div class="p-4 bg-slate-50 border-l-4 border-indigo-500 rounded-r-xl">
+                    <h4 class="font-bold text-indigo-900 text-sm mb-1">ขั้นตอนที่ 1: การกำหนดกลุ่ม (Assignment Step / Expectation)</h4>
+                    <p class="text-slate-600 text-xs leading-relaxed mb-2 font-light">
+                        เมื่อตำแหน่งของจุดศูนย์กลาง $\mu_k$ ถูกตรึงคงที่ เราจะคำนวณระยะทางจากข้อมูลทุกจุด $x_i$ ไปยังทุก Centroid แล้วกำหนดให้ $x_i$ สังกัดกลุ่มที่ Centroid อยู่ใกล้ที่สุด:
+                    </p>
+                    <div class="text-xs text-center py-1 font-mono text-indigo-700">
+                        $$S_k^{(t)} = \{ x_i : ||x_i - \mu_k^{(t)}||^2 \le ||x_i - \mu_j^{(t)}||^2 \quad \forall j \}$$
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="p-4 bg-slate-50 border-l-4 border-emerald-500 rounded-r-xl">
+                    <h4 class="font-bold text-emerald-900 text-sm mb-1">ขั้นตอนที่ 2: การอัปเดตจุดศูนย์กลาง (Update Step / Maximization)</h4>
+                    <p class="text-slate-600 text-xs leading-relaxed mb-2 font-light">
+                        เมื่อการจัดกลุ่มถูกตรึงคงที่ เราจะคำนวณตำแหน่งใหม่ของ Centroid $\mu_k$ โดยหาค่าเฉลี่ยทางคณิตศาสตร์ (Mean) ของสมาชิกทั้งหมดในกลุ่มนั้น:
+                    </p>
+                    <div class="text-xs text-center py-1 font-mono text-emerald-700">
+                        $$\mu_k^{(t+1)} = \frac{1}{|S_k^{(t)}|} \sum_{x_i \in S_k^{(t)}} x_i$$
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-indigo-50/60 rounded-xl border border-indigo-100 text-xs text-slate-700 leading-relaxed">
+                <strong class="font-bold text-indigo-900 block mb-1">🔒 การรับประกันการลู่เข้าทางคณิตศาสตร์ (Convergence Guarantee):</strong>
+                ในแต่ละรอบของการสลับระหว่าง Assignment และ Update ค่า $J$ (WCSS) จะ<strong>ลดลงเสมอหรือไม่เพิ่มขึ้น (Monotonically Decreasing)</strong> และเนื่องจากจำนวนวิธีจัดกลุ่มของข้อมูลจำกัด $N$ จุดมีจำนวนจำกัด อัลกอริทึม K-Means จึง<strong>รับประกันว่าจะลู่เข้าสู่จุดยุติเสมอ (Guaranteed Convergence)</strong> อย่างไรก็ตาม จุดยุติดังกล่าวมักเป็นเพียง <em>Local Optimum</em> ไม่ได้รับประกันว่าจะเป็น Global Optimum เสมอไป
+            </div>
+        </section>
+
+        <!-- Section 4: Choosing K (Elbow & Silhouette) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-900 mb-4 border-b border-slate-100 pb-3 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mr-3 font-bold text-sm">4</span>
+                การเลือกจำนวนกลุ่ม $K$ ที่เหมาะสม (The Elbow Method & Silhouette Score)
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4 text-sm md:text-base">
+                หนึ่งในคำถามสำคัญที่สุดในการทำ Clustering คือ <em>"เราควรแบ่งข้อมูลเป็นกี่กลุ่ม ($K=$?)"</em> เนื่องจากหากเราเพิ่มค่า $K$ มากขึ้นเรื่อยๆ ค่า WCSS จะลดลงตามธรรมชาติ (หาก $K=N$ ค่า WCSS จะเป็น 0 ทันที แต่ไร้ประโยชน์) สองวิธีมาตรฐานในการตัดสินใจเลือก $K$ ได้แก่:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-4">
+                <!-- Method 1: Elbow Method -->
+                <div class="p-5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 font-mono">วิธีที่ 1</span>
+                        <h3 class="text-base font-bold text-slate-900 mt-1 mb-2">วิธีข้อศอก (The Elbow Method)</h3>
+                        <p class="text-xs text-slate-600 font-light leading-relaxed mb-3">
+                            พล็อตกราฟระหว่างจำนวนกลุ่ม $K$ (แกน X) กับค่า WCSS/Inertia (แกน Y) จุดที่เหมาะสมคือจุดที่<strong>ความชันของการลดลงหักงอลงอย่างมีนัยสำคัญ</strong> คล้ายกับ "ข้อศอกของแขน"
+                        </p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 text-[11px] text-slate-500 font-mono">
+                        <span class="text-indigo-600 font-bold block mb-1">ตัวอย่างจากใบงาน Excel:</span>
+                        K=1: 99.50<br>
+                        K=2: 17.50 (ลดลง 82.00 หรือ 82.4% ★ จุดข้อศอก)<br>
+                        K=3: 7.83 (เริ่มชะลอตัว)<br>
+                        K=4: 5.33
+                    </div>
+                </div>
+
+                <!-- Method 2: Silhouette Analysis -->
+                <div class="p-5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 font-mono">วิธีที่ 2</span>
+                        <h3 class="text-base font-bold text-slate-900 mt-1 mb-2">การวิเคราะห์ค่าซิลลูเอต (Silhouette Score)</h3>
+                        <p class="text-xs text-slate-600 font-light leading-relaxed mb-3">
+                            วัดความกระชับภายในกลุ่มเทียบกับระยะห่างจากกลุ่มที่ใกล้ที่สุด สำหรับแต่ละจุด $i$:
+                        </p>
+                        <div class="text-xs text-center py-1 font-mono text-emerald-700">
+                            $$s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}$$
+                        </div>
+                        <p class="text-[11px] text-slate-500 font-light mt-2">
+                            โดย $a(i)$ คือระยะเฉลี่ยสู่จุดในกลุ่มเดียวกัน, $b(i)$ คือระยะเฉลี่ยสู่จุดในกลุ่มที่ใกล้ที่สุด ค่าอยู่ระหว่าง $[-1, 1]$ โดยค่าเข้าใกล้ $+1$ หมายถึงจัดกลุ่มได้ยอดเยี่ยม
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Centroid Initialization & K-Means++ -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-900 mb-4 border-b border-slate-100 pb-3 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mr-3 font-bold text-sm">5</span>
+                ปัญหาของจุดศูนย์กลางเริ่มต้น และอัลกอริทึม K-Means++
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4 text-sm md:text-base">
+                หากเราสุ่มเลือกจุดศูนย์กลางเริ่มต้นแบบสุ่มอย่างสิ้นเชิง (Random Initialization) K-Means อาจติดอยู่ใน <strong>Local Minima</strong> ที่ให้ผลลัพธ์การแบ่งกลุ่มที่แย่มาก ตัวอย่างเช่น Centroid สองจุดอาจตกลงไปในกลุ่มเดียวกัน ทำให้แบ่งกลุ่มผิดพลาด
+            </p>
+
+            <div class="bg-slate-900 text-slate-200 p-5 rounded-2xl border border-slate-800 text-xs">
+                <h3 class="font-bold text-amber-400 text-sm mb-2 flex items-center">
+                    ✨ ทางแก้มาตรฐานระดับอุตสาหกรรม: K-Means++ (Arthur & Vassilvitskii, 2007)
+                </h3>
+                <p class="text-slate-300 font-light leading-relaxed mb-3">
+                    K-Means++ เพิ่มขั้นตอนการเลือก Centroid เริ่มต้นอย่างชาญฉลาดเพื่อให้จุดเริ่มต้นกระจายตัวห่างจากกันมากที่สุด:
+                </p>
+                <ol class="list-decimal pl-5 space-y-1.5 text-slate-300 font-light">
+                    <li>สุ่มเลือก Centroid แรก $c_1$ จากชุดข้อมูล $X$ แบบสุ่มเอกรูป (Uniform Random)</li>
+                    <li>สำหรับแต่ละจุด $x$ คำนวณระยะห่างไปยัง Centroid ที่ใกล้ที่สุด: $D(x) = \min_{j} ||x - c_j||$</li>
+                    <li>เลือก Centroid ถัดไป $c_k$ ด้วยความน่าจะเป็นที่แปรผันตาม<strong>ระยะทางกำลังสอง</strong>:
+                        <span class="font-mono text-emerald-400 block my-1 text-center">$$P(x) = \frac{D(x)^2}{\sum_{x' \in X} D(x')^2}$$</span>
+                    </li>
+                    <li>ทำซ้ำขั้นตอน 2 และ 3 จนกระทั่งได้ครบ $K$ จุดศูนย์กลางเริ่มต้น จากนั้นรัน Lloyd's Algorithm ตามปกติ</li>
+                </ol>
+                <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-800 pt-2">
+                    Scikit-Learn กำหนดให้พารามิเตอร์ <code class="text-indigo-300">init='k-means++'</code> เป็นค่าเริ่มต้น (Default) เสมอ ช่วยลดเวลาในการลู่เข้าและเพิ่มความแม่นยำอย่างมหาศาล
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Assumptions & Limitations -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-900 mb-4 border-b border-slate-100 pb-3 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mr-3 font-bold text-sm">6</span>
+                ข้อสมมติฐานและข้อจำกัดสำคัญของ K-Means
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4 text-sm md:text-base">
+                ในการใช้งาน K-Means ให้ได้ผลดี วิศวกรข้อมูลต้องตระหนักถึงข้อสมมติฐานทางเรขาคณิตของโมเดล:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div class="p-4 bg-rose-50/60 border border-rose-100 rounded-xl">
+                    <span class="font-bold text-rose-900 block mb-1">1. สมมติฐานรูปทรงกลม (Spherical Clusters)</span>
+                    <p class="text-slate-600 font-light leading-relaxed">
+                        K-Means มองว่ากลุ่มข้อมูลมีลักษณะเป็นทรงกลม (Convex) และมีความแปรปรวนเท่ากัน หากข้อมูลเป็นรูปร่างวงรีแนวยาว พระจันทร์เสี้ยว หรือวงกลมซ้อนกัน (Concentric Circles) K-Means จะทำงานล้มเหลว (ควรใช้ <strong>DBSCAN</strong> หรือ <strong>GMM</strong> แทน)
+                    </p>
+                </div>
+                <div class="p-4 bg-amber-50/60 border border-amber-100 rounded-xl">
+                    <span class="font-bold text-amber-900 block mb-1">2. ความไวต่อการสเกลข้อมูล (Feature Scaling)</span>
+                    <p class="text-slate-600 font-light leading-relaxed">
+                        เนื่องจากใช้ระยะทาง Euclidean ฟีเจอร์ที่มีหน่วยขนาดใหญ่ (เช่น รายได้ 1,000,000 บาท) จะครอบงำฟีเจอร์หน่วยเล็ก (เช่น อายุ 25 ปี) โดยสิ้นเชิง <strong>จำเป็นต้องทำ StandardScaler เสมอก่อนรัน K-Means</strong>
+                    </p>
+                </div>
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <span class="font-bold text-slate-900 block mb-1">3. ความไวต่อค่าผิดปกติ (Sensitivity to Outliers)</span>
+                    <p class="text-slate-600 font-light leading-relaxed">
+                        เนื่องจาก Centroid คำนวณจากค่าเฉลี่ย (Mean) จุดที่เป็น Outlier เพียงจุดเดียวสามารถดึงรั้ง Centroid ให้ออกจากกลุ่มหลักได้อย่างมาก (ทางเลือก: ใช้ <strong>K-Medoids / PAM</strong>)
+                    </p>
+                </div>
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <span class="font-bold text-slate-900 block mb-1">4. ต้องกำหนดค่า K ล่วงหน้า</span>
+                    <p class="text-slate-600 font-light leading-relaxed">
+                        ผู้ใช้ต้องเดาหรือทดลองหาค่า K เอง ต่างจากอัลกอริทึมอย่าง DBSCAN ที่สามารถค้นหาจำนวนกลุ่มได้อัตโนมัติตามความหนาแน่น
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Interactive Sandbox In-Lesson -->
+        <section id="sandbox-section" class="bg-slate-950 text-white rounded-3xl p-6 md:p-8 mb-8 border border-slate-800 shadow-2xl">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-955/60 px-3 py-1 rounded-full border border-emerald-800/40 font-mono">Interactive Simulation</span>
+                    <h2 class="text-xl md:text-2xl font-bold mt-2 text-slate-100">ห้องทดลอง K-Means สดในบทเรียน (Live 2D Sandbox)</h2>
+                    <p class="text-slate-400 text-xs mt-1 font-light">ทดลองคลิกเพิ่มจุดข้อมูล เลือกค่า K สังเกตการสลับกลุ่ม และการเคลื่อนที่ของ Centroid</p>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <button onclick="sandboxReset()" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition">รีเซ็ต</button>
+                    <button onclick="sandboxStep()" class="text-xs px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition shadow-md shadow-indigo-600/30">ก้าว 1 รอบ (Step)</button>
+                    <button id="s-play-btn" onclick="sandboxTogglePlay()" class="text-xs px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition">รันอัตโนมัติ</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <!-- Canvas -->
+                <div class="md:col-span-2 relative aspect-[4/3] bg-[#070b14] rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                    <canvas id="sCanvas" width="500" height="380" class="w-full h-full cursor-crosshair"></canvas>
+                    <div id="s-converged-badge" class="absolute bottom-3 right-3 text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-3 py-1 rounded-lg font-mono opacity-0 transition-opacity">
+                        ลู่เข้าสมบูรณ์ (Converged)
+                    </div>
+                </div>
+
+                <!-- Live Info & Presets -->
+                <div class="flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800">
+                            <span class="text-[10px] text-slate-400 uppercase font-bold block mb-1">เลือกชุดข้อมูลตัวอย่าง:</span>
+                            <div class="grid grid-cols-2 gap-1.5 text-xs">
+                                <button onclick="sandboxLoadPreset('excel')" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded font-mono text-[11px] border border-slate-700">โจทย์ Excel (8 จุด)</button>
+                                <button onclick="sandboxLoadPreset('blobs')" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded font-mono text-[11px] border border-slate-700">3 กลุ่มชัดเจน</button>
+                                <button onclick="sandboxLoadPreset('circles')" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-rose-300 rounded font-mono text-[11px] border border-slate-700">วงกลม 2 ชั้น</button>
+                                <button onclick="sandboxClear()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded font-mono text-[11px] border border-slate-700">ล้างกระดาน</button>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800">
+                            <div class="flex justify-between items-center text-xs mb-1.5">
+                                <span class="text-slate-300 font-bold">จำนวนกลุ่ม (K):</span>
+                                <span id="s-k-display" class="font-mono text-indigo-400 font-bold">2</span>
+                            </div>
+                            <input type="range" id="sKSlider" min="2" max="5" value="2" oninput="sandboxChangeK(this.value)" class="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                        </div>
+
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800 space-y-2 text-xs font-mono">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">รอบที่ (Iteration):</span>
+                                <span id="s-iter-display" class="font-bold text-white">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">WCSS (Inertia):</span>
+                                <span id="s-wcss-display" class="font-bold text-indigo-400">0.00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">จำนวนจุด (N):</span>
+                                <span id="s-n-display" class="font-bold text-slate-300">8 จุด</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <a href="lab-unsupervised-kmeans/index.html" target="_blank" class="w-full block text-center py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl font-semibold border border-slate-700 transition">
+                            ↗ ขยายเป็นหน้าจอ Sandbox ฉบับเต็ม (Full App)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: Interactive Checkpoint Quiz -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-900 mb-4 border-b border-slate-100 pb-3 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mr-3 font-bold text-sm">8</span>
+                แบบทดสอบทบทวนความเข้าใจ (Knowledge Check)
+            </h2>
+
+            <div class="space-y-6 text-sm">
+                <!-- Q1 -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <p class="font-bold text-slate-900 mb-3">1. เหตุใดค่า WCSS (Within-Cluster Sum of Squares) จึงลดลงเรื่อยๆ เมื่อเราเพิ่มจำนวนกลุ่ม $K$?</p>
+                    <div class="space-y-2 text-xs text-slate-600">
+                        <label class="flex items-center space-x-2 p-2 rounded hover:bg-white cursor-pointer transition">
+                            <input type="radio" name="q1" value="wrong1" class="text-indigo-600">
+                            <span>ก. เพราะข้อมูลมีการตัดจุด Outliers ทิ้งโดยอัตโนมัติ</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 rounded hover:bg-white cursor-pointer transition">
+                            <input type="radio" name="q1" value="correct" class="text-indigo-600">
+                            <span>ข. เพราะเมื่อมี Centroid มากขึ้น แต่ละจุดจะมี Centroid อยู่ใกล้ตัวมากขึ้น ส่งผลให้ระยะห่างยกกำลังสองเฉลี่ยลดลง</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 rounded hover:bg-white cursor-pointer transition">
+                            <input type="radio" name="q1" value="wrong2" class="text-indigo-600">
+                            <span>ค. เพราะ K-Means เปลี่ยนฟังก์ชันการวัดระยะทางไปเป็น Manhattan</span>
+                        </label>
+                    </div>
+                    <div id="q1-feedback" class="mt-2 text-xs font-semibold hidden"></div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <p class="font-bold text-slate-900 mb-3">2. หากฟีเจอร์ X1 มีช่วงค่า 1 - 10 แต่ฟีเจอร์ X2 มีช่วงค่า 1,000 - 100,000 จะเกิดอะไรขึ้นกับ K-Means หากไม่ทำ Feature Scaling?</p>
+                    <div class="space-y-2 text-xs text-slate-600">
+                        <label class="flex items-center space-x-2 p-2 rounded hover:bg-white cursor-pointer transition">
+                            <input type="radio" name="q2" value="correct" class="text-indigo-600">
+                            <span>ก. ฟีเจอร์ X2 จะมีอิทธิพลครอบงำการคำนวณระยะทาง Euclidean ทั้งหมด จน X1 แทบไม่มีผลต่อการจัดกลุ่ม</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 rounded hover:bg-white cursor-pointer transition">
+                            <input type="radio" name="q2" value="wrong1" class="text-indigo-600">
+                            <span>ข. อัลกอริทึมจะลู่เข้าเร็วขึ้น 10 เท่าโดยไม่มีผลข้างเคียง</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 rounded hover:bg-white cursor-pointer transition">
+                            <input type="radio" name="q2" value="wrong2" class="text-indigo-600">
+                            <span>ค. โปรแกรมจะเกิดข้อผิดพลาด Division by Zero</span>
+                        </label>
+                    </div>
+                    <div id="q2-feedback" class="mt-2 text-xs font-semibold hidden"></div>
+                </div>
+
+                <button onclick="checkQuiz()" class="py-2 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition shadow-md shadow-indigo-600/20">
+                    ตรวจคำตอบแบบทดสอบ
+                </button>
+            </div>
+        </section>
+
+        <!-- Section 9: Labs Overview & Downloads -->
+        <section id="lab-download-section" class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 md:p-8 mb-8 border border-slate-800 shadow-xl">
+            <h2 class="text-2xl font-bold text-white mb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-500/30 text-indigo-300 flex items-center justify-center mr-3 font-bold text-sm">9</span>
+                คลังใบงานและแบบฝึกหัดปฏิบัติการ (Labs Repositories)
+            </h2>
+            <p class="text-slate-400 text-xs md:text-sm font-light mb-6 leading-relaxed">
+                หลักสูตรจัดเตรียมทั้งไฟล์ Excel สำหรับฝึกคำนวณมือทีละขั้น และโค้ด Python จากศูนย์พร้อมโค้ด Scikit-Learn ในการประยุกต์ใช้งานจริง
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Excel Lab -->
+                <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/60 px-2.5 py-1 rounded border border-amber-800/40 font-mono">Excel Calculation Lab</span>
+                        <h3 class="text-base font-bold text-slate-100 mt-2.5 mb-1.5">ใบงานคำนวณ K-Means ทีละขั้นใน Excel</h3>
+                        <p class="text-xs text-slate-400 font-light leading-relaxed mb-4">
+                            คำนวณมือ 8 จุดข้อมูล หา Euclidean Distance, Assignment, Update Centroid, Convergence Check, และทำกราฟ Elbow Method
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80">
+                        <a href="lab-unsupervised-kmeans/KMeans_Clustering_Step_by_Step_TH.xlsx" class="text-center py-2 px-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition">
+                            📥 โจทย์ (สำหรับฝึกทำ)
+                        </a>
+                        <a href="lab-unsupervised-kmeans/KMeans_Clustering_Step_by_Step_TH_Solved.xlsx" class="text-center py-2 px-3 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-bold transition">
+                            ✅ เฉลยพร้อมสูตร
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Python Lab -->
+                <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 px-2.5 py-1 rounded border border-sky-800/40 font-mono">Python Code Labs</span>
+                        <h3 class="text-base font-bold text-slate-100 mt-2.5 mb-1.5">โค้ด Python จากศูนย์ & Scikit-Learn</h3>
+                        <p class="text-xs text-slate-400 font-light leading-relaxed mb-4">
+                            รัน <code class="text-indigo-300">kmeans_from_scratch.py</code> ตรวจเลขตรงกับ Excel จุดต่อจุด และรันโครงงานจัดกลุ่มลูกค้าจริงด้วย scikit-learn
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80">
+                        <a href="lab-unsupervised-kmeans/README.md" class="text-center py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition">
+                            📖 คู่มือแล็บ (README)
+                        </a>
+                        <a href="lab-unsupervised-kmeans/index.html" class="text-center py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-md shadow-indigo-600/20">
+                            ⚡ เปิด Sandbox App
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-500 text-xs py-8 border-t border-slate-900">
+        <div class="container mx-auto px-4 max-w-4xl text-center space-y-2">
+            <p>Machine Learning Curriculum & Practical Labs &bull; จัดทำขึ้นเพื่อการศึกษาและการเรียนรู้แบบมีปฏิสัมพันธ์</p>
+            <p class="text-slate-600 font-mono text-[11px]">บทที่ 18: Unsupervised Learning & K-Means Clustering</p>
+        </div>
+    </footer>
+
+    <!-- In-lesson Sandbox Script -->
+    <script>
+        const sCanvas = document.getElementById('sCanvas');
+        const sCtx = sCanvas.getContext('2d');
+        const S_COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#a855f7'];
+
+        let sPoints = [];
+        let sCentroids = [];
+        let sLabels = [];
+        let sK = 2;
+        let sIter = 0;
+        let sTimer = null;
+        let sConverged = false;
+
+        function sToX(x) { return (x / 10) * (sCanvas.width - 60) + 30; }
+        function sToY(y) { return sCanvas.height - ((y / 10) * (sCanvas.height - 60) + 30); }
+        function sFromX(cx) { return Math.max(0, Math.min(10, ((cx - 30) / (sCanvas.width - 60)) * 10)); }
+        function sFromY(cy) { return Math.max(0, Math.min(10, ((sCanvas.height - 30 - cy) / (sCanvas.height - 60)) * 10)); }
+
+        function sandboxLoadPreset(key) {
+            sandboxStopPlay();
+            if (key === 'excel') {
+                sPoints = [
+                    {x: 1, y: 2}, {x: 2, y: 1}, {x: 2, y: 3}, {x: 4, y: 4},
+                    {x: 6, y: 5}, {x: 7, y: 7}, {x: 8, y: 6}, {x: 8, y: 8}
+                ];
+                sK = 2;
+                document.getElementById('sKSlider').value = 2;
+                document.getElementById('s-k-display').innerText = 2;
+            } else if (key === 'blobs') {
+                sPoints = [
+                    {x: 2, y: 2}, {x: 2.5, y: 2.8}, {x: 1.8, y: 3.2}, {x: 3, y: 2.2},
+                    {x: 7.5, y: 2.5}, {x: 8, y: 3}, {x: 7, y: 2}, {x: 8.5, y: 1.8},
+                    {x: 5, y: 8}, {x: 4.5, y: 7.5}, {x: 5.5, y: 7.8}, {x: 5.2, y: 8.2}
+                ];
+                sK = 3;
+                document.getElementById('sKSlider').value = 3;
+                document.getElementById('s-k-display').innerText = 3;
+            } else if (key === 'circles') {
+                sPoints = [
+                    {x: 5, y: 5}, {x: 5.5, y: 5.2}, {x: 4.5, y: 4.8},
+                    {x: 2, y: 5}, {x: 8, y: 5}, {x: 5, y: 2}, {x: 5, y: 8},
+                    {x: 3, y: 7}, {x: 7, y: 7}, {x: 3, y: 3}, {x: 7, y: 3}
+                ];
+                sK = 2;
+                document.getElementById('sKSlider').value = 2;
+                document.getElementById('s-k-display').innerText = 2;
+            }
+            sandboxReset();
+        }
+
+        function sandboxChangeK(val) {
+            sK = parseInt(val);
+            document.getElementById('s-k-display').innerText = sK;
+            sandboxReset();
+        }
+
+        function sandboxClear() {
+            sPoints = [];
+            sandboxReset();
+        }
+
+        sCanvas.addEventListener('click', (e) => {
+            const rect = sCanvas.getBoundingClientRect();
+            const cx = (e.clientX - rect.left) * (sCanvas.width / rect.width);
+            const cy = (e.clientY - rect.top) * (sCanvas.height / rect.height);
+            sPoints.push({ x: Number(sFromX(cx).toFixed(2)), y: Number(sFromY(cy).toFixed(2)) });
+            sandboxReset();
+        });
+
+        function sandboxReset() {
+            sandboxStopPlay();
+            sIter = 0;
+            sConverged = false;
+            sLabels = new Array(sPoints.length).fill(0);
+            sCentroids = [];
+            document.getElementById('s-converged-badge').classList.add('opacity-0');
+
+            if (sPoints.length > 0) {
+                // Pick initial centroids
+                if (sPoints.length === 8 && sPoints[0].x === 1 && sPoints[3].x === 4) {
+                    // Excel preset
+                    sCentroids.push({ x: 1, y: 2 });
+                    sCentroids.push({ x: 4, y: 4 });
+                } else {
+                    let pool = [...sPoints];
+                    for (let i = 0; i < sK && pool.length > 0; i++) {
+                        let idx = Math.floor(Math.random() * pool.length);
+                        sCentroids.push({ x: pool[idx].x, y: pool[idx].y });
+                        pool.splice(idx, 1);
+                    }
+                }
+            }
+            sandboxUpdateUI();
+            sandboxDraw();
+        }
+
+        function sandboxStep() {
+            if (sConverged || sPoints.length === 0 || sCentroids.length === 0) return;
+            sIter++;
+            let changed = false;
+
+            // Assign
+            for (let i = 0; i < sPoints.length; i++) {
+                let p = sPoints[i];
+                let minDist = Infinity;
+                let best = 0;
+                for (let k = 0; k < sCentroids.length; k++) {
+                    let d = Math.hypot(p.x - sCentroids[k].x, p.y - sCentroids[k].y);
+                    if (d < minDist) { minDist = d; best = k + 1; }
+                }
+                if (sLabels[i] !== best) {
+                    sLabels[i] = best;
+                    changed = true;
+                }
+            }
+
+            // Update
+            let maxShift = 0;
+            let newCentroids = [];
+            for (let k = 1; k <= sK; k++) {
+                let pts = sPoints.filter((_, idx) => sLabels[idx] === k);
+                if (pts.length === 0) {
+                    newCentroids.push({...sCentroids[k - 1]});
+                    continue;
+                }
+                let avgX = pts.reduce((a, b) => a + b.x, 0) / pts.length;
+                let avgY = pts.reduce((a, b) => a + b.y, 0) / pts.length;
+                let shift = Math.hypot(avgX - sCentroids[k - 1].x, avgY - sCentroids[k - 1].y);
+                maxShift = Math.max(maxShift, shift);
+                newCentroids.push({ x: Number(avgX.toFixed(4)), y: Number(avgY.toFixed(4)) });
+            }
+            sCentroids = newCentroids;
+
+            if (!changed || maxShift < 1e-4) {
+                sConverged = true;
+                sandboxStopPlay();
+                document.getElementById('s-converged-badge').classList.remove('opacity-0');
+            }
+
+            sandboxUpdateUI();
+            sandboxDraw();
+        }
+
+        function sandboxTogglePlay() {
+            if (sTimer) {
+                sandboxStopPlay();
+            } else {
+                if (sConverged) sandboxReset();
+                document.getElementById('s-play-btn').innerText = 'หยุด';
+                document.getElementById('s-play-btn').className = 'text-xs px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg transition';
+                sTimer = setInterval(() => {
+                    if (sConverged) sandboxStopPlay();
+                    else sandboxStep();
+                }, 800);
+            }
+        }
+
+        function sandboxStopPlay() {
+            if (sTimer) {
+                clearInterval(sTimer);
+                sTimer = null;
+                document.getElementById('s-play-btn').innerText = 'รันอัตโนมัติ';
+                document.getElementById('s-play-btn').className = 'text-xs px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition';
+            }
+        }
+
+        function sandboxUpdateUI() {
+            document.getElementById('s-iter-display').innerText = sIter;
+            document.getElementById('s-n-display').innerText = `${sPoints.length} จุด`;
+            let wcss = 0;
+            for (let i = 0; i < sPoints.length; i++) {
+                let lbl = sLabels[i];
+                if (lbl > 0 && sCentroids[lbl - 1]) {
+                    let c = sCentroids[lbl - 1];
+                    wcss += Math.pow(sPoints[i].x - c.x, 2) + Math.pow(sPoints[i].y - c.y, 2);
+                }
+            }
+            document.getElementById('s-wcss-display').innerText = wcss.toFixed(2);
+        }
+
+        function sandboxDraw() {
+            sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
+
+            // Grid
+            sCtx.strokeStyle = '#1e293b';
+            sCtx.lineWidth = 1;
+            for (let i = 0; i <= 10; i += 2) {
+                sCtx.beginPath(); sCtx.moveTo(sToX(i), sToY(0)); sCtx.lineTo(sToX(i), sToY(10)); sCtx.stroke();
+                sCtx.beginPath(); sCtx.moveTo(sToX(0), sToY(i)); sCtx.lineTo(sToX(10), sToY(i)); sCtx.stroke();
+            }
+
+            // Points
+            sPoints.forEach((p, idx) => {
+                let lbl = sLabels[idx];
+                let col = lbl > 0 ? S_COLORS[(lbl - 1) % S_COLORS.length] : '#94a3b8';
+                sCtx.beginPath();
+                sCtx.arc(sToX(p.x), sToY(p.y), 6, 0, Math.PI * 2);
+                sCtx.fillStyle = col;
+                sCtx.fill();
+                sCtx.strokeStyle = '#ffffff';
+                sCtx.lineWidth = 1.5;
+                sCtx.stroke();
+            });
+
+            // Centroids
+            sCentroids.forEach((c, idx) => {
+                let cx = sToX(c.x);
+                let cy = sToY(c.y);
+                let col = S_COLORS[idx % S_COLORS.length];
+                sCtx.fillStyle = col;
+                sCtx.fillRect(cx - 8, cy - 8, 16, 16);
+                sCtx.strokeStyle = '#ffffff';
+                sCtx.lineWidth = 2;
+                sCtx.strokeRect(cx - 8, cy - 8, 16, 16);
+                sCtx.fillStyle = '#ffffff';
+                sCtx.font = 'bold 10px monospace';
+                sCtx.fillText(`C${idx+1}`, cx - 6, cy - 10);
+            });
+        }
+
+        function checkQuiz() {
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            const q1Fb = document.getElementById('q1-feedback');
+            if (q1) {
+                q1Fb.classList.remove('hidden');
+                if (q1.value === 'correct') {
+                    q1Fb.innerText = '✅ ถูกต้อง! เมื่อมี K มากขึ้น จุดแต่ละจุดจะเข้าใกล้ Centroid มากขึ้น WCSS จึงลดลงเรื่อยๆ';
+                    q1Fb.className = 'mt-2 text-xs font-semibold text-emerald-600';
+                } else {
+                    q1Fb.innerText = '❌ ยังไม่ถูกต้อง ลองพิจารณาผลของจำนวน Centroid ต่อระยะห่างของจุดในกลุ่ม';
+                    q1Fb.className = 'mt-2 text-xs font-semibold text-rose-600';
+                }
+            }
+
+            const q2 = document.querySelector('input[name="q2"]:checked');
+            const q2Fb = document.getElementById('q2-feedback');
+            if (q2) {
+                q2Fb.classList.remove('hidden');
+                if (q2.value === 'correct') {
+                    q2Fb.innerText = '✅ ถูกต้อง! ระยะทาง Euclidean ไวต่อขนาดตัวเลขมาก ฟีเจอร์ที่หน่วยใหญ่กว่าจะครอบงำผลลัพธ์ทั้งหมด จึงต้องทำ Standard Scaling เสมอ';
+                    q2Fb.className = 'mt-2 text-xs font-semibold text-emerald-600';
+                } else {
+                    q2Fb.innerText = '❌ ยังไม่ถูกต้อง สูตร Euclidean Distance ใช้ผลต่างกำลังสองของตัวเลขโดยตรง';
+                    q2Fb.className = 'mt-2 text-xs font-semibold text-rose-600';
+                }
+            }
+        }
+
+        window.addEventListener('load', () => {
+            sandboxLoadPreset('excel');
+        });
+    </script>
+
+    <!-- Presentation Slideshow System Script -->
+    <script>
+    (function() {
+        let isSlideshowActive = false;
+        let currentSlide = 0;
+        let slides = [];
+        let originalParents = [];
+
+        window.toggleSlideshow = function() {
+            if (!isSlideshowActive) startSlideshow();
+            else exitSlideshow();
+        };
+
+        function startSlideshow() {
+            isSlideshowActive = true;
+            document.body.classList.add('overflow-hidden');
+
+            const overlay = document.createElement('div');
+            overlay.id = 'slideshow-overlay';
+            overlay.className = 'fixed inset-0 z-[9999] bg-[#090d16] text-white flex flex-col font-sans select-none';
+
+            overlay.innerHTML = `
+                <div class="flex items-center justify-between px-6 py-4 border-b border-indigo-950/60 bg-[#0c1222]">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-3 py-1 rounded-full font-mono">Lecture Presentation</span>
+                        <span class="text-sm font-semibold text-slate-300">บทที่ 18: Unsupervised Learning & K-Means</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span id="slide-counter" class="text-xs font-mono text-slate-400">สไลด์ 1 / 1</span>
+                        <button onclick="window.toggleSlideshow()" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition" title="ออกจากโหมดนำเสนอ (Esc)">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="slide-view-area" class="flex-1 overflow-y-auto px-6 py-8 flex items-center justify-center"></div>
+                <div class="px-6 py-3 border-t border-indigo-950/60 bg-[#0c1222] flex justify-between items-center text-xs text-slate-400">
+                    <div>กดปุ่ม ← / → บนคีย์บอร์ด หรือคลิกปุ่มนำทางเพื่อเปลี่ยนสไลด์</div>
+                    <div class="flex space-x-2">
+                        <button id="prev-slide-btn" onclick="window.prevSlide()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg transition disabled:opacity-40">◀ ก่อนหน้า</button>
+                        <button id="next-slide-btn" onclick="window.nextSlide()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition disabled:opacity-40">ถัดไป ▶</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            buildSlideDeck();
+            showSlide(0);
+
+            window.addEventListener('keydown', handleKeyNav);
+        }
+
+        function exitSlideshow() {
+            isSlideshowActive = false;
+            document.body.classList.remove('overflow-hidden');
+            restoreMovedElements();
+            const overlay = document.getElementById('slideshow-overlay');
+            if (overlay) overlay.remove();
+            window.removeEventListener('keydown', handleKeyNav);
+        }
+
+        function handleKeyNav(e) {
+            if (e.key === 'ArrowRight' || e.key === 'Space') nextSlide();
+            else if (e.key === 'ArrowLeft') prevSlide();
+            else if (e.key === 'Escape') exitSlideshow();
+        }
+
+        function buildSlideDeck() {
+            slides = [];
+            // Title Slide
+            slides.push({
+                type: 'hero',
+                title: 'การเรียนรู้แบบไม่มีผู้สอน และ K-Means Clustering',
+                subtitle: 'บทที่ 18: Unsupervised Learning & K-Means Clustering (Machine Learning Curriculum)',
+                elements: []
+            });
+
+            // Sections
+            const sections = document.querySelectorAll('main > section');
+            sections.forEach(sec => {
+                const h2 = sec.querySelector('h2');
+                const title = h2 ? h2.innerText : 'เนื้อหาบทเรียน';
+                const children = Array.from(sec.children).filter(c => c !== h2);
+                slides.push({
+                    type: 'section',
+                    title: title,
+                    elements: children
+                });
+            });
+        }
+
+        function showSlide(index) {
+            currentSlide = index;
+            const viewArea = document.getElementById('slide-view-area');
+            if (!viewArea) return;
+            viewArea.innerHTML = '';
+
+            const slide = slides[index];
+            const container = document.createElement('div');
+            container.className = 'max-w-4xl w-full bg-[#111827] border border-slate-800 rounded-2xl p-8 shadow-2xl';
+
+            if (slide.type === 'hero') {
+                container.className += ' text-center py-16';
+                container.innerHTML = `
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-4 py-1.5 rounded-full font-mono">บทที่ 18</span>
+                    <h1 class="text-4xl md:text-5xl font-extrabold mt-6 mb-4 text-white">${slide.title}</h1>
+                    <p class="text-slate-400 text-lg font-light">${slide.subtitle}</p>
+                `;
+            } else {
+                const titleEl = document.createElement('h2');
+                titleEl.className = 'text-2xl font-bold text-indigo-400 mb-6 border-b border-slate-800 pb-3';
+                titleEl.innerText = slide.title;
+                container.appendChild(titleEl);
+
+                slide.elements.forEach((orig, idx) => {
+                    const clone = orig.cloneNode(true);
+                    // Lighten text for dark mode in presentation
+                    clone.querySelectorAll('.text-slate-600, .text-slate-500, .text-slate-700, .text-slate-800, .text-slate-900').forEach(el => {
+                        el.classList.add('text-slate-300');
+                    });
+                    container.appendChild(clone);
+                });
+            }
+
+            viewArea.appendChild(container);
+            if (window.renderMathInElement) {
+                renderMathInElement(container, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});
+            }
+
+            document.getElementById('slide-counter').innerText = `สไลด์ ${index + 1} / ${slides.length}`;
+            document.getElementById('prev-slide-btn').disabled = index === 0;
+            document.getElementById('next-slide-btn').disabled = index === slides.length - 1;
+        }
+
+        function restoreMovedElements() {
+            // Clones were used, no elements detached
+        }
+
+        window.nextSlide = function() {
+            if (currentSlide < slides.length - 1) showSlide(currentSlide + 1);
+        };
+
+        window.prevSlide = function() {
+            if (currentSlide > 0) showSlide(currentSlide - 1);
+        };
+    })();
+    </script>
+</body>
+</html>

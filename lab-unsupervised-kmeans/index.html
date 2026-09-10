@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Means Clustering Interactive Sandbox - Unsupervised Learning</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Sarabun', 'Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        darkbg: '#0b0f19',
+                        panelbg: '#111827',
+                        bordercolor: '#1f293d',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: 'Sarabun', sans-serif;
+        }
+        .glow-btn {
+            box-shadow: 0 0 15px -3px rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <a href="../index.html" class="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition" title="กลับหน้าแรก">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </a>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">Unsupervised Lab</span>
+                        <h1 class="text-base md:text-lg font-bold text-white tracking-tight">K-Means Clustering Sandbox</h1>
+                    </div>
+                    <p class="text-xs text-slate-400 font-light">เครื่องมือจำลองอัลกอริทึม Lloyd's K-Means แบบโต้ตอบสองมิติ</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <a href="../18-ML-Unsupervised-KMeans.html" class="text-xs font-semibold px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition shadow-sm flex items-center space-x-1.5">
+                    <span>📖 อ่านบทเรียน</span>
+                </a>
+                <a href="KMeans_Clustering_Step_by_Step_TH.xlsx" class="text-xs font-semibold px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-lg transition flex items-center space-x-1">
+                    <span>📝 ใบงาน Excel</span>
+                </a>
+                <a href="KMeans_Clustering_Step_by_Step_TH_Solved.xlsx" class="text-xs font-semibold px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 rounded-lg transition flex items-center space-x-1">
+                    <span>✅ เฉลย Excel</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="container mx-auto px-4 py-6 flex-1 max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left Canvas Area (7 Cols) -->
+            <div class="lg:col-span-7 flex flex-col space-y-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">2D Feature Space (คลิกบนกระดานเพื่อเพิ่มจุด)</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span id="point-count-badge" class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">8 จุด</span>
+                        </div>
+                    </div>
+
+                    <!-- Canvas Container -->
+                    <div class="relative w-full aspect-square bg-[#080d1a] rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                        <canvas id="kmeansCanvas" width="600" height="600" class="w-full h-full cursor-crosshair"></canvas>
+                        <div id="canvas-overlay-msg" class="absolute inset-0 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs transition-opacity opacity-0 pointer-events-none">
+                            <span class="text-base font-bold text-emerald-400 bg-slate-900 border border-emerald-500/40 px-4 py-2 rounded-xl shadow-lg">ลู่เข้าแล้ว (Converged)!</span>
+                        </div>
+                    </div>
+
+                    <!-- Canvas Bottom Quick Controls -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t border-slate-800 text-xs text-slate-400">
+                        <div class="flex items-center space-x-2">
+                            <span>ชุดข้อมูลตัวอย่าง:</span>
+                            <button onclick="loadPreset('excel')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded border border-slate-700 font-semibold transition">โจทย์ Excel (8 จุด)</button>
+                            <button onclick="loadPreset('blobs3')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded border border-slate-700 font-semibold transition">3 Blobs</button>
+                            <button onclick="loadPreset('circles')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded border border-slate-700 font-semibold transition">วงกลม 2 ชั้น</button>
+                        </div>
+                        <button onclick="clearAllPoints()" class="text-rose-400 hover:text-rose-300 transition">ล้างจุดทั้งหมด</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Controls & Metrics Panel (5 Cols) -->
+            <div class="lg:col-span-5 flex flex-col space-y-4">
+
+                <!-- Control Box -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-indigo-400 font-mono mb-4 flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                        แผงควบคุมการคำนวณ (Algorithm Controls)
+                    </h2>
+
+                    <!-- K selection -->
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center text-xs mb-1">
+                            <span class="text-slate-300 font-semibold">จำนวนกลุ่ม (K):</span>
+                            <span id="k-value-display" class="font-mono text-indigo-400 font-bold text-sm">2</span>
+                        </div>
+                        <input type="range" id="kSlider" min="2" max="6" value="2" oninput="changeK(this.value)" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                        <div class="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+                            <span>K=2</span><span>K=3</span><span>K=4</span><span>K=5</span><span>K=6</span>
+                        </div>
+                    </div>
+
+                    <!-- Init method -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">วิธีเลือก Centroid เริ่มต้น:</label>
+                        <select id="initSelect" onchange="resetAlgorithm()" class="w-full bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500">
+                            <option value="excel">อ้างอิงโจทย์ในใบงาน Excel (C1=P1, C2=P4)</option>
+                            <option value="kmeans++">K-Means++ (Probabilistic D² Selection)</option>
+                            <option value="random">Random Initialization (สุ่มจากข้อมูล)</option>
+                        </select>
+                    </div>
+
+                    <!-- Primary Action Buttons -->
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <button id="stepBtn" onclick="stepAlgorithm()" class="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-md shadow-indigo-600/20">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+                            <span>ก้าวทีละขั้น (Step 1 Iter)</span>
+                        </button>
+                        <button id="playBtn" onclick="toggleAutoPlay()" class="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-600/20">
+                            <svg id="playIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
+                            <span id="playBtnText">รันอัตโนมัติ (Play)</span>
+                        </button>
+                    </div>
+
+                    <button onclick="resetAlgorithm()" class="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs border border-slate-700 transition">
+                        🔄 เริ่มต้นรอบใหม่ (Reset Centroids)
+                    </button>
+                </div>
+
+                <!-- Live Metrics Dashboard -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex-1 flex flex-col">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-sky-400 font-mono mb-4 flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        สถานะและการวัดผลสด (Live Metrics)
+                    </h2>
+
+                    <!-- Metric Cards Grid -->
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block">รอบการคำนวณ (Iteration)</span>
+                            <span id="metric-iter" class="text-xl font-extrabold text-white font-mono mt-0.5 block">0</span>
+                        </div>
+                        <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block">สถานะ (Status)</span>
+                            <span id="metric-status" class="text-xs font-bold text-amber-400 mt-1.5 block">รอเริ่มทำงาน</span>
+                        </div>
+                        <div class="col-span-2 bg-indigo-950/40 p-3 rounded-xl border border-indigo-800/40">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-[10px] uppercase font-bold text-indigo-300">ฟังก์ชันเป้าหมาย WCSS (Inertia):</span>
+                                <span id="metric-wcss" class="text-lg font-black text-indigo-300 font-mono">0.0000</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1 font-light">ผลรวมระยะทางยกกำลังสองจากจุดไปยัง Centroid ที่สังกัด</p>
+                        </div>
+                    </div>
+
+                    <!-- Centroids Table -->
+                    <div class="mt-auto">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1.5 font-mono">พิกัด Centroid ปัจจุบัน:</span>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-[11px] text-left border border-slate-800 rounded-lg overflow-hidden">
+                                <thead class="bg-slate-800 text-slate-300 text-[10px] uppercase font-mono">
+                                    <tr>
+                                        <th class="py-1.5 px-2">กลุ่ม</th>
+                                        <th class="py-1.5 px-2">พิกัด (X, Y)</th>
+                                        <th class="py-1.5 px-2 text-right">สมาชิก</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="centroid-table-body" class="divide-y divide-slate-800 font-mono text-slate-300">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Interactive Script -->
+    <script>
+        const canvas = document.getElementById('kmeansCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Color palette for clusters
+        const CLUSTER_COLORS = [
+            { main: '#3b82f6', light: 'rgba(59, 130, 246, 0.25)', border: '#2563eb' }, // Blue
+            { main: '#ef4444', light: 'rgba(239, 68, 68, 0.25)', border: '#dc2626' },   // Red
+            { main: '#10b981', light: 'rgba(16, 185, 129, 0.25)', border: '#059669' }, // Green
+            { main: '#f59e0b', light: 'rgba(245, 158, 11, 0.25)', border: '#d97706' }, // Amber
+            { main: '#a855f7', light: 'rgba(168, 85, 247, 0.25)', border: '#9333ea' }, // Purple
+            { main: '#06b6d4', light: 'rgba(6, 182, 212, 0.25)', border: '#0891b2' },  // Cyan
+        ];
+
+        let points = [];
+        let centroids = [];
+        let labels = [];
+        let centroidHistory = [];
+        let K = 2;
+        let iteration = 0;
+        let isConverged = false;
+        let autoPlayTimer = null;
+
+        // Coordinate space: 0 to 10 for both X and Y
+        const COORD_MAX = 10;
+
+        function toCanvasX(x) { return (x / COORD_MAX) * (canvas.width - 80) + 40; }
+        function toCanvasY(y) { return canvas.height - ((y / COORD_MAX) * (canvas.height - 80) + 40); }
+        function fromCanvasX(cx) { return Math.max(0, Math.min(10, ((cx - 40) / (canvas.width - 80)) * COORD_MAX)); }
+        function fromCanvasY(cy) { return Math.max(0, Math.min(10, ((canvas.height - 40 - cy) / (canvas.height - 80)) * COORD_MAX)); }
+
+        // Presets
+        const PRESETS = {
+            excel: [
+                {x: 1, y: 2, name: 'P1'}, {x: 2, y: 1, name: 'P2'}, {x: 2, y: 3, name: 'P3'},
+                {x: 4, y: 4, name: 'P4'}, {x: 6, y: 5, name: 'P5'}, {x: 7, y: 7, name: 'P6'},
+                {x: 8, y: 6, name: 'P7'}, {x: 8, y: 8, name: 'P8'}
+            ],
+            blobs3: [
+                {x: 2, y: 2}, {x: 2.5, y: 2.8}, {x: 1.8, y: 3.2}, {x: 3, y: 2.2}, {x: 2.2, y: 1.5},
+                {x: 7.5, y: 2.5}, {x: 8, y: 3}, {x: 7, y: 2}, {x: 8.5, y: 1.8}, {x: 8, y: 2.2},
+                {x: 5, y: 8}, {x: 4.5, y: 7.5}, {x: 5.5, y: 7.8}, {x: 4.8, y: 8.5}, {x: 5.2, y: 8.2}
+            ],
+            circles: [
+                // Inner circle
+                {x: 5, y: 5}, {x: 5.5, y: 5.2}, {x: 4.5, y: 4.8}, {x: 5.2, y: 4.5}, {x: 4.8, y: 5.5},
+                // Outer circle
+                {x: 2, y: 5}, {x: 8, y: 5}, {x: 5, y: 2}, {x: 5, y: 8},
+                {x: 3, y: 7}, {x: 7, y: 7}, {x: 3, y: 3}, {x: 7, y: 3}
+            ]
+        };
+
+        function initData() {
+            loadPreset('excel');
+        }
+
+        function loadPreset(key) {
+            points = PRESETS[key].map(p => ({...p}));
+            if (key === 'blobs3') {
+                K = 3;
+                document.getElementById('kSlider').value = 3;
+                document.getElementById('k-value-display').innerText = 3;
+            } else if (key === 'excel') {
+                K = 2;
+                document.getElementById('kSlider').value = 2;
+                document.getElementById('k-value-display').innerText = 2;
+                document.getElementById('initSelect').value = 'excel';
+            }
+            resetAlgorithm();
+        }
+
+        function changeK(val) {
+            K = parseInt(val);
+            document.getElementById('k-value-display').innerText = K;
+            resetAlgorithm();
+        }
+
+        function clearAllPoints() {
+            points = [];
+            resetAlgorithm();
+        }
+
+        // Click canvas to add custom point
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const cx = (e.clientX - rect.left) * scaleX;
+            const cy = (e.clientY - rect.top) * scaleY;
+            const x = Number(fromCanvasX(cx).toFixed(2));
+            const y = Number(fromCanvasY(cy).toFixed(2));
+            points.push({ x, y, name: `P${points.length + 1}` });
+            resetAlgorithm();
+        });
+
+        function resetAlgorithm() {
+            stopAutoPlay();
+            iteration = 0;
+            isConverged = false;
+            labels = new Array(points.length).fill(0);
+            centroidHistory = [];
+            initCentroids();
+            updateMetrics();
+            draw();
+            document.getElementById('point-count-badge').innerText = `${points.length} จุด`;
+        }
+
+        function initCentroids() {
+            if (points.length === 0) {
+                centroids = [];
+                return;
+            }
+            const mode = document.getElementById('initSelect').value;
+            centroids = [];
+
+            if (mode === 'excel' && points.length >= 4) {
+                // Fixed Excel teaching centroids: P1 (1,2) and P4 (4,4)
+                centroids.push({ x: 1.0, y: 2.0 });
+                centroids.push({ x: 4.0, y: 4.0 });
+                for (let i = 2; i < K; i++) {
+                    centroids.push({ x: points[i * 2 % points.length].x, y: points[i * 2 % points.length].y });
+                }
+            } else if (mode === 'kmeans++') {
+                // K-Means++
+                const first = points[Math.floor(Math.random() * points.length)];
+                centroids.push({ x: first.x, y: first.y });
+                while (centroids.length < K) {
+                    let dists = points.map(p => {
+                        return Math.min(...centroids.map(c => Math.hypot(p.x - c.x, p.y - c.y)));
+                    });
+                    let distSq = dists.map(d => d * d);
+                    let sumSq = distSq.reduce((a, b) => a + b, 0);
+                    let r = Math.random() * sumSq;
+                    let cum = 0;
+                    let chosen = points[0];
+                    for (let i = 0; i < points.length; i++) {
+                        cum += distSq[i];
+                        if (r <= cum) {
+                            chosen = points[i];
+                            break;
+                        }
+                    }
+                    centroids.push({ x: chosen.x, y: chosen.y });
+                }
+            } else {
+                // Randomly sample K distinct points
+                let pool = [...points];
+                for (let i = 0; i < K && pool.length > 0; i++) {
+                    let idx = Math.floor(Math.random() * pool.length);
+                    centroids.push({ x: pool[idx].x, y: pool[idx].y });
+                    pool.splice(idx, 1);
+                }
+            }
+            centroidHistory.push(centroids.map(c => ({...c})));
+        }
+
+        function stepAlgorithm() {
+            if (isConverged || points.length === 0 || centroids.length === 0) return;
+
+            iteration++;
+            let changed = false;
+
+            // Step 1: Assignment Step
+            for (let i = 0; i < points.length; i++) {
+                let p = points[i];
+                let minDist = Infinity;
+                let bestK = 0;
+                for (let k = 0; k < centroids.length; k++) {
+                    let d = Math.hypot(p.x - centroids[k].x, p.y - centroids[k].y);
+                    if (d < minDist) {
+                        minDist = d;
+                        bestK = k + 1; // 1-indexed
+                    }
+                }
+                if (labels[i] !== bestK) {
+                    labels[i] = bestK;
+                    changed = true;
+                }
+            }
+
+            // Step 2: Update Step
+            let maxShift = 0;
+            let newCentroids = [];
+            for (let k = 1; k <= K; k++) {
+                let clusterPoints = points.filter((_, idx) => labels[idx] === k);
+                if (clusterPoints.length === 0) {
+                    newCentroids.push({...centroids[k - 1]});
+                    continue;
+                }
+                let avgX = clusterPoints.reduce((acc, p) => acc + p.x, 0) / clusterPoints.length;
+                let avgY = clusterPoints.reduce((acc, p) => acc + p.y, 0) / clusterPoints.length;
+                let shift = Math.hypot(avgX - centroids[k - 1].x, avgY - centroids[k - 1].y);
+                maxShift = Math.max(maxShift, shift);
+                newCentroids.push({ x: Number(avgX.toFixed(4)), y: Number(avgY.toFixed(4)) });
+            }
+
+            centroids = newCentroids;
+            centroidHistory.push(centroids.map(c => ({...c})));
+
+            if (!changed || maxShift < 1e-4) {
+                isConverged = true;
+                stopAutoPlay();
+                showOverlayMsg();
+            }
+
+            updateMetrics();
+            draw();
+        }
+
+        function computeWCSS() {
+            if (labels.length === 0 || centroids.length === 0) return 0;
+            let wcss = 0;
+            for (let i = 0; i < points.length; i++) {
+                let lbl = labels[i];
+                if (lbl > 0 && centroids[lbl - 1]) {
+                    let c = centroids[lbl - 1];
+                    let d2 = Math.pow(points[i].x - c.x, 2) + Math.pow(points[i].y - c.y, 2);
+                    wcss += d2;
+                }
+            }
+            return wcss;
+        }
+
+        function updateMetrics() {
+            document.getElementById('metric-iter').innerText = iteration;
+            const wcss = computeWCSS();
+            document.getElementById('metric-wcss').innerText = wcss.toFixed(4);
+
+            const statusEl = document.getElementById('metric-status');
+            if (isConverged) {
+                statusEl.innerText = 'ลู่เข้าแล้ว (Converged) ✅';
+                statusEl.className = 'text-xs font-bold text-emerald-400 mt-1.5 block';
+            } else if (iteration > 0) {
+                statusEl.innerText = `กำลังคำนวณรอบ ${iteration}...`;
+                statusEl.className = 'text-xs font-bold text-amber-400 mt-1.5 block';
+            } else {
+                statusEl.innerText = 'รอเริ่มคำนวณ';
+                statusEl.className = 'text-xs font-bold text-slate-400 mt-1.5 block';
+            }
+
+            // Centroids table
+            const tbody = document.getElementById('centroid-table-body');
+            tbody.innerHTML = '';
+            centroids.forEach((c, idx) => {
+                const count = labels.filter(l => l === idx + 1).length;
+                const col = CLUSTER_COLORS[idx % CLUSTER_COLORS.length].main;
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="py-1.5 px-2 flex items-center space-x-1.5 font-bold" style="color: ${col};">
+                            <span class="w-2 h-2 rounded-full inline-block" style="background-color: ${col};"></span>
+                            <span>C${idx + 1}</span>
+                        </td>
+                        <td class="py-1.5 px-2 font-mono">(${c.x.toFixed(2)}, ${c.y.toFixed(2)})</td>
+                        <td class="py-1.5 px-2 text-right">${count} จุด</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function toggleAutoPlay() {
+            if (autoPlayTimer) {
+                stopAutoPlay();
+            } else {
+                if (isConverged) resetAlgorithm();
+                document.getElementById('playBtnText').innerText = 'หยุด (Pause)';
+                document.getElementById('playBtn').className = 'py-2.5 px-4 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-md shadow-amber-600/20';
+                autoPlayTimer = setInterval(() => {
+                    if (isConverged) {
+                        stopAutoPlay();
+                    } else {
+                        stepAlgorithm();
+                    }
+                }, 750);
+            }
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayTimer) {
+                clearInterval(autoPlayTimer);
+                autoPlayTimer = null;
+                document.getElementById('playBtnText').innerText = 'รันอัตโนมัติ (Play)';
+                document.getElementById('playBtn').className = 'py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-600/20';
+            }
+        }
+
+        function showOverlayMsg() {
+            const overlay = document.getElementById('canvas-overlay-msg');
+            overlay.classList.remove('opacity-0');
+            setTimeout(() => {
+                overlay.classList.add('opacity-0');
+            }, 1800);
+        }
+
+        // Rendering on HTML5 Canvas
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Grid Lines
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= COORD_MAX; i++) {
+                let cx = toCanvasX(i);
+                let cy = toCanvasY(i);
+                // Vertical
+                ctx.beginPath(); ctx.moveTo(cx, toCanvasY(0)); ctx.lineTo(cx, toCanvasY(COORD_MAX)); ctx.stroke();
+                // Horizontal
+                ctx.beginPath(); ctx.moveTo(toCanvasX(0), cy); ctx.lineTo(toCanvasX(COORD_MAX), cy); ctx.stroke();
+
+                // Axis Numbers
+                ctx.fillStyle = '#64748b';
+                ctx.font = '10px "Fira Code", monospace';
+                ctx.fillText(i, cx - 3, toCanvasY(0) + 16);
+                if (i > 0) ctx.fillText(i, toCanvasX(0) - 18, cy + 3);
+            }
+
+            // 2. Draw Voronoi Background Partition (Light approximation)
+            if (centroids.length > 0 && iteration > 0) {
+                const step = 8;
+                for (let px = 40; px < canvas.width - 40; px += step) {
+                    for (let py = 40; py < canvas.height - 40; py += step) {
+                        let rx = fromCanvasX(px);
+                        let ry = fromCanvasY(py);
+                        let minDist = Infinity;
+                        let bestK = 0;
+                        for (let k = 0; k < centroids.length; k++) {
+                            let d = Math.hypot(rx - centroids[k].x, ry - centroids[k].y);
+                            if (d < minDist) { minDist = d; bestK = k; }
+                        }
+                        ctx.fillStyle = CLUSTER_COLORS[bestK % CLUSTER_COLORS.length].light;
+                        ctx.fillRect(px, py, step, step);
+                    }
+                }
+            }
+
+            // 3. Draw Assignment Lines (from point to assigned centroid)
+            if (iteration > 0) {
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 3]);
+                points.forEach((p, idx) => {
+                    let lbl = labels[idx];
+                    if (lbl > 0 && centroids[lbl - 1]) {
+                        let c = centroids[lbl - 1];
+                        ctx.strokeStyle = CLUSTER_COLORS[(lbl - 1) % CLUSTER_COLORS.length].border;
+                        ctx.beginPath();
+                        ctx.moveTo(toCanvasX(p.x), toCanvasY(p.y));
+                        ctx.lineTo(toCanvasX(c.x), toCanvasY(c.y));
+                        ctx.stroke();
+                    }
+                });
+                ctx.setLineDash([]);
+            }
+
+            // 4. Draw Centroid Movement History Trajectories
+            for (let k = 0; k < centroids.length; k++) {
+                if (centroidHistory.length > 1) {
+                    ctx.strokeStyle = CLUSTER_COLORS[k % CLUSTER_COLORS.length].main;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    for (let h = 0; h < centroidHistory.length; h++) {
+                        let pos = centroidHistory[h][k];
+                        if (!pos) continue;
+                        if (h === 0) ctx.moveTo(toCanvasX(pos.x), toCanvasY(pos.y));
+                        else ctx.lineTo(toCanvasX(pos.x), toCanvasY(pos.y));
+                    }
+                    ctx.stroke();
+                }
+            }
+
+            // 5. Draw Data Points
+            points.forEach((p, idx) => {
+                let lbl = labels[idx];
+                let color = lbl > 0 ? CLUSTER_COLORS[(lbl - 1) % CLUSTER_COLORS.length].main : '#94a3b8';
+
+                ctx.beginPath();
+                ctx.arc(toCanvasX(p.x), toCanvasY(p.y), 7, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Point Label (e.g. P1, P2)
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '11px "Sarabun", sans-serif';
+                ctx.fillText(p.name || `P${idx+1}`, toCanvasX(p.x) + 9, toCanvasY(p.y) - 6);
+            });
+
+            // 6. Draw Centroids
+            centroids.forEach((c, idx) => {
+                let cx = toCanvasX(c.x);
+                let cy = toCanvasY(c.y);
+                let col = CLUSTER_COLORS[idx % CLUSTER_COLORS.length].main;
+
+                // Centroid Marker (Square with Cross)
+                ctx.fillStyle = col;
+                ctx.fillRect(cx - 10, cy - 10, 20, 20);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(cx - 10, cy - 10, 20, 20);
+
+                // Cross inside
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(cx - 6, cy); ctx.lineTo(cx + 6, cy);
+                ctx.moveTo(cx, cy - 6); ctx.lineTo(cx, cy + 6);
+                ctx.stroke();
+
+                // Centroid Badge Name
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 12px "Fira Code", monospace';
+                ctx.fillText(`C${idx + 1}`, cx - 8, cy - 14);
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initData();
+        });
+    </script>
+</body>
+</html>

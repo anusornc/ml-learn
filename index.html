@@ -104,7 +104,7 @@
         <!-- Navigation Tabs -->
         <div class="flex justify-center mb-8 bg-slate-200 p-1.5 rounded-2xl max-w-md mx-auto border border-slate-300/60 shadow-sm">
             <button id="tab-chapters-btn" onclick="switchTab('chapters')" class="flex-1 text-center py-2 px-4 rounded-xl text-xs font-bold transition-all duration-350 bg-white text-indigo-700 shadow-sm">
-                📑 สารบัญแยกตามบทเรียน (17 บท)
+                📑 สารบัญแยกตามบทเรียน (18 บท)
             </button>
             <button id="tab-timeline-btn" onclick="switchTab('timeline')" class="flex-1 text-center py-2 px-4 rounded-xl text-xs font-bold transition-all duration-350 text-slate-600 hover:text-slate-900">
                 📅 แผนการเรียน 15 สัปดาห์ (Study Guide)
@@ -877,6 +877,62 @@
                     <a href="17-ML-Evolutionary-PSO.html" class="mt-3 block text-center py-2 px-3 bg-indigo-550 hover:bg-indigo-650 text-indigo-600 hover:text-indigo-800 bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 rounded-lg text-xs font-bold transition">
                         📖 เข้าสู่บทเรียนและการจำลองแบบโต้ตอบ
                     </a>
+                </div>
+            </div>
+        
+
+            <!-- Card 18 -->
+            <div class="card bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-indigo-400">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-100 font-mono">18-ML-Unsupervised-KMeans.html</span>
+                        <span class="text-xs font-medium text-slate-400">บทที่ 18</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2 leading-snug">
+                        <a href="18-ML-Unsupervised-KMeans.html" class="hover:text-indigo-600 transition">Unsupervised: K-Means Clustering</a>
+                    </h3>
+                    <p class="text-slate-500 text-xs leading-relaxed mb-4">การเรียนรู้แบบไม่มีผู้สอน การค้นหารูปแบบและโครงสร้างในข้อมูลโดยไม่มีเฉลย ขั้นตอนวิธี Lloyd's K-Means, ฟังก์ชันเป้าหมาย WCSS/Inertia, และวิธีข้อศอก (Elbow Method)</p>
+                    
+                    <!-- Supplementary Labs Info -->
+                    <div class="mb-4">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">แล็บเสริม (Supplementary):</p>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="text-[9px] font-medium px-2 py-0.5 rounded border bg-amber-50 text-amber-700 border-amber-100">python-ml-notebooks (Clustering)</span>
+                            <span class="text-[9px] font-medium px-2 py-0.5 rounded border bg-emerald-50 text-emerald-700 border-emerald-100">ML-For-Beginners (Clustering)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-auto border-t border-slate-100 pt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">แล็บหลัก (Main Lab):</span>
+                        <span class="text-[10px] font-semibold text-sky-600 font-mono truncate max-w-[140px]" title="09_unsupervised_learning.ipynb">K-Means Clustering</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="https://github.com/anusornc/handson-ml3/blob/main/09_unsupervised_learning.ipynb" target="_blank" rel="noopener" class="flex items-center justify-center space-x-1 py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                            </svg>
+                            <span>GitHub</span>
+                        </a>
+                        <a href="https://colab.research.google.com/github/anusornc/handson-ml3/blob/main/09_unsupervised_learning.ipynb" target="_blank" rel="noopener" class="flex items-center justify-center space-x-1 py-2 px-3 bg-sky-500 hover:bg-sky-600 text-white rounded-lg text-xs font-semibold transition shadow-sm hover:shadow">
+                            <span>Colab 🚀</span>
+                        </a>
+                    </div>
+                    <a href="18-ML-Unsupervised-KMeans.html" class="mt-3 block text-center py-2 px-3 bg-indigo-550 hover:bg-indigo-650 text-indigo-600 hover:text-indigo-800 bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 rounded-lg text-xs font-bold transition">
+                        📖 เข้าสู่บทเรียนและการจำลองแบบโต้ตอบ
+                    </a>
+                    <a href="lab-unsupervised-kmeans/index.html" class="mt-2 block text-center py-2.5 px-3 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white rounded-lg text-xs font-bold transition shadow-md shadow-emerald-500/10">
+                        ⚡ เครื่องมือจำลองแบบโต้ตอบ K-Means Sandbox
+                    </a>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <a href="lab-unsupervised-kmeans/KMeans_Clustering_Step_by_Step_TH.xlsx" class="block text-center py-1.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-[11px] font-bold transition">
+                            📝 ใบงาน Excel (โจทย์)
+                        </a>
+                        <a href="lab-unsupervised-kmeans/KMeans_Clustering_Step_by_Step_TH_Solved.xlsx" class="block text-center py-1.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-[11px] font-bold transition">
+                            ✅ เฉลย Excel
+                        </a>
+                    </div>
                 </div>
             </div>
         
@@ -1687,6 +1743,9 @@
                         
                 <a href="17-ML-Evolutionary-PSO.html" class="inline-flex items-center space-x-1 bg-white hover:bg-indigo-50 border border-indigo-100 hover:border-indigo-300 text-indigo-700 text-xs font-bold py-1.5 px-3 rounded-lg transition shadow-sm">
                     <span>📖 บทเรียน: Evolutionary & PSO</span>
+                </a>
+                <a href="18-ML-Unsupervised-KMeans.html" class="inline-flex items-center space-x-1 bg-white hover:bg-emerald-50 border border-emerald-100 hover:border-emerald-300 text-emerald-700 text-xs font-bold py-1.5 px-3 rounded-lg transition shadow-sm">
+                    <span>📖 บทเรียน: Unsupervised & K-Means</span>
                 </a>
             
                     </div>
