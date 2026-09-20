@@ -395,12 +395,12 @@
             <div id="key-drawer" class="hidden p-4 bg-slate-950/90 border border-slate-800 rounded-xl space-y-3 animate-fade-in text-xs">
                 <div class="flex items-center justify-between">
                     <span class="font-bold text-slate-200">ระบุ API Key สำหรับ AI For Thai (ทางเลือก):</span>
-                    <button onclick="useProvidedDemoKey()" class="text-[11px] text-cyan-400 hover:text-cyan-300 underline font-mono">
-                        + ใช้ Demo Key ของบทเรียนนี้
-                    </button>
+                    <a href="https://aiforthai.in.th" target="_blank" rel="noopener" class="text-[11px] text-cyan-400 hover:text-cyan-300 underline font-mono">
+                        สมัครขอคีย์ฟรีได้ที่ aiforthai.in.th ↗
+                    </a>
                 </div>
                 <div class="flex gap-2">
-                    <input type="password" id="aiforthai-key-input" class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 font-mono text-white focus:border-blue-500 outline-none" placeholder="กรอก API Key เช่น kPYzRjW3YC4ikMEGdatw7zWNDU1RDe3R">
+                    <input type="password" id="aiforthai-key-input" class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 font-mono text-white focus:border-blue-500 outline-none" placeholder="กรอก API Key ของคุณที่ได้รับจาก aiforthai.in.th">
                     <button onclick="saveAiforthaiKey()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 font-semibold text-white rounded-lg transition">
                         บันทึก
                     </button>
@@ -530,7 +530,7 @@
 <pre id="code-display">import requests
 
 url = "https://api.aiforthai.in.th/lpr-iapp"
-headers = { 'apikey': 'kPYzRjW3YC4ikMEGdatw7zWNDU1RDe3R' }
+headers = { 'apikey': 'YOUR_AIFORTHAI_API_KEY' }
 files = [('file', ('car.jpg', open('/path/to/car.jpg', 'rb'), 'image/jpeg'))]
 
 response = requests.post(url, headers=headers, files=files)
@@ -725,11 +725,6 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
             drawer.classList.toggle('hidden');
         }
 
-        function useProvidedDemoKey() {
-            document.getElementById('aiforthai-key-input').value = 'kPYzRjW3YC4ikMEGdatw7zWNDU1RDe3R';
-            saveAiforthaiKey();
-        }
-
         function saveAiforthaiKey() {
             const key = document.getElementById('aiforthai-key-input').value.trim();
             if (key) {
@@ -862,7 +857,7 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
                 display.innerText = `import requests
 
 url = "https://api.aiforthai.in.th/lpr-iapp"
-headers = { 'apikey': 'kPYzRjW3YC4ikMEGdatw7zWNDU1RDe3R' }
+headers = { 'apikey': 'YOUR_AIFORTHAI_API_KEY' }
 files = [('file', ('car.jpg', open('/path/to/car.jpg', 'rb'), 'image/jpeg'))]
 
 response = requests.post(url, headers=headers, files=files)
@@ -876,7 +871,7 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
                 btnCurl.className = "px-2.5 py-1 rounded text-[11px] font-mono font-semibold bg-blue-600 text-white";
                 btnPy.className = "px-2.5 py-1 rounded text-[11px] font-mono font-semibold bg-slate-800 text-slate-400 hover:text-white";
                 display.innerText = `curl --location --request POST 'https://api.aiforthai.in.th/lpr-iapp' \\
---header 'apikey: kPYzRjW3YC4ikMEGdatw7zWNDU1RDe3R' \\
+--header 'apikey: YOUR_AIFORTHAI_API_KEY' \\
 --form 'file=@"/your/path/to/car.jpg"'`;
             }
         }
