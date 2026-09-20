@@ -61,12 +61,12 @@
         
 
                             <!-- Header -->
-    <header class="bg-gradient-to-r from-slate-900 via-emerald-950 to-teal-900 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
+    <header class="bg-gradient-to-r from-slate-900 via-amber-950 to-yellow-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-955/60 border-emerald-900/30 px-3 py-1 rounded-full border">Supervised & Association Rules &bull; บทที่ 14</span>
-            <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Learning Set of Rules</h1>
-            <p class="text-slate-350 text-sm md:text-base mt-2 font-light">การเรียนรู้เซตของกฎแบบ IF-THEN, Sequential Covering, CN2 และ Apriori</p>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 border-emerald-900/30 px-3 py-1 rounded-full border">Supervised & Association Rules &bull; บทที่ 14</span>
+            <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Learning Sets of Rules</h1>
+            <p class="text-slate-350 text-sm md:text-base mt-2 font-light">การเรียนรู้กฎแบบมีผู้สอน กฎความสัมพันธ์ (Association Rules) และอัลกอริทึม Apriori</p>
         </div>
     </header>
 
@@ -80,11 +80,31 @@
                 การเรียนรู้เซตของกฎ (Learning Set of Rules)
             </h2>
             <p class="text-slate-600 leading-relaxed mb-4">
-                แทนที่จะสร้างรูปแบบโครงสร้างต้นไม้เหมือน Decision Tree อัลกอริทึมกลุ่มนี้จะเลือกดึงข้อมูลออกมาสร้างเป็นกลุ่มของกฎกติกาในรูปแบบ <strong>"ถ้า... แล้ว..." (IF - THEN Rules)</strong> เพื่อให้เกิดความง่ายต่อมนุษย์ในการอ่านทำความเข้าใจและนำไปวิเคราะห์ต่อ
+                แทนที่จะสร้างรูปแบบโครงสร้างต้นไม้เหมือน Decision Tree อัลกอริทึมกลุ่มนี้จะเลือกดึงข้อมูลออกมาสร้างเป็นกลุ่มของกฎกติกาในรูปแบบ <strong>"ถ้า... แล้ว..." (IF - THEN Rules)</strong> เพื่อให้เกิดความง่ายต่อมนุษย์ในการอ่านทำความเข้าใจและนำไปวิเคราะห์ต่อ (Interpretable AI)
             </p>
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-4">
-                <div class="font-mono text-sm text-slate-700">
-                    <strong>IF</strong> วันหยุด = ใช่ <strong>AND</strong> สภาพอากาศ = ปลอดโปร่ง <strong>THEN</strong> กิจกรรม = ท่องเที่ยว
+
+            <!-- Supervised vs Unsupervised Rules Comparison Box -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-5 text-xs">
+                <div class="p-4 rounded-xl border border-blue-200 bg-blue-50/70">
+                    <span class="font-bold text-blue-900 block text-sm mb-1">🎯 1. การเรียนรู้กฎแบบมีผู้สอน (Supervised Rule Learning)</span>
+                    <p class="text-slate-600 mb-2 leading-relaxed">
+                        มีคลาสเป้าหมายชัดเจน (Target Label) เพื่อใช้ในการจำแนกประเภท (Classification):
+                    </p>
+                    <div class="bg-white p-2.5 rounded border border-blue-200 font-mono text-[11px] text-blue-800 mb-2">
+                        IF อายุ &gt; 50 AND ความดัน &gt; 140 THEN เป็นโรค = ใช่
+                    </div>
+                    <p class="text-slate-500"><strong>ตัวอย่างอัลกอริทึม:</strong> Sequential Covering, CN2, RIPPER, FOIL</p>
+                </div>
+
+                <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/70">
+                    <span class="font-bold text-amber-900 block text-sm mb-1">🛒 2. การค้นหากฎความสัมพันธ์ (Unsupervised Association Rules)</span>
+                    <p class="text-slate-600 mb-2 leading-relaxed">
+                        ไม่มีคลาสเป้าหมายล่วงหน้า แต่ค้นหารูปแบบความสัมพันธ์ระหว่างไอเทมใดๆ ในตะกร้าสินค้า:
+                    </p>
+                    <div class="bg-white p-2.5 rounded border border-amber-200 font-mono text-[11px] text-amber-800 mb-2">
+                        IF ซื้อผ้าอ้อม THEN ซื้อเบียร์ (Support=30%, Conf=75%)
+                    </div>
+                    <p class="text-slate-500"><strong>ตัวอย่างอัลกอริทึม:</strong> Apriori, FP-Growth, ECLAT</p>
                 </div>
             </div>
             
@@ -393,7 +413,7 @@
             const subtitle = header.querySelector('p')?.cloneNode(true);
             
             if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border border-sky-800/30 px-3 py-1 rounded-full mb-4";
                 coverNode.appendChild(badge);
             }
             if (title) {
@@ -559,7 +579,7 @@
                 });
                 el.querySelectorAll('td').forEach(td => {
                     if (!td.hasAttribute('data-original-class')) td.setAttribute('data-original-class', td.className);
-                    td.className = 'py-2 px-4 border-b border-slate-850 text-slate-350';
+                    td.className = 'py-2 px-4 border-b border-slate-800 text-slate-300';
                 });
             }
             

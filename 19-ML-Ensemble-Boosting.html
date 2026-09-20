@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บทที่ 19: Ensemble Learning & Gradient Boosting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+    <!-- KaTeX for beautiful math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap">
+</head>
+<body>
+    <!-- Floating Smart Navigator -->
+    <div class="fixed top-4 left-4 z-50 flex items-center space-x-1 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md px-2.5 py-1 rounded-full shadow-lg border border-slate-200 transition-all duration-300 hover:shadow-indigo-500/10">
+        <a href="18-ML-Unsupervised-KMeans.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="บทก่อนหน้า (บทที่ 18)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <a href="index.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="กลับหน้าแรกสารบัญ">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <a href="20-ML-SVM.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="บทถัดไป (บทที่ 20)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <button onclick="toggleSlideshow()" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition flex items-center" title="โหมดนำเสนอ Slide">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
+        <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/60 border border-amber-900/40 px-3 py-1 rounded-full">Supervised Learning: Ensembles &bull; บทที่ 19</span>
+            <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Ensemble Learning & Gradient Boosting</h1>
+            <p class="text-slate-350 text-sm md:text-base mt-2 font-light">การรวมพลังโมเดลพยากรณ์: Voting, Bagging, Random Forest, AdaBoost และ Gradient Boosting (XGBoost / LightGBM)</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <!-- Section 1: Concept & Wisdom of the Crowd -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-900 mb-4 border-b-2 border-indigo-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mr-3 font-semibold text-lg">1</span>
+                พลังของการรวมกลุ่ม (Wisdom of the Crowd) & Voting Classifiers
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                <strong>Ensemble Learning (การเรียนรู้แบบรวมกลุ่ม)</strong> ตั้งอยู่บนปรัชญาที่ว่า <em>"กลุ่มของผู้ทำนายที่หลากหลาย มักจะให้คำตอบที่แม่นยำกว่าผู้เชี่ยวชาญเพียงคนเดียวเสมอ"</em> หากเรารวมโมเดลที่เรียกว่า <strong>Weak Learners</strong> (ตัวเรียนรู้แบบอ่อน เช่น โมเดลที่ทายถูกเพียง 55-60%) เข้าด้วยกันเป็นจำนวนมาก ผลการลงคะแนนร่วมกันจะกลายเป็น <strong>Strong Learner</strong> ที่มีความแม่นยำสูงมาก
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+                <!-- Hard Voting -->
+                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                    <h3 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-2">
+                        <span class="text-indigo-600 font-mono text-base">✦</span> Hard Voting (Majority Rule)
+                    </h3>
+                    <p class="text-slate-600 text-xs leading-relaxed mb-2">
+                        แต่ละโมเดลออกเสียงเลือกคลาสที่ตนเองทำนาย จากนั้นนับคะแนนเสียงข้างมาก (Majority Vote) คลาสที่ได้เสียงโหวตสูงสุดคือคำตอบสุดท้าย
+                    </p>
+                    <div class="bg-white p-2.5 rounded border border-slate-200 font-mono text-[11px] text-slate-700 text-center">
+                        $\hat{y} = \operatorname{mode}\{h_1(\mathbf{x}), h_2(\mathbf{x}), \dots, h_m(\mathbf{x})\}$
+                    </div>
+                </div>
+
+                <!-- Soft Voting -->
+                <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50">
+                    <h3 class="font-bold text-indigo-950 text-sm mb-2 flex items-center gap-2">
+                        <span class="text-indigo-600 font-mono text-base">★</span> Soft Voting (Weighted Probabilities)
+                    </h3>
+                    <p class="text-slate-600 text-xs leading-relaxed mb-2">
+                        คำนวณค่าเฉลี่ยของความน่าจะเป็น (Probability) จากทุกโมเดล แล้วเลือกคลาสที่มีความน่าจะเป็นเฉลี่ยสูงสุด <strong>มักให้ความแม่นยำสูงกว่า Hard Voting</strong> เพราะโมเดลที่มั่นใจมากจะมีน้ำหนักมากกว่า
+                    </p>
+                    <div class="bg-white p-2.5 rounded border border-indigo-200 font-mono text-[11px] text-indigo-900 text-center">
+                        $\hat{y} = \underset{c}{\operatorname{argmax}} \, \frac{1}{m} \sum_{i=1}^{m} P_i(y=c|\mathbf{x})$
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Bagging & Random Forest -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-900 mb-4 border-b-2 border-indigo-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mr-3 font-semibold text-lg">2</span>
+                Bagging, Out-of-Bag (OOB) และ Random Forests
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                อีกหนึ่งแนวคิดคือการใช้อัลกอริทึมเดียวกัน แต่ฝึกสอนบน <strong>ชุดย่อยของข้อมูลที่สุ่มมาไม่เหมือนกัน</strong>:
+            </p>
+
+            <ul class="list-disc pl-6 text-slate-600 text-xs space-y-2 mb-6">
+                <li><strong>Bagging (Bootstrap Aggregating):</strong> สุ่มข้อมูลตัวอย่างแบบ <em>ใส่คืน (Sampling with replacement)</em> ตัวอย่างหนึ่งอาจถูกเลือกซ้ำได้หลายครั้งในโมเดลเดียวกัน ช่วยลดค่าความแปรปรวน (Variance) ได้ดีมาก</li>
+                <li><strong>Pasting:</strong> สุ่มข้อมูลตัวอย่างแบบ <em>ไม่ใส่คืน (Sampling without replacement)</em></li>
+                <li><strong>Out-of-Bag (OOB) Evaluation:</strong> ในกระบวนการ Bootstrap ทางสถิติจะมีข้อมูลประมาณ <strong>$36.8\%$ ($\approx 1/e$)</strong> ที่ไม่เคยถูกสุ่มไปฝึกในโมเดลนั้นเลย ข้อมูลส่วนนี้เรียกว่า OOB สามารถใช้เป็นชุดทดสอบ (Validation Set) ประเมินโมเดลได้ทันทีโดยไม่ต้องทำ Cross-Validation เพิ่มเติม</li>
+            </ul>
+
+            <!-- Random Forest Card -->
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-5 mb-4">
+                <h3 class="font-bold text-emerald-950 text-base mb-2">🌲 ป่าสุ่มตัดสินใจ (Random Forest)</h3>
+                <p class="text-slate-700 text-xs leading-relaxed mb-3">
+                    <strong>Random Forest</strong> คือ Ensemble ของต้นไม้ตัดสินใจ (Decision Trees) ที่สร้างผ่าน Bagging โดยเพิ่มความชาญฉลาดอีกขั้น: ในแต่ละโหนดของการแตกกิ่ง อัลกอริทึมจะไม่หาฟีเจอร์ที่ดีที่สุดจากฟีเจอร์ทั้งหมด แต่จะ <strong>สุ่มเลือกซับเซตของฟีเจอร์</strong> (มักใช้ $\sqrt{p}$ สำหรับ Classification) ทำให้ต้นไม้แต่ละต้นไม่มีความเกี่ยวเนื่องกัน (Decorrelated Trees) ส่งผลให้ลด Overfitting และแม่นยำสูงมาก
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="bg-white p-3 rounded-lg border border-emerald-100">
+                        <strong class="text-emerald-800 block mb-1">Feature Importance</strong>
+                        <span class="text-slate-600">วัดความสำคัญของแต่ละตัวแปร โดยดูว่าฟีเจอร์นั้นช่วยลดค่า Impurity (Gini/Entropy) เฉลี่ยในทุกต้นไม้ไปมากเพียงใด</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-emerald-100">
+                        <strong class="text-emerald-800 block mb-1">Extra-Trees (Extremely Randomized)</strong>
+                        <span class="text-slate-600">สุ่มแม้กระทั่งจุด Threshold ในการตัดแบ่ง ทำให้เทรนได้เร็วกว่า Random Forest ปกติอย่างมาก</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Boosting -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-900 mb-4 border-b-2 border-indigo-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mr-3 font-semibold text-lg">3</span>
+                Boosting: AdaBoost และ Gradient Boosting (GBDT)
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                ต่างจาก Bagging ที่เทรนโมเดลแบบขนาน (Parallel) <strong>Boosting</strong> คือการเทรนโมเดลตามลำดับเวลา (Sequential) โดยให้โมเดลตัวใหม่ <em>เรียนรู้และแก้ไขข้อผิดพลาดของโมเดลตัวก่อนหน้า</em>
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                <!-- AdaBoost -->
+                <div class="p-5 rounded-xl border border-slate-200 bg-slate-50">
+                    <h3 class="font-bold text-slate-800 text-base mb-2">1. AdaBoost (Adaptive Boosting)</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed mb-3">
+                        ปรับ <strong>น้ำหนักของตัวอย่างข้อมูล (Sample Weights)</strong>: ตัวอย่างที่โมเดลก่อนหน้าทายผิด จะถูกเพิ่มน้ำหนักให้สูงขึ้น เพื่อบีบให้โมเดลตัวถัดไปต้องให้ความสำคัญกับตัวอย่างที่ยากเหล่านั้น
+                    </p>
+                    <div class="bg-white p-3 rounded-lg border border-slate-200 text-center font-mono text-xs mb-2">
+                        $$w_i^{(t+1)} = w_i^{(t)} \exp\left(-\alpha_t y_i h_t(\mathbf{x}_i)\right)$$
+                    </div>
+                    <p class="text-slate-500 text-[11px]">*เมื่อ $\alpha_t = \frac{1}{2} \ln\left(\frac{1 - \epsilon_t}{\epsilon_t}\right)$ คือน้ำหนักความน่าเชื่อถือของตัวทำนายที่ $t$*</p>
+                </div>
+
+                <!-- Gradient Boosting -->
+                <div class="p-5 rounded-xl border border-indigo-200 bg-indigo-50/40">
+                    <h3 class="font-bold text-indigo-950 text-base mb-2">2. Gradient Boosting (GBDT)</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed mb-3">
+                        แทนที่จะปรับค่าน้ำหนักของข้อมูล Gradient Boosting จะให้โมเดลใหม่ <strong>ฟิตค่าความคลาดเคลื่อนส่วนตกค้าง (Residuals)</strong> ของโมเดลเดิมโดยตรง เทียบเท่ากับการทำ Gradient Descent ในพื้นที่ฟังก์ชัน!
+                    </p>
+                    <div class="bg-white p-3 rounded-lg border border-indigo-200 text-center font-mono text-xs mb-2">
+                        $$y - \hat{y}_{(m-1)} \implies \text{ฝึก } h_m(\mathbf{x}) \text{ เพื่อทำนาย Residual}$$
+                        $$F_m(\mathbf{x}) = F_{m-1}(\mathbf{x}) + \eta \, h_m(\mathbf{x})$$
+                    </div>
+                    <p class="text-slate-500 text-[11px]">*โดยที่ $\eta$ คือ Learning Rate (Shrinkage) ช่วยควบคุม Overfitting*</p>
+                </div>
+            </div>
+
+            <!-- Modern Gradient Boosting Frameworks -->
+            <div class="bg-slate-900 text-white rounded-xl p-5 mt-4">
+                <h3 class="font-bold text-amber-400 text-sm mb-3">⚡ 3 เสาหลัก Gradient Boosting ยุคปัจจุบันในวงการอุตสาหกรรม</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-350">
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
+                        <strong class="text-white block mb-1 font-mono text-sm text-sky-400">XGBoost</strong>
+                        <p>Extreme Gradient Boosting ใช้การประมาณอนุพันธ์อันดับ 2 (Hessian), มี L1/L2 Regularization ในตัว และตัดแต่งกิ่งแบบ Exact Greedy</p>
+                    </div>
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
+                        <strong class="text-white block mb-1 font-mono text-sm text-emerald-400">LightGBM</strong>
+                        <p>จาก Microsoft ใช้ Histogram-based binning และการแตกกิ่งแบบ Leaf-wise (Best-first) เร็วขึ้นหลายเท่าและประหยัดแรมมหาศาล</p>
+                    </div>
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
+                        <strong class="text-white block mb-1 font-mono text-sm text-rose-400">CatBoost</strong>
+                        <p>จาก Yandex โดดเด่นเป็นเลิศในการจัดการข้อมูลตัวแปรกลุ่ม (Categorical Features) โดยไม่ต้องทำ One-Hot Encoding ล่วงหน้า</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Interactive Simulation -->
+        <section class="bg-slate-950 text-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-slate-800">
+            <h2 class="text-2xl font-bold text-white mb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-indigo-500/30 text-indigo-300 flex items-center justify-center mr-3 font-bold text-sm">4</span>
+                เครื่องจำลองการเรียนรู้แบบรวมกลุ่ม (Interactive Ensemble Sandbox)
+            </h2>
+            <p class="text-slate-400 text-xs mb-6">สังเกตว่าการเพิ่มจำนวนต้นไม้ตัดสินใจ (Estimators) ช่วยลดความผิดพลาดและปรับขอบเขตการตัดสินใจให้เรียบเนียนขึ้นอย่างไร</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                <div class="space-y-4 text-xs">
+                    <div>
+                        <label class="block text-slate-300 font-semibold mb-1">เลือกประเภทโมเดล:</label>
+                        <select id="ensemble-type" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                            <option value="single">Single Decision Tree (ต้นเดียว)</option>
+                            <option value="bagging" selected>Random Forest (Bagging)</option>
+                            <option value="boosting">Gradient Boosting (Residuals)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-slate-300 font-semibold mb-1">
+                            <span>จำนวนต้นไม้ ($N$ Estimators):</span>
+                            <span id="n-estimators-val" class="text-indigo-400 font-bold">10</span>
+                        </div>
+                        <input type="range" id="n-estimators" min="1" max="50" value="10" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+                    <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800 space-y-1.5 text-[11px] text-slate-300">
+                        <div>สถานะ: <span id="ens-status" class="text-emerald-400 font-semibold">เทรนสำเร็จ</span></div>
+                        <div>ความแม่นยำจำลอง: <span id="ens-acc" class="text-indigo-400 font-bold">92.4%</span></div>
+                        <div class="text-[10px] text-slate-400 mt-1" id="ens-desc">รวมเสียงโหวตจากหลายต้นไม้ ช่วยลด Variance ขอบเขตจึงไม่หยักคมเหมือนต้นเดี่ยว</div>
+                    </div>
+                    <button onclick="regenerateData()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg transition">สุ่มข้อมูลจุดใหม่</button>
+                </div>
+
+                <div class="md:col-span-2 flex flex-col items-center">
+                    <canvas id="ensemble-canvas" width="460" height="280" class="w-full max-w-[460px] bg-slate-900 border border-slate-800 rounded-xl shadow-inner"></canvas>
+                    <div class="flex gap-4 mt-3 text-xs text-slate-400">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-sky-500 inline-block"></span> คลาส 0 (ฟ้า)</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> คลาส 1 (แดง)</span>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                let dataPoints = [];
+                function initData() {
+                    dataPoints = [];
+                    for(let i=0; i<40; i++) {
+                        let r = 30 + Math.random()*50;
+                        let a = Math.random() * Math.PI * 2;
+                        dataPoints.push({ x: 150 + r*Math.cos(a), y: 140 + r*Math.sin(a), c: 0 });
+                    }
+                    for(let i=0; i<40; i++) {
+                        let r = 90 + Math.random()*45;
+                        let a = Math.random() * Math.PI * 2;
+                        dataPoints.push({ x: 150 + r*Math.cos(a), y: 140 + r*Math.sin(a), c: 1 });
+                    }
+                }
+                function regenerateData() {
+                    initData();
+                    drawEnsemble();
+                }
+                function drawEnsemble() {
+                    const canvas = document.getElementById('ensemble-canvas');
+                    if(!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    const w = canvas.width, h = canvas.height;
+                    const type = document.getElementById('ensemble-type').value;
+                    const n = parseInt(document.getElementById('n-estimators').value);
+                    document.getElementById('n-estimators-val').innerText = n;
+
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(0,0,w,h);
+
+                    // Simulated decision region
+                    const imgData = ctx.createImageData(w, h);
+                    for(let y=0; y<h; y+=3) {
+                        for(let x=0; x<w; x+=3) {
+                            let dist = Math.hypot(x - 150, y - 140);
+                            let score = 0;
+                            if (type === 'single') {
+                                score = (x > 120 && x < 200 && y > 90 && y < 190) ? 0 : 1;
+                            } else {
+                                let noise = Math.sin(x*0.08)*5 + Math.cos(y*0.08)*5;
+                                let threshold = 75 + (noise / Math.sqrt(n));
+                                score = dist < threshold ? 0 : 1;
+                            }
+                            let r = score === 0 ? 14 : 244;
+                            let g = score === 0 ? 116 : 63;
+                            let b = score === 0 ? 144 : 94;
+                            for(let dy=0; dy<3 && y+dy<h; dy++) {
+                                for(let dx=0; dx<3 && x+dx<w; dx++) {
+                                    let idx = ((y+dy)*w + (x+dx))*4;
+                                    imgData.data[idx] = r;
+                                    imgData.data[idx+1] = g;
+                                    imgData.data[idx+2] = b;
+                                    imgData.data[idx+3] = 40;
+                                }
+                            }
+                        }
+                    }
+                    ctx.putImageData(imgData, 0, 0);
+
+                    // Draw points
+                    dataPoints.forEach(p => {
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+                        ctx.fillStyle = p.c === 0 ? '#38bdf8' : '#f43f5e';
+                        ctx.fill();
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    });
+
+                    // Update metrics
+                    let acc = type === 'single' ? 78.5 : Math.min(98.5, 82 + Math.log2(n)*3.5);
+                    document.getElementById('ens-acc').innerText = acc.toFixed(1) + '%';
+                }
+                document.addEventListener('DOMContentLoaded', () => {
+                    initData();
+                    drawEnsemble();
+                    document.getElementById('ensemble-type').addEventListener('change', drawEnsemble);
+                    document.getElementById('n-estimators').addEventListener('input', drawEnsemble);
+                });
+            </script>
+        </section>
+
+        <!-- Section 5: Practical Labs -->
+        <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 text-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-slate-800 mt-8">
+            <div class="mb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 px-3 py-1 rounded-full border border-sky-900/30">ใบงานปฏิบัติการ (Practical Labs)</span>
+                <h3 class="text-xl font-bold mt-2 text-slate-100">ลงมือปฏิบัติด้วย Jupyter Notebook</h3>
+                <p class="text-slate-400 text-xs mt-1">เสริมสร้างทักษะภาคปฏิบัติผ่านแล็บทดลอง ทั้ง Random Forests, AdaBoost และ Gradient Boosting ด้วย Scikit-Learn</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <!-- Main Lab Card -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between hover:border-indigo-900 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 font-semibold">ใบงานหลัก (Main Lab)</span>
+                            <span class="text-[10px] font-medium text-slate-500 font-mono">Repo: handson-ml3</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-200 bg-slate-950/40 p-2 rounded border border-slate-800 font-mono mb-2">07_ensemble_learning_and_random_forests.ipynb</h4>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">ฝึกฝนสร้าง Voting Classifier, Bagging, Random Forest, Feature Importance และการปรับจูน Gradient Boosting</p>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <a href="https://github.com/anusornc/handson-ml3/blob/main/07_ensemble_learning_and_random_forests.ipynb" target="_blank" rel="noopener" class="flex-1 text-center bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 px-3 rounded-lg border border-slate-700 transition">
+                            GitHub
+                        </a>
+                        <a href="https://colab.research.google.com/github/anusornc/handson-ml3/blob/main/07_ensemble_learning_and_random_forests.ipynb" target="_blank" rel="noopener" class="flex-1 text-center bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold py-2 px-3 rounded-lg transition shadow-sm hover:shadow">
+                            Colab 🚀
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Supplementary Labs Card -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between hover:border-emerald-950 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 font-semibold">ใบงานเสริม (Supplementary Labs)</span>
+                            <span class="text-[10px] font-medium text-slate-500">หัวข้อขยายความเข้าใจเพิ่มเติม</span>
+                        </div>
+                        <div class="space-y-2.5 mt-2">
+                            <div class="flex items-center justify-between p-3 bg-slate-950/40 border border-slate-800 rounded-lg hover:border-slate-700 transition">
+                                <div class="flex-1 min-w-0 pr-2">
+                                    <p class="text-xs font-semibold text-slate-200 truncate">Trees & Ensembles In-Depth</p>
+                                    <p class="text-[9px] text-slate-500 font-mono truncate">Repo: python-ml-notebooks</p>
+                                </div>
+                                <div class="flex gap-1.5 shrink-0">
+                                    <a href="https://github.com/anusornc/python-ml-notebooks/blob/master/notebooks/5-trees-ensembles-in-depth.ipynb" target="_blank" rel="noopener" class="p-1 px-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[10px] rounded font-semibold transition">
+                                        GitHub
+                                    </a>
+                                    <a href="https://colab.research.google.com/github/anusornc/python-ml-notebooks/blob/master/notebooks/5-trees-ensembles-in-depth.ipynb" target="_blank" rel="noopener" class="p-1 px-2.5 bg-sky-500 hover:bg-sky-600 text-white text-[10px] rounded font-semibold transition shadow-sm">
+                                        Colab
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 text-slate-400 text-xs border-t border-slate-200">
+        หลักสูตรการเรียนรู้ของเครื่อง (Machine Learning Curriculum) &bull; ภาควิชาวิทยาการคอมพิวเตอร์
+    </footer>
+
+    <!-- Slideshow Generator Script -->
+    <script>
+    (function() {
+        let currentSlide = 0;
+        let slides = [];
+        let isSlideshowActive = false;
+        let originalParents = [];
+
+        window.toggleSlideshow = function() {
+            if (isSlideshowActive) exitSlideshow();
+            else enterSlideshow();
+        };
+
+        function enterSlideshow() {
+            const mainContent = document.querySelector('main');
+            if (!mainContent) return;
+            slides = buildSlides(mainContent);
+            if (slides.length === 0) return;
+
+            isSlideshowActive = true;
+            document.body.style.overflow = 'hidden';
+
+            const overlay = document.createElement('div');
+            overlay.id = 'slideshow-overlay';
+            overlay.className = 'fixed inset-0 z-50 bg-slate-950 text-white flex flex-col justify-between p-6 md:p-12 overflow-y-auto';
+
+            const topBar = document.createElement('div');
+            topBar.className = 'flex justify-between items-center w-full border-b border-slate-800 pb-4';
+            topBar.innerHTML = `
+                <div class="text-xs font-mono text-slate-400" id="slide-counter">สไลด์ 1 / ${slides.length}</div>
+                <button onclick="toggleSlideshow()" class="text-slate-400 hover:text-white px-3 py-1 rounded-lg border border-slate-800 bg-slate-900 text-xs">Esc ปิดสไลด์</button>
+            `;
+
+            const viewArea = document.createElement('div');
+            viewArea.id = 'slide-view-area';
+            viewArea.className = 'flex-1 flex items-center justify-center my-6';
+
+            const navBar = document.createElement('div');
+            navBar.className = 'flex justify-between items-center w-full border-t border-slate-800 pt-4';
+            navBar.innerHTML = `
+                <button id="prev-slide-btn" onclick="prevSlide()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg">← ก่อนหน้า (Space/←)</button>
+                <button id="next-slide-btn" onclick="nextSlide()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg">ถัดไป (→)</button>
+            `;
+
+            overlay.appendChild(topBar);
+            overlay.appendChild(viewArea);
+            overlay.appendChild(navBar);
+            document.body.appendChild(overlay);
+
+            document.addEventListener('keydown', handleKeypress);
+            showSlide(currentSlide);
+        }
+
+        function exitSlideshow() {
+            const overlay = document.getElementById('slideshow-overlay');
+            if (overlay) overlay.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', handleKeypress);
+            isSlideshowActive = false;
+            restoreMovedElements();
+        }
+
+        function handleKeypress(e) {
+            if (e.key === 'Escape') exitSlideshow();
+            else if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+        }
+
+        function buildSlides(mainContent) {
+            const header = document.querySelector('header');
+            let slideList = [];
+            if (header) {
+                const coverNode = document.createElement('div');
+                coverNode.className = 'text-center flex flex-col justify-center items-center h-full p-8';
+                const badge = header.querySelector('span')?.cloneNode(true);
+                const title = header.querySelector('h1')?.cloneNode(true);
+                const subtitle = header.querySelector('p')?.cloneNode(true);
+                if (badge) {
+                    badge.className = "text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-950/60 border border-amber-900/40 px-3 py-1 rounded-full mb-4";
+                    coverNode.appendChild(badge);
+                }
+                if (title) {
+                    title.className = "text-3xl md:text-5xl font-extrabold text-white leading-tight mb-4";
+                    coverNode.appendChild(title);
+                }
+                if (subtitle) {
+                    subtitle.className = "text-base md:text-xl text-slate-350 font-light max-w-2xl";
+                    coverNode.appendChild(subtitle);
+                }
+                slideList.push({ title: "บทนำ", content: [coverNode] });
+            }
+            let slideContainers = Array.from(mainContent.querySelectorAll('section'));
+            slideContainers.forEach((sec, idx) => {
+                slideList.push({ title: `ตอนที่ ${idx + 1}`, content: [sec] });
+            });
+            return slideList;
+        }
+
+        function showSlide(index) {
+            const viewArea = document.getElementById('slide-view-area');
+            if (!viewArea) return;
+            viewArea.innerHTML = '';
+            const slideData = slides[index];
+            const slideContainer = document.createElement('div');
+            slideContainer.className = 'w-full max-w-3xl bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8';
+            slideData.content.forEach(node => {
+                if (index === 0) {
+                    slideContainer.appendChild(node);
+                } else {
+                    const placeholderId = `slide-placeholder-${Date.now()}-${Math.random()}`;
+                    const placeholder = document.createElement('div');
+                    placeholder.id = placeholderId;
+                    node.parentNode.insertBefore(placeholder, node);
+                    originalParents.push({ element: node, placeholderId });
+                    slideContainer.appendChild(node);
+                }
+            });
+            viewArea.appendChild(slideContainer);
+            document.getElementById('slide-counter').innerText = `สไลด์ ${index + 1} / ${slides.length}`;
+            document.getElementById('prev-slide-btn').disabled = index === 0;
+            document.getElementById('next-slide-btn').disabled = index === slides.length - 1;
+        }
+
+        function restoreMovedElements() {
+            originalParents.forEach(item => {
+                const placeholder = document.getElementById(item.placeholderId);
+                if (placeholder) {
+                    placeholder.parentNode.insertBefore(item.element, placeholder);
+                    placeholder.remove();
+                }
+            });
+            originalParents = [];
+        }
+
+        window.nextSlide = function() {
+            if (currentSlide < slides.length - 1) {
+                restoreMovedElements();
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        };
+
+        window.prevSlide = function() {
+            if (currentSlide > 0) {
+                restoreMovedElements();
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        };
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บทที่ 21: Dimensionality Reduction (การลดทอนมิติข้อมูล)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+    <!-- KaTeX for beautiful math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap">
+</head>
+<body>
+    <!-- Floating Smart Navigator -->
+    <div class="fixed top-4 left-4 z-50 flex items-center space-x-1 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md px-2.5 py-1 rounded-full shadow-lg border border-slate-200 transition-all duration-300 hover:shadow-indigo-500/10">
+        <a href="20-ML-SVM.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="บทก่อนหน้า (บทที่ 20)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <a href="index.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="กลับหน้าแรกสารบัญ">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <a href="22-ML-Pipelines-Feature-Engineering.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="บทถัดไป (บทที่ 22)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <button onclick="toggleSlideshow()" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition flex items-center" title="โหมดนำเสนอ Slide">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-slate-900 via-purple-950 to-indigo-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
+        <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-950/60 border border-purple-900/40 px-3 py-1 rounded-full">Unsupervised Learning: Dimension Reduction &bull; บทที่ 21</span>
+            <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Dimensionality Reduction: PCA, t-SNE & UMAP</h1>
+            <p class="text-slate-350 text-sm md:text-base mt-2 font-light">ก้าวข้ามคำสาปแห่งมิติ (Curse of Dimensionality), การวิเคราะห์องค์ประกอบหลัก (PCA), และการพล็อตกลุ่มข้อมูลด้วย Manifold Learning</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <!-- Section 1: Curse of Dimensionality -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-purple-900 mb-4 border-b-2 border-purple-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center mr-3 font-semibold text-lg">1</span>
+                คำสาปแห่งมิติ (The Curse of Dimensionality)
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                ในโลกของข้อมูลจริง แต่ละตัวอย่างอาจมีตัวแปรเป็นพันหรือหมื่นฟีเจอร์ (เช่น พิกเซลในรูปภาพ หรือคำศัพท์ในคลังข้อความ) สัญชาตญาณทางเรขาคณิตของเราที่คุ้นเคยกับ 2 หรือ 3 มิติจะพังทลายลงในมิติสูง:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6 text-xs">
+                <div class="p-4 rounded-xl border border-rose-200 bg-rose-50/60">
+                    <strong class="text-rose-900 block text-sm mb-1.5">🌀 ปรากฏการณ์ในมิติสูง (High-Dimensional Space)</strong>
+                    <ul class="list-disc list-inside space-y-1.5 text-slate-700 leading-relaxed">
+                        <li><strong>พื้นที่ว่างมหาศาล (Extreme Sparsity):</strong> จุดข้อมูลส่วนใหญ่จะอยู่ห่างไกลกันมาก และกระจุกตัวอยู่แถว "ขอบ" ของปริภูมิลูกบาศก์มิติสูง</li>
+                        <li><strong>ระยะทางสูญเสียความหมาย:</strong> ระยะห่างระหว่างจุดที่ใกล้ที่สุดกับจุดที่ไกลที่สุดจะแทบไม่ต่างกัน ทำให้โมเดลจำพวก k-NN หรือ K-Means ทำงานล้มเหลว</li>
+                        <li><strong>เสี่ยงต่อ Overfitting ขั้นรุนแรง:</strong> โมเดลสามารถหาข้อสรุปปลอมจาก Noise ได้ง่ายมาก</li>
+                    </ul>
+                </div>
+
+                <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/60">
+                    <strong class="text-indigo-900 block text-sm mb-1.5">🎯 สองแนวทางหลักในการลดมิติ (Main Approaches)</strong>
+                    <ul class="list-disc list-inside space-y-1.5 text-slate-700 leading-relaxed">
+                        <li><strong>1. การฉายภาพ (Projection):</strong> ข้อมูลจริงมักจะไม่ได้กระจายตัวเต็มทุกมิติ แต่จะนอนอยู่บนหรือใกล้กับไฮเปอร์เพลนมิติต่ำ เช่น ข้อมูล 3 มิตินอนอยู่บนแผ่นเรียบ 2 มิติ (วิธีหลัก: <strong>PCA</strong>)</li>
+                        <li><strong>2. การเรียนรู้แมนิโฟลด์ (Manifold Learning):</strong> ข้อมูลมิติต่ำอาจถูกบิด ม้วน หรือโค้งงออยู่ในมิติสูง เช่น แผ่นแป้ง Swiss Roll การฉายภาพแบนๆ จะทำให้ข้อมูลทับกัน จึงต้อง "คลี่" แมนิโฟลด์ออก (วิธีหลัก: <strong>t-SNE, UMAP</strong>)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: PCA -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-purple-900 mb-4 border-b-2 border-purple-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center mr-3 font-semibold text-lg">2</span>
+                การวิเคราะห์องค์ประกอบหลัก (Principal Component Analysis - PCA)
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                <strong>PCA</strong> เป็นเทคนิคการลดมิติข้อมูลแบบเชิงเส้น (Linear) ที่ได้รับความนิยมสูงสุด โดยมีหลักการง่ายๆ คือ: <strong>"ค้นหาแกนที่รักษาสัดส่วนความแปรปรวน (Variance) ของข้อมูลไว้ได้มากที่สุด"</strong> เพราะแกนที่มีความแปรปรวนสูงสุดจะสูญเสียข้อมูล (Information Loss) น้อยที่สุดเมื่อทำการฉายภาพ
+            </p>
+
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 my-4 text-xs text-slate-700 space-y-3">
+                <h3 class="font-bold text-purple-950 text-sm">📐 ทฤษฎีคณิตศาสตร์เบื้องหลัง PCA: SVD (Singular Value Decomposition)</h3>
+                <p>
+                    ในการหาแกนองค์ประกอบหลัก (Principal Components) เราจะใช้การแยกค่าเอกฐาน (SVD) บนเมทริกซ์ข้อมูลที่ลบค่าเฉลี่ยออกแล้ว ($\mathbf{X} - \boldsymbol{\mu}$):
+                </p>
+                <div class="bg-white p-3 rounded-lg border border-slate-200 font-mono text-center text-sm text-purple-900">
+                    $$\mathbf{X} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^T$$
+                </div>
+                <p class="leading-relaxed">
+                    โดยที่คอลัมน์ของเมทริกซ์ $\mathbf{V}$ คือ <strong>เวกเตอร์หนึ่งหน่วยของแกนหลักทั้งหมด</strong>: $\mathbf{V} = [\mathbf{c}_1, \mathbf{c}_2, \dots, \mathbf{c}_n]$<br>
+                    เมื่อต้องการลดมิติจาก $n$ มิติ เหลือ $d$ มิติ เราเพียงคัดเลือก $d$ เวกเตอร์แรก: $\mathbf{W}_d = [\mathbf{c}_1, \dots, \mathbf{c}_d]$ แล้วฉายภาพข้อมูลลงไป:
+                </p>
+                <div class="bg-white p-2.5 rounded-lg border border-slate-200 font-mono text-center text-xs text-purple-800">
+                    $$\mathbf{X}_{d\text{-proj}} = \mathbf{X} \mathbf{W}_d$$
+                </div>
+            </div>
+
+            <!-- Explained Variance Ratio -->
+            <div class="bg-purple-50/70 border border-purple-200 rounded-xl p-4 text-xs text-purple-950">
+                <strong class="block text-sm font-bold mb-1">📊 สัดส่วนความแปรปรวนที่อธิบายได้ (Explained Variance Ratio)</strong>
+                <p class="leading-relaxed mb-2">
+                    ใน Scikit-Learn แอตทริบิวต์ <code>pca.explained_variance_ratio_</code> จะบอกว่าแกนแต่ละแกนเก็บข้อมูลไว้ได้กี่เปอร์เซ็นต์ ตัวอย่างเช่น:
+                </p>
+                <div class="bg-white p-2.5 rounded border border-purple-200 font-mono text-[11px] text-purple-900">
+                    PC1: 84.2%, PC2: 11.5%, PC3: 3.1%, PC4: 1.2%
+                </div>
+                <p class="mt-2 text-slate-700">
+                    เพียงใช้ 2 มิติแรก ($PC1 + PC2$) เราก็สามารถรักษาข้อมูลเดิมไว้ได้ถึง <strong>$95.7\%$</strong> โดยลดมิติข้อมูลลงได้ครึ่งหนึ่ง!
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 3: t-SNE and UMAP -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-purple-900 mb-4 border-b-2 border-purple-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center mr-3 font-semibold text-lg">3</span>
+                Manifold Learning สำหรับ Data Visualization: t-SNE และ UMAP
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                สำหรับงานสำรวจและแสดงภาพข้อมูล (Visualization) ใน 2D หรือ 3D การใช้วิธีเชิงเส้นอย่าง PCA อาจไม่สามารถแยกแยะกลุ่มข้อมูลที่ซับซ้อนได้ จึงต้องใช้อัลกอริทึมประเภท <strong>Non-linear Manifold Learning</strong>:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <!-- t-SNE -->
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <h3 class="font-bold text-slate-900 text-sm mb-1.5 flex items-center gap-1.5">
+                        <span class="text-indigo-600 font-mono">1.</span> t-SNE (t-Distributed Stochastic Neighbor Embedding)
+                    </h3>
+                    <p class="text-slate-600 leading-relaxed mb-2">
+                        แปลงระยะห่างระหว่างจุดข้อมูลในมิติสูงให้เป็นความน่าจะเป็นแบบเกาส์เซียน และพยายามจัดวางจุดในมิติต่ำให้มีความน่าจะเป็นแบบ Student-t คล้ายกันที่สุด (ลดค่า KL Divergence)
+                    </p>
+                    <ul class="list-disc list-inside text-slate-500 space-y-1">
+                        <li><strong>จุดเด่น:</strong> แยกคลัสเตอร์ใน 2D ได้สวยงาม คมชัด แยกกลุ่มชัดเจนมาก</li>
+                        <li><strong>ข้อจำกัด:</strong> ทำงานช้าบนชุดข้อมูลขนาดใหญ่ และไม่รักษาระยะห่างภาพรวมระหว่างกลุ่ม (Global Structure)</li>
+                    </ul>
+                </div>
+
+                <!-- UMAP -->
+                <div class="p-4 bg-indigo-50/50 border border-indigo-200 rounded-xl">
+                    <h3 class="font-bold text-indigo-950 text-sm mb-1.5 flex items-center gap-1.5">
+                        <span class="text-indigo-600 font-mono">2.</span> UMAP (Uniform Manifold Approximation & Projection)
+                    </h3>
+                    <p class="text-slate-600 leading-relaxed mb-2">
+                        สร้างขึ้นจากทฤษฎีทางคณิตศาสตร์เรขาคณิตไรمانน์ (Riemannian Geometry) และโทโพโลยี (Topology) เพื่อหาโครงสร้างแบบฟัซซีของข้อมูล
+                    </p>
+                    <ul class="list-disc list-inside text-slate-700 space-y-1">
+                        <li><strong>จุดเด่น:</strong> รวดเร็วกว่า t-SNE อย่างมหาศาล และสามารถรักษาได้ทั้งโครงสร้างเฉพาะที่ (Local) และโครงสร้างภาพรวม (Global)</li>
+                        <li><strong>การประยุกต์ใช้:</strong> มาตรฐานอันดับ 1 ในงาน Single-cell Genomics, NLP Embeddings และ Visual Search</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Interactive Simulation -->
+        <section class="bg-slate-950 text-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-slate-800">
+            <h2 class="text-2xl font-bold text-white mb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-purple-500/30 text-purple-300 flex items-center justify-center mr-3 font-bold text-sm">4</span>
+                เครื่องจำลองการหมุนหาแกน PCA (Interactive PCA Axis Finder)
+            </h2>
+            <p class="text-slate-400 text-xs mb-6">หมุนองศาของแกนเพื่อสังเกต: แกนที่ให้ความแปรปรวน (Variance) สูงสุด คือแกนที่เส้นเชื่อมฉายภาพ (Reconstruction Error) สั้นที่สุด!</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                <div class="space-y-4 text-xs">
+                    <div>
+                        <div class="flex justify-between text-slate-300 font-semibold mb-1">
+                            <span>มุมของแกนฉายภาพ (Angle):</span>
+                            <span id="angle-disp" class="text-purple-400 font-bold">35°</span>
+                        </div>
+                        <input type="range" id="pca-angle" min="0" max="180" value="35" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500">
+                    </div>
+                    <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800 space-y-2 text-[11px] text-slate-300">
+                        <div class="flex justify-between">
+                            <span>ความแปรปรวน (Variance):</span>
+                            <span id="var-disp" class="text-emerald-400 font-bold">88.4%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>ค่าความผิดพลาด (MSE):</span>
+                            <span id="mse-disp" class="text-rose-400 font-bold">0.116</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400 mt-1" id="pca-hint">ลองหมุนไปยังมุมที่เส้นสีม่วงพาดผ่านแนวยาวของกลุ่มข้อมูล เพื่อให้ได้ Variance สูงสุด</div>
+                    </div>
+                    <button onclick="resetPcaData()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg transition">สุ่มจุดข้อมูลใหม่</button>
+                </div>
+
+                <div class="md:col-span-2 flex flex-col items-center">
+                    <canvas id="pca-canvas" width="460" height="280" class="w-full max-w-[460px] bg-slate-900 border border-slate-800 rounded-xl shadow-inner"></canvas>
+                    <div class="flex gap-4 mt-3 text-xs text-slate-400">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-sky-400 inline-block"></span> จุดข้อมูล 2D เดิม</span>
+                        <span class="flex items-center gap-1.5"><span class="w-4 h-0.5 bg-purple-400 inline-block"></span> แกน PCA ที่เลือกทดลอง</span>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                let pcaPoints = [];
+                function initPcaData() {
+                    pcaPoints = [];
+                    // Generate correlated elliptical points
+                    for(let i=0; i<50; i++) {
+                        let u = (Math.random() - 0.5) * 220;
+                        let v = (Math.random() - 0.5) * 50;
+                        // Rotate ~ 35 deg
+                        let rad = 35 * Math.PI / 180;
+                        let x = 230 + (u * Math.cos(rad) - v * Math.sin(rad));
+                        let y = 140 + (u * Math.sin(rad) + v * Math.cos(rad));
+                        pcaPoints.push({ x, y });
+                    }
+                }
+                function resetPcaData() {
+                    initPcaData();
+                    drawPca();
+                }
+                function drawPca() {
+                    const canvas = document.getElementById('pca-canvas');
+                    if(!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    const w = canvas.width, h = canvas.height;
+                    const deg = parseInt(document.getElementById('pca-angle').value);
+                    document.getElementById('angle-disp').innerText = `${deg}°`;
+                    const rad = deg * Math.PI / 180;
+
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(0,0,w,h);
+
+                    const cx = 230, cy = 140;
+                    const dx = Math.cos(rad), dy = Math.sin(rad);
+
+                    // Draw PCA axis
+                    ctx.beginPath();
+                    ctx.moveTo(cx - dx*250, cy - dy*250);
+                    ctx.lineTo(cx + dx*250, cy + dy*250);
+                    ctx.strokeStyle = '#c084fc';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Project points & compute variance / error
+                    let sumVar = 0;
+                    let sumMse = 0;
+
+                    pcaPoints.forEach(p => {
+                        let rx = p.x - cx;
+                        let ry = p.y - cy;
+                        // Dot product onto axis
+                        let proj = rx * dx + ry * dy;
+                        let px = cx + proj * dx;
+                        let py = cy + proj * dy;
+
+                        sumVar += proj * proj;
+                        let errDist = Math.hypot(p.x - px, p.y - py);
+                        sumMse += errDist * errDist;
+
+                        // Draw projection dashed line
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(px, py);
+                        ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+
+                        // Draw original point
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, 3.5, 0, Math.PI*2);
+                        ctx.fillStyle = '#38bdf8';
+                        ctx.fill();
+
+                        // Draw projected point on axis
+                        ctx.beginPath();
+                        ctx.arc(px, py, 2.5, 0, Math.PI*2);
+                        ctx.fillStyle = '#f43f5e';
+                        ctx.fill();
+                    });
+
+                    let totalVar = sumVar + sumMse;
+                    let varRatio = totalVar > 0 ? (sumVar / totalVar) * 100 : 0;
+                    let mseVal = sumMse / (pcaPoints.length * 1000);
+
+                    document.getElementById('var-disp').innerText = `${varRatio.toFixed(1)}%`;
+                    document.getElementById('mse-disp').innerText = mseVal.toFixed(3);
+                }
+                document.addEventListener('DOMContentLoaded', () => {
+                    initPcaData();
+                    drawPca();
+                    document.getElementById('pca-angle').addEventListener('input', drawPca);
+                });
+            </script>
+        </section>
+
+        <!-- Section 5: Practical Labs -->
+        <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 text-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-slate-800 mt-8">
+            <div class="mb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-950/60 px-3 py-1 rounded-full border border-purple-900/30">ใบงานปฏิบัติการ (Practical Labs)</span>
+                <h3 class="text-xl font-bold mt-2 text-slate-100">ลงมือปฏิบัติด้วย Jupyter Notebook</h3>
+                <p class="text-slate-400 text-xs mt-1">ทดลองลดมิติภาพใบหน้าและชุดข้อมูล MNIST ด้วย PCA, Incremental PCA และสร้างกราฟด้วย t-SNE</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <!-- Main Lab Card -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between hover:border-purple-900 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400 font-semibold">ใบงานหลัก (Main Lab)</span>
+                            <span class="text-[10px] font-medium text-slate-500 font-mono">Repo: handson-ml3</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-200 bg-slate-950/40 p-2 rounded border border-slate-800 font-mono mb-2">08_dimensionality_reduction.ipynb</h4>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">ฝึกฝนการใช้ PCA, การเลือกจำนวนมิติด้วย Explained Variance Ratio, Random PCA และการพล็อต t-SNE</p>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <a href="https://github.com/anusornc/handson-ml3/blob/main/08_dimensionality_reduction.ipynb" target="_blank" rel="noopener" class="flex-1 text-center bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 px-3 rounded-lg border border-slate-700 transition">
+                            GitHub
+                        </a>
+                        <a href="https://colab.research.google.com/github/anusornc/handson-ml3/blob/main/08_dimensionality_reduction.ipynb" target="_blank" rel="noopener" class="flex-1 text-center bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold py-2 px-3 rounded-lg transition shadow-sm hover:shadow">
+                            Colab 🚀
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Supplementary Labs Card -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between hover:border-emerald-950 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 font-semibold">ใบงานเสริม (Supplementary Labs)</span>
+                            <span class="text-[10px] font-medium text-slate-500">หัวข้อขยายความเข้าใจเพิ่มเติม</span>
+                        </div>
+                        <div class="space-y-2.5 mt-2">
+                            <div class="flex items-center justify-between p-3 bg-slate-950/40 border border-slate-800 rounded-lg hover:border-slate-700 transition">
+                                <div class="flex-1 min-w-0 pr-2">
+                                    <p class="text-xs font-semibold text-slate-200 truncate">Dimensionality Reduction In-Depth</p>
+                                    <p class="text-[9px] text-slate-500 font-mono truncate">Repo: python-ml-notebooks</p>
+                                </div>
+                                <div class="flex gap-1.5 shrink-0">
+                                    <a href="https://github.com/anusornc/python-ml-notebooks/blob/master/notebooks/8-dimensionality-reduction.ipynb" target="_blank" rel="noopener" class="p-1 px-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[10px] rounded font-semibold transition">
+                                        GitHub
+                                    </a>
+                                    <a href="https://colab.research.google.com/github/anusornc/python-ml-notebooks/blob/master/notebooks/8-dimensionality-reduction.ipynb" target="_blank" rel="noopener" class="p-1 px-2.5 bg-sky-500 hover:bg-sky-600 text-white text-[10px] rounded font-semibold transition shadow-sm">
+                                        Colab
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 text-slate-400 text-xs border-t border-slate-200">
+        หลักสูตรการเรียนรู้ของเครื่อง (Machine Learning Curriculum) &bull; ภาควิชาวิทยาการคอมพิวเตอร์
+    </footer>
+
+    <!-- Slideshow Generator Script -->
+    <script>
+    (function() {
+        let currentSlide = 0;
+        let slides = [];
+        let isSlideshowActive = false;
+        let originalParents = [];
+
+        window.toggleSlideshow = function() {
+            if (isSlideshowActive) exitSlideshow();
+            else enterSlideshow();
+        };
+
+        function enterSlideshow() {
+            const mainContent = document.querySelector('main');
+            if (!mainContent) return;
+            slides = buildSlides(mainContent);
+            if (slides.length === 0) return;
+
+            isSlideshowActive = true;
+            document.body.style.overflow = 'hidden';
+
+            const overlay = document.createElement('div');
+            overlay.id = 'slideshow-overlay';
+            overlay.className = 'fixed inset-0 z-50 bg-slate-950 text-white flex flex-col justify-between p-6 md:p-12 overflow-y-auto';
+
+            const topBar = document.createElement('div');
+            topBar.className = 'flex justify-between items-center w-full border-b border-slate-800 pb-4';
+            topBar.innerHTML = `
+                <div class="text-xs font-mono text-slate-400" id="slide-counter">สไลด์ 1 / ${slides.length}</div>
+                <button onclick="toggleSlideshow()" class="text-slate-400 hover:text-white px-3 py-1 rounded-lg border border-slate-800 bg-slate-900 text-xs">Esc ปิดสไลด์</button>
+            `;
+
+            const viewArea = document.createElement('div');
+            viewArea.id = 'slide-view-area';
+            viewArea.className = 'flex-1 flex items-center justify-center my-6';
+
+            const navBar = document.createElement('div');
+            navBar.className = 'flex justify-between items-center w-full border-t border-slate-800 pt-4';
+            navBar.innerHTML = `
+                <button id="prev-slide-btn" onclick="prevSlide()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg">← ก่อนหน้า (Space/←)</button>
+                <button id="next-slide-btn" onclick="nextSlide()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-lg">ถัดไป (→)</button>
+            `;
+
+            overlay.appendChild(topBar);
+            overlay.appendChild(viewArea);
+            overlay.appendChild(navBar);
+            document.body.appendChild(overlay);
+
+            document.addEventListener('keydown', handleKeypress);
+            showSlide(currentSlide);
+        }
+
+        function exitSlideshow() {
+            const overlay = document.getElementById('slideshow-overlay');
+            if (overlay) overlay.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', handleKeypress);
+            isSlideshowActive = false;
+            restoreMovedElements();
+        }
+
+        function handleKeypress(e) {
+            if (e.key === 'Escape') exitSlideshow();
+            else if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+        }
+
+        function buildSlides(mainContent) {
+            const header = document.querySelector('header');
+            let slideList = [];
+            if (header) {
+                const coverNode = document.createElement('div');
+                coverNode.className = 'text-center flex flex-col justify-center items-center h-full p-8';
+                const badge = header.querySelector('span')?.cloneNode(true);
+                const title = header.querySelector('h1')?.cloneNode(true);
+                const subtitle = header.querySelector('p')?.cloneNode(true);
+                if (badge) {
+                    badge.className = "text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-950/60 border border-purple-900/40 px-3 py-1 rounded-full mb-4";
+                    coverNode.appendChild(badge);
+                }
+                if (title) {
+                    title.className = "text-3xl md:text-5xl font-extrabold text-white leading-tight mb-4";
+                    coverNode.appendChild(title);
+                }
+                if (subtitle) {
+                    subtitle.className = "text-base md:text-xl text-slate-350 font-light max-w-2xl";
+                    coverNode.appendChild(subtitle);
+                }
+                slideList.push({ title: "บทนำ", content: [coverNode] });
+            }
+            let slideContainers = Array.from(mainContent.querySelectorAll('section'));
+            slideContainers.forEach((sec, idx) => {
+                slideList.push({ title: `ตอนที่ ${idx + 1}`, content: [sec] });
+            });
+            return slideList;
+        }
+
+        function showSlide(index) {
+            const viewArea = document.getElementById('slide-view-area');
+            if (!viewArea) return;
+            viewArea.innerHTML = '';
+            const slideData = slides[index];
+            const slideContainer = document.createElement('div');
+            slideContainer.className = 'w-full max-w-3xl bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8';
+            slideData.content.forEach(node => {
+                if (index === 0) {
+                    slideContainer.appendChild(node);
+                } else {
+                    const placeholderId = `slide-placeholder-${Date.now()}-${Math.random()}`;
+                    const placeholder = document.createElement('div');
+                    placeholder.id = placeholderId;
+                    node.parentNode.insertBefore(placeholder, node);
+                    originalParents.push({ element: node, placeholderId });
+                    slideContainer.appendChild(node);
+                }
+            });
+            viewArea.appendChild(slideContainer);
+            document.getElementById('slide-counter').innerText = `สไลด์ ${index + 1} / ${slides.length}`;
+            document.getElementById('prev-slide-btn').disabled = index === 0;
+            document.getElementById('next-slide-btn').disabled = index === slides.length - 1;
+        }
+
+        function restoreMovedElements() {
+            originalParents.forEach(item => {
+                const placeholder = document.getElementById(item.placeholderId);
+                if (placeholder) {
+                    placeholder.parentNode.insertBefore(item.element, placeholder);
+                    placeholder.remove();
+                }
+            });
+            originalParents = [];
+        }
+
+        window.nextSlide = function() {
+            if (currentSlide < slides.length - 1) {
+                restoreMovedElements();
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        };
+
+        window.prevSlide = function() {
+            if (currentSlide > 0) {
+                restoreMovedElements();
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        };
+    })();
+    </script>
+</body>
+</html>

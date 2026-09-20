@@ -67,16 +67,29 @@
         
 
                             <!-- Header -->
-    <header class="bg-gradient-to-r from-indigo-950 via-slate-900 to-blue-955 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
+    <header class="bg-gradient-to-r from-indigo-950 via-slate-900 to-blue-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border-sky-900/30 px-3 py-1 rounded-full border">Supervised Learning Concepts &bull; บทที่ 04</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border-sky-900/30 px-3 py-1 rounded-full border">Supervised Learning Concepts &bull; บทที่ 04</span>
             <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Regression vs. Classification</h1>
             <p class="text-slate-350 text-sm md:text-base mt-2 font-light">ความแตกต่างในเชิงเป้าหมาย วิธีการวัดผล และรูปแบบอัลกอริทึมหลัก</p>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Companion Code Banner -->
+        <div class="mb-8 p-5 bg-gradient-to-r from-sky-900/40 via-indigo-900/30 to-slate-900/50 border border-sky-500/30 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 px-2.5 py-0.5 rounded border border-sky-800/40 font-mono">Companion Code Walkthrough</span>
+                <h3 class="text-base font-bold text-slate-100 mt-1">สไลด์เจาะลึกโค้ด: Training Linear Models</h3>
+                <p class="text-xs text-slate-300 mt-0.5">ศึกษาโค้ดอย่างเป็นระบบจาก Normal Equation, Polynomial Regression ไปจนถึง Softmax Classification</p>
+            </div>
+            <a href="04-training-linear-models-code-slides.html" class="shrink-0 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center space-x-1.5">
+                <span>เปิดสไลด์โค้ด (18 หน้า)</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+
         <!-- Introduction Section -->
         <section class="mb-12">
             <div class="bg-white rounded-xl shadow-md p-6 mb-8">
@@ -123,6 +136,12 @@
                             </svg>
                         </div>
                     </div>
+                </div>
+
+                <!-- Decision Threshold Note -->
+                <div class="mt-6 bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-700 leading-relaxed">
+                    <p class="font-bold text-slate-800 text-sm mb-1">💡 จุดเชื่อมโยงสำคัญ: จาก Probability สู่ Decision Boundary</p>
+                    <p>ในความเป็นจริง โมเดล Classification จำนวนมาก (เช่น Logistic Regression) เริ่มต้นด้วยการคำนวณ <strong>ความน่าจะเป็น (Probability $\in [0, 1]$)</strong> ซึ่งเป็นค่าตัวเลขต่อเนื่อง จากนั้นจึงใช้ <strong>เกณฑ์ตัดสินใจ (Decision Threshold เช่น 0.5)</strong> ในการตัดแบ่งผลลัพธ์เป็นคลาส 0 หรือ 1 แนวคิดนี้จะถูกอธิบายอย่างลึกซึ้งใน <a href="06-ML-Logistics-Regression.html" class="text-indigo-600 font-bold hover:underline">บทที่ 06: Logistic Regression</a></p>
                 </div>
             </div>
         </section>
@@ -826,7 +845,7 @@
             const subtitle = header.querySelector('p')?.cloneNode(true);
             
             if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border border-sky-800/30 px-3 py-1 rounded-full mb-4";
                 coverNode.appendChild(badge);
             }
             if (title) {
@@ -992,7 +1011,7 @@
                 });
                 el.querySelectorAll('td').forEach(td => {
                     if (!td.hasAttribute('data-original-class')) td.setAttribute('data-original-class', td.className);
-                    td.className = 'py-2 px-4 border-b border-slate-850 text-slate-350';
+                    td.className = 'py-2 px-4 border-b border-slate-800 text-slate-300';
                 });
             }
             

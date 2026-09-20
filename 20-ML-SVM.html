@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บทที่ 20: Support Vector Machines (SVM) & Kernel Methods</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+    <!-- KaTeX for beautiful math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap">
+</head>
+<body>
+    <!-- Floating Smart Navigator -->
+    <div class="fixed top-4 left-4 z-50 flex items-center space-x-1 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md px-2.5 py-1 rounded-full shadow-lg border border-slate-200 transition-all duration-300 hover:shadow-indigo-500/10">
+        <a href="19-ML-Ensemble-Boosting.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="บทก่อนหน้า (บทที่ 19)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <a href="index.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="กลับหน้าแรกสารบัญ">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <a href="21-ML-Dimensionality-Reduction.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="บทถัดไป (บทที่ 21)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <button onclick="toggleSlideshow()" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition flex items-center" title="โหมดนำเสนอ Slide">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-slate-900 via-teal-950 to-emerald-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
+        <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-teal-400 bg-teal-950/60 border border-teal-900/40 px-3 py-1 rounded-full">Supervised Learning: Optimization &bull; บทที่ 20</span>
+            <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Support Vector Machines (SVM) & Kernel Trick</h1>
+            <p class="text-slate-350 text-sm md:text-base mt-2 font-light">เส้นแบ่งขอบกว้างที่สุด (Max Margin), ซอฟต์มาร์จิน, การแปลงมิติด้วยฟังก์ชันเคอร์เนล (RBF) และ Support Vector Regression</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <!-- Section 1: Maximum Margin -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-teal-900 mb-4 border-b-2 border-teal-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center mr-3 font-semibold text-lg">1</span>
+                ขอบเขตแบ่งกลุ่มที่กว้างที่สุด (Maximum Margin) & Support Vectors
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                สำหรับข้อมูลที่สามารถแบ่งแยกเป็นสองกลุ่มได้ด้วยเส้นตรง (Linearly Separable) จะมีเส้นแบ่ง (Decision Boundary) ที่เป็นไปได้จำนวนนับไม่ถ้วน แต่ <strong>Support Vector Machine (SVM)</strong> จะเลือกเส้นตรงเพียงเส้นเดียวที่อยู่ <strong>"ห่างจากจุดข้อมูลของทั้งสองฝั่งมากที่สุด"</strong> ซึ่งเรียกว่า <strong>Maximum Margin Hyperplane</strong>
+            </p>
+
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 my-4 text-xs text-slate-700 space-y-3">
+                <h3 class="font-bold text-teal-950 text-sm">📐 พื้นฐานคณิตศาสตร์ของเส้นแบ่งและมาร์จิน (Margin)</h3>
+                <p>กำหนดไฮเปอร์เพลนด้วยสมการ: $\mathbf{w}^T\mathbf{x} + b = 0$</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+                    <div class="p-3 bg-white rounded-lg border border-slate-200">
+                        <strong class="text-teal-800 block mb-1">ขอบเขตบนและล่าง (Street Margins)</strong>
+                        <p>$\mathbf{w}^T\mathbf{x} + b \ge +1 \quad \text{สำหรับคลาส } +1$</p>
+                        <p>$\mathbf{w}^T\mathbf{x} + b \le -1 \quad \text{สำหรับคลาส } -1$</p>
+                    </div>
+                    <div class="p-3 bg-white rounded-lg border border-slate-200">
+                        <strong class="text-teal-800 block mb-1">ความกว้างของถนน (Margin Width)</strong>
+                        <p class="font-mono text-center my-1 text-sm text-teal-900">$$\text{Margin} = \frac{2}{\|\mathbf{w}\|}$$</p>
+                        <p class="text-slate-500 text-[11px]">การทำให้ Margin กว้างที่สุด เท่ากับ <strong>การลดขนาด $\|\mathbf{w}\|$ ให้เหลือน้อยที่สุด ($\min \frac{1}{2}\|\mathbf{w}\|^2$)</strong></p>
+                    </div>
+                </div>
+                <div class="bg-teal-50 p-3 rounded-lg border border-teal-200 text-teal-950">
+                    <strong>Support Vectors:</strong> คือจุดข้อมูลเพียงไม่กี่จุดที่นอนอยู่บนเส้นขอบถนนพอดี ($\mathbf{w}^T\mathbf{x} + b = \pm 1$) จุดเหล่านี้เป็นผู้กำหนดตำแหน่งและทิศทางของเส้นแบ่ง หากเราลบจุดข้อมูลอื่น ๆ ที่อยู่นอกถนนทิ้งไป โมเดลจะยังคงได้เส้นแบ่งเดิมทุกประการ!
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Soft Margin & C parameter -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-teal-900 mb-4 border-b-2 border-teal-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center mr-3 font-semibold text-lg">2</span>
+                ซอฟต์มาร์จิน (Soft Margin) และไฮเปอร์พารามิเตอร์ $C$
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                ในโลกความเป็นจริง ข้อมูลมักมีสัญญาณรบกวน (Noise) หรือจุด Outliers ที่ทำให้ไม่สามารถขีดเส้นตรงแบ่งแยกได้อย่างสมบูรณ์แบบ (Hard Margin จะล้มเหลวทันที) เราจึงต้องใช้ <strong>Soft Margin Classification</strong> ซึ่งยอมให้มีจุดข้อมูลบางจุดล่วงล้ำเข้ามาในมาร์จินหรืออยู่ผิดฝั่งได้ โดยวัดความผิดพลาดด้วยตัวแปรผ่อนปรน <strong>(Slack Variable: $\xi_i \ge 0$)</strong>
+            </p>
+
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
+                <h3 class="font-bold text-slate-800 text-sm mb-2">สมการเป้าหมายแบบผ่อนปรน (Soft Margin Objective):</h3>
+                <div class="bg-white p-3 rounded-lg border border-slate-200 text-center font-mono text-xs mb-3">
+                    $$\min_{\mathbf{w}, b, \boldsymbol{\xi}} \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^{m} \xi_i \quad \text{ภายใต้เงื่อนไข } y_i(\mathbf{w}^T\mathbf{x}_i + b) \ge 1 - \xi_i$$
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-lg">
+                        <strong class="text-amber-900 block mb-1">ค่า $C$ สูง (Strict / Low Regularization)</strong>
+                        <p class="text-slate-700 leading-relaxed">โมเดลจะลงโทษจุดที่ผิดพลาดอย่างหนัก ทำให้ถนนมาร์จินแคบ ขอบเขตเข้มงวด ลด Bias แต่เสี่ยงต่อการเกิด <strong>Overfitting</strong></p>
+                    </div>
+                    <div class="p-3 bg-blue-50/70 border border-blue-200 rounded-lg">
+                        <strong class="text-blue-900 block mb-1">ค่า $C$ ต่ำ (Tolerant / High Regularization)</strong>
+                        <p class="text-slate-700 leading-relaxed">โมเดลยอมให้จุดล่วงล้ำเข้ามาในมาร์จินได้มากขึ้น ทำให้ถนนกว้างขึ้น ทนทานต่อ Outlier แต่หากต่ำเกินไปจะเกิด <strong>Underfitting</strong></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Kernel Trick -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-teal-900 mb-4 border-b-2 border-teal-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center mr-3 font-semibold text-lg">3</span>
+                กลวิธีเคอร์เนล (The Kernel Trick) & ฟังก์ชัน RBF
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                เมื่อข้อมูลไม่สามารถแบ่งแยกด้วยเส้นตรงได้ในมิติเดิม ทางออกคลาสสิกคือการแปลงข้อมูลไปยังมิติที่สูงขึ้น (Feature Mapping: $\phi(\mathbf{x})$) เช่น จาก 2 มิติ สู่ 3 มิติ เพื่อให้สามารถขีดระนาบตรงตัดแบ่งได้ แต่การแปลงมิติโดยตรงต้องใช้ต้นทุนการคำนวณและหน่วยความจำมหาศาล
+            </p>
+
+            <div class="bg-gradient-to-r from-teal-50 via-slate-50 to-emerald-50 border border-teal-200 rounded-xl p-5 mb-4">
+                <h3 class="font-bold text-teal-950 text-base mb-2">✨ ความมหัศจรรย์ของ The Kernel Trick</h3>
+                <p class="text-slate-700 text-xs leading-relaxed mb-3">
+                    <strong>กลวิธีเคอร์เนล (Kernel Trick)</strong> อาศัยทฤษฎีบทของเมอร์เซอร์ (Mercer's Theorem) ซึ่งพิสูจน์ว่า เราสามารถคำนวณผลคูณจุด (Dot Product) ในมิติที่สูงมาก (หรือแม้กระทั่งมิติอนันต์!) ได้โดยตรงจากพิกัดในมิติต่ำเดิม: $K(\mathbf{a}, \mathbf{b}) = \phi(\mathbf{a})^T \phi(\mathbf{b})$ โดย <strong>ไม่ต้องแปลงพิกัด $\phi(\mathbf{x})$ จริงเลยแม้แต่น้อย!</strong>
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mt-3">
+                    <div class="bg-white p-3.5 rounded-lg border border-teal-100">
+                        <strong class="text-teal-800 block mb-1">1. Polynomial Kernel</strong>
+                        <div class="font-mono text-[11px] text-center my-1 bg-slate-50 p-1.5 rounded">$K(\mathbf{a}, \mathbf{b}) = (\gamma \mathbf{a}^T\mathbf{b} + r)^d$</div>
+                        <p class="text-slate-600">สร้างความสัมพันธ์แบบพหุนาม ดีสำหรับข้อมูลที่มีปฏิสัมพันธ์แบบเชิงคูณ</p>
+                    </div>
+                    <div class="bg-white p-3.5 rounded-lg border border-teal-100">
+                        <strong class="text-teal-800 block mb-1">2. Gaussian RBF (Radial Basis Function)</strong>
+                        <div class="font-mono text-[11px] text-center my-1 bg-slate-50 p-1.5 rounded">$K(\mathbf{a}, \mathbf{b}) = \exp(-\gamma \|\mathbf{a} - \mathbf{b}\|^2)$</div>
+                        <p class="text-slate-600">เคอร์เนลยอดนิยมอันดับ 1 เทียบเท่าการแมปข้อมูลไปยัง <strong>มิติที่เป็นอนันต์ ($\infty$)</strong></p>
+                    </div>
+                </div>
+
+                <div class="mt-3 p-3 bg-white rounded-lg border border-teal-100 text-xs text-slate-700 leading-relaxed">
+                    <strong>💡 บทบาทของไฮเปอร์พารามิเตอร์ $\gamma$ (Gamma):</strong> ทำหน้าที่กำหนดความกว้างของระฆังคว่ำแบบเกาส์เซียน หาก $\gamma$ สูง จุดแต่ละจุดจะมีรัศมีอิทธิพลแคบ ขอบเขตจะหยักโค้งรอบจุดข้อมูลอย่างมาก (เสี่ยง Overfitting) แต่หาก $\gamma$ ต่ำ รัศมีจะกว้าง ขอบเขตจะเรียบแบนขึ้น
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Interactive Simulation -->
+        <section class="bg-slate-950 text-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-slate-800">
+            <h2 class="text-2xl font-bold text-white mb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-teal-500/30 text-teal-300 flex items-center justify-center mr-3 font-bold text-sm">4</span>
+                เครื่องจำลองขอบเขต SVM (Interactive SVM Sandbox)
+            </h2>
+            <p class="text-slate-400 text-xs mb-6">ทดลองปรับเปลี่ยนค่า $C$ และ $\gamma$ ในการจำลองขอบเขตการตัดสินใจของ Gaussian RBF SVM</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                <div class="space-y-4 text-xs">
+                    <div>
+                        <div class="flex justify-between text-slate-300 font-semibold mb-1">
+                            <span>ค่า $C$ (Regularization):</span>
+                            <span id="c-val-disp" class="text-teal-400 font-bold">1.0</span>
+                        </div>
+                        <input type="range" id="c-slider" min="0.1" max="10" step="0.1" value="1.0" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-slate-300 font-semibold mb-1">
+                            <span>ค่า $\gamma$ (Gamma - RBF Radius):</span>
+                            <span id="gamma-val-disp" class="text-teal-400 font-bold">0.5</span>
+                        </div>
+                        <input type="range" id="gamma-slider" min="0.05" max="2.0" step="0.05" value="0.5" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                    </div>
+                    <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800 space-y-1.5 text-[11px] text-slate-300">
+                        <div>จำนวน Support Vectors: <span id="sv-count" class="text-amber-400 font-bold">14 จุด</span></div>
+                        <div class="text-[10px] text-slate-400" id="svm-summary">เมื่อ $\gamma$ พอเหมาะ ขอบเขตตัดสินใจจะโอบล้อมคลัสเตอร์ได้อย่างเป็นธรรมชาติ</div>
+                    </div>
+                    <button onclick="resetSvmData()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg transition">สุ่มจุดข้อมูลใหม่</button>
+                </div>
+
+                <div class="md:col-span-2 flex flex-col items-center">
+                    <canvas id="svm-canvas" width="460" height="280" class="w-full max-w-[460px] bg-slate-900 border border-slate-800 rounded-xl shadow-inner"></canvas>
+                    <div class="flex gap-4 mt-3 text-xs text-slate-400">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-teal-400 inline-block"></span> คลาส +1</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-400 inline-block"></span> คลาส -1</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full border border-amber-400 inline-block"></span> Support Vectors (วงกลมสีทอง)</span>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                let svmPoints = [];
+                function initSvmData() {
+                    svmPoints = [];
+                    // Class +1
+                    for(let i=0; i<25; i++) {
+                        let a = Math.random()*Math.PI*2;
+                        let r = Math.random()*50;
+                        svmPoints.push({ x: 160 + r*Math.cos(a), y: 140 + r*Math.sin(a), yClass: 1 });
+                    }
+                    // Class -1 (surrounding ring)
+                    for(let i=0; i<30; i++) {
+                        let a = Math.random()*Math.PI*2;
+                        let r = 85 + Math.random()*45;
+                        svmPoints.push({ x: 160 + r*Math.cos(a), y: 140 + r*Math.sin(a), yClass: -1 });
+                    }
+                }
+                function resetSvmData() {
+                    initSvmData();
+                    drawSvm();
+                }
+                function drawSvm() {
+                    const canvas = document.getElementById('svm-canvas');
+                    if(!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    const w = canvas.width, h = canvas.height;
+                    const C = parseFloat(document.getElementById('c-slider').value);
+                    const gamma = parseFloat(document.getElementById('gamma-slider').value);
+                    document.getElementById('c-val-disp').innerText = C.toFixed(1);
+                    document.getElementById('gamma-val-disp').innerText = gamma.toFixed(2);
+
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(0,0,w,h);
+
+                    // Render RBF Decision surface
+                    const imgData = ctx.createImageData(w, h);
+                    let svCount = 0;
+                    for(let y=0; y<h; y+=3) {
+                        for(let x=0; x<w; x+=3) {
+                            let f = 0;
+                            for(let p of svmPoints) {
+                                let d2 = (x - p.x)**2 + (y - p.y)**2;
+                                f += p.yClass * Math.exp(-gamma * 0.0008 * d2);
+                            }
+                            let isPos = f > 0;
+                            let isMargin = Math.abs(f) < (1.2 / C);
+                            let r = isMargin ? 40 : (isPos ? 13 : 190);
+                            let g = isMargin ? 50 : (isPos ? 148 : 40);
+                            let b = isMargin ? 70 : (isPos ? 136 : 80);
+                            for(let dy=0; dy<3 && y+dy<h; dy++) {
+                                for(let dx=0; dx<3 && x+dx<w; dx++) {
+                                    let idx = ((y+dy)*w + (x+dx))*4;
+                                    imgData.data[idx] = r;
+                                    imgData.data[idx+1] = g;
+                                    imgData.data[idx+2] = b;
+                                    imgData.data[idx+3] = isMargin ? 80 : 35;
+                                }
+                            }
+                        }
+                    }
+                    ctx.putImageData(imgData, 0, 0);
+
+                    // Draw points and support vectors
+                    svmPoints.forEach(p => {
+                        let f = 0;
+                        for(let other of svmPoints) {
+                            let d2 = (p.x - other.x)**2 + (p.y - other.y)**2;
+                            f += other.yClass * Math.exp(-gamma * 0.0008 * d2);
+                        }
+                        let isSV = Math.abs(f) < (1.5 / Math.sqrt(C));
+                        if(isSV) svCount++;
+
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+                        ctx.fillStyle = p.yClass === 1 ? '#2dd4bf' : '#fb7185';
+                        ctx.fill();
+
+                        if (isSV) {
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, 7, 0, Math.PI*2);
+                            ctx.strokeStyle = '#fbbf24';
+                            ctx.lineWidth = 1.5;
+                            ctx.stroke();
+                        }
+                    });
+
+                    document.getElementById('sv-count').innerText = `${svCount} จุด`;
+                }
+                document.addEventListener('DOMContentLoaded', () => {
+                    initSvmData();
+                    drawSvm();
+                    document.getElementById('c-slider').addEventListener('input', drawSvm);
+                    document.getElementById('gamma-slider').addEventListener('input', drawSvm);
+                });
+            </script>
+        </section>
+
+        <!-- Section 5: Practical Labs -->
+        <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 text-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-slate-800 mt-8">
+            <div class="mb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-teal-400 bg-teal-950/60 px-3 py-1 rounded-full border border-teal-900/30">ใบงานปฏิบัติการ (Practical Labs)</span>
+                <h3 class="text-xl font-bold mt-2 text-slate-100">ลงมือปฏิบัติด้วย Jupyter Notebook</h3>
+                <p class="text-slate-400 text-xs mt-1">ทดลองสร้าง Linear SVM, Non-linear RBF Kernel และ Support Vector Regression ด้วย Scikit-Learn</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <!-- Main Lab Card -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between hover:border-teal-900 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-teal-400 font-semibold">ใบงานหลัก (Main Lab)</span>
+                            <span class="text-[10px] font-medium text-slate-500 font-mono">Repo: handson-ml3</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-200 bg-slate-950/40 p-2 rounded border border-slate-800 font-mono mb-2">05_support_vector_machines.ipynb</h4>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">เรียนรู้วิธีสร้าง LinearSVC, SVC (Polynomial, RBF), LinearSVR และการจูนไฮเปอร์พารามิเตอร์ C และ Gamma</p>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <a href="https://github.com/anusornc/handson-ml3/blob/main/05_support_vector_machines.ipynb" target="_blank" rel="noopener" class="flex-1 text-center bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 px-3 rounded-lg border border-slate-700 transition">
+                            GitHub
+                        </a>
+                        <a href="https://colab.research.google.com/github/anusornc/handson-ml3/blob/main/05_support_vector_machines.ipynb" target="_blank" rel="noopener" class="flex-1 text-center bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold py-2 px-3 rounded-lg transition shadow-sm hover:shadow">
+                            Colab 🚀
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Supplementary Labs Card -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between hover:border-emerald-950 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 font-semibold">ใบงานเสริม (Supplementary Labs)</span>
+                            <span class="text-[10px] font-medium text-slate-500">หัวข้อขยายความเข้าใจเพิ่มเติม</span>
+                        </div>
+                        <div class="space-y-2.5 mt-2">
+                            <div class="flex items-center justify-between p-3 bg-slate-950/40 border border-slate-800 rounded-lg hover:border-slate-700 transition">
+                                <div class="flex-1 min-w-0 pr-2">
+                                    <p class="text-xs font-semibold text-slate-200 truncate">SVMs & Kernel Trick In-Depth</p>
+                                    <p class="text-[9px] text-slate-500 font-mono truncate">Repo: python-ml-notebooks</p>
+                                </div>
+                                <div class="flex gap-1.5 shrink-0">
+                                    <a href="https://github.com/anusornc/python-ml-notebooks/blob/master/notebooks/4-support-vector-machines.ipynb" target="_blank" rel="noopener" class="p-1 px-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[10px] rounded font-semibold transition">
+                                        GitHub
+                                    </a>
+                                    <a href="https://colab.research.google.com/github/anusornc/python-ml-notebooks/blob/master/notebooks/4-support-vector-machines.ipynb" target="_blank" rel="noopener" class="p-1 px-2.5 bg-sky-500 hover:bg-sky-600 text-white text-[10px] rounded font-semibold transition shadow-sm">
+                                        Colab
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 text-slate-400 text-xs border-t border-slate-200">
+        หลักสูตรการเรียนรู้ของเครื่อง (Machine Learning Curriculum) &bull; ภาควิชาวิทยาการคอมพิวเตอร์
+    </footer>
+
+    <!-- Slideshow Generator Script -->
+    <script>
+    (function() {
+        let currentSlide = 0;
+        let slides = [];
+        let isSlideshowActive = false;
+        let originalParents = [];
+
+        window.toggleSlideshow = function() {
+            if (isSlideshowActive) exitSlideshow();
+            else enterSlideshow();
+        };
+
+        function enterSlideshow() {
+            const mainContent = document.querySelector('main');
+            if (!mainContent) return;
+            slides = buildSlides(mainContent);
+            if (slides.length === 0) return;
+
+            isSlideshowActive = true;
+            document.body.style.overflow = 'hidden';
+
+            const overlay = document.createElement('div');
+            overlay.id = 'slideshow-overlay';
+            overlay.className = 'fixed inset-0 z-50 bg-slate-950 text-white flex flex-col justify-between p-6 md:p-12 overflow-y-auto';
+
+            const topBar = document.createElement('div');
+            topBar.className = 'flex justify-between items-center w-full border-b border-slate-800 pb-4';
+            topBar.innerHTML = `
+                <div class="text-xs font-mono text-slate-400" id="slide-counter">สไลด์ 1 / ${slides.length}</div>
+                <button onclick="toggleSlideshow()" class="text-slate-400 hover:text-white px-3 py-1 rounded-lg border border-slate-800 bg-slate-900 text-xs">Esc ปิดสไลด์</button>
+            `;
+
+            const viewArea = document.createElement('div');
+            viewArea.id = 'slide-view-area';
+            viewArea.className = 'flex-1 flex items-center justify-center my-6';
+
+            const navBar = document.createElement('div');
+            navBar.className = 'flex justify-between items-center w-full border-t border-slate-800 pt-4';
+            navBar.innerHTML = `
+                <button id="prev-slide-btn" onclick="prevSlide()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg">← ก่อนหน้า (Space/←)</button>
+                <button id="next-slide-btn" onclick="nextSlide()" class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold rounded-lg">ถัดไป (→)</button>
+            `;
+
+            overlay.appendChild(topBar);
+            overlay.appendChild(viewArea);
+            overlay.appendChild(navBar);
+            document.body.appendChild(overlay);
+
+            document.addEventListener('keydown', handleKeypress);
+            showSlide(currentSlide);
+        }
+
+        function exitSlideshow() {
+            const overlay = document.getElementById('slideshow-overlay');
+            if (overlay) overlay.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', handleKeypress);
+            isSlideshowActive = false;
+            restoreMovedElements();
+        }
+
+        function handleKeypress(e) {
+            if (e.key === 'Escape') exitSlideshow();
+            else if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+        }
+
+        function buildSlides(mainContent) {
+            const header = document.querySelector('header');
+            let slideList = [];
+            if (header) {
+                const coverNode = document.createElement('div');
+                coverNode.className = 'text-center flex flex-col justify-center items-center h-full p-8';
+                const badge = header.querySelector('span')?.cloneNode(true);
+                const title = header.querySelector('h1')?.cloneNode(true);
+                const subtitle = header.querySelector('p')?.cloneNode(true);
+                if (badge) {
+                    badge.className = "text-xs font-bold uppercase tracking-wider text-teal-400 bg-teal-950/60 border border-teal-900/40 px-3 py-1 rounded-full mb-4";
+                    coverNode.appendChild(badge);
+                }
+                if (title) {
+                    title.className = "text-3xl md:text-5xl font-extrabold text-white leading-tight mb-4";
+                    coverNode.appendChild(title);
+                }
+                if (subtitle) {
+                    subtitle.className = "text-base md:text-xl text-slate-350 font-light max-w-2xl";
+                    coverNode.appendChild(subtitle);
+                }
+                slideList.push({ title: "บทนำ", content: [coverNode] });
+            }
+            let slideContainers = Array.from(mainContent.querySelectorAll('section'));
+            slideContainers.forEach((sec, idx) => {
+                slideList.push({ title: `ตอนที่ ${idx + 1}`, content: [sec] });
+            });
+            return slideList;
+        }
+
+        function showSlide(index) {
+            const viewArea = document.getElementById('slide-view-area');
+            if (!viewArea) return;
+            viewArea.innerHTML = '';
+            const slideData = slides[index];
+            const slideContainer = document.createElement('div');
+            slideContainer.className = 'w-full max-w-3xl bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8';
+            slideData.content.forEach(node => {
+                if (index === 0) {
+                    slideContainer.appendChild(node);
+                } else {
+                    const placeholderId = `slide-placeholder-${Date.now()}-${Math.random()}`;
+                    const placeholder = document.createElement('div');
+                    placeholder.id = placeholderId;
+                    node.parentNode.insertBefore(placeholder, node);
+                    originalParents.push({ element: node, placeholderId });
+                    slideContainer.appendChild(node);
+                }
+            });
+            viewArea.appendChild(slideContainer);
+            document.getElementById('slide-counter').innerText = `สไลด์ ${index + 1} / ${slides.length}`;
+            document.getElementById('prev-slide-btn').disabled = index === 0;
+            document.getElementById('next-slide-btn').disabled = index === slides.length - 1;
+        }
+
+        function restoreMovedElements() {
+            originalParents.forEach(item => {
+                const placeholder = document.getElementById(item.placeholderId);
+                if (placeholder) {
+                    placeholder.parentNode.insertBefore(item.element, placeholder);
+                    placeholder.remove();
+                }
+            });
+            originalParents = [];
+        }
+
+        window.nextSlide = function() {
+            if (currentSlide < slides.length - 1) {
+                restoreMovedElements();
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        };
+
+        window.prevSlide = function() {
+            if (currentSlide > 0) {
+                restoreMovedElements();
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        };
+    })();
+    </script>
+</body>
+</html>

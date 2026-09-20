@@ -396,10 +396,10 @@
     });
     </script>
                             <!-- Header -->
-    <header class="bg-gradient-to-r from-indigo-955 via-slate-900 to-indigo-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
+    <header class="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-955/60 border-indigo-900/30 px-3 py-1 rounded-full border">Model Validation & Metrics &bull; บทที่ 05</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-950/60 border-indigo-900/30 px-3 py-1 rounded-full border">Model Validation & Metrics &bull; บทที่ 05</span>
             <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">การวัดประสิทธิภาพโมเดล</h1>
             <p class="text-slate-350 text-sm md:text-base mt-2 font-light">เมตริกวิเคราะห์ ฟังก์ชันความสูญเสียสำหรับ Regression และ Classification</p>
         </div>
@@ -1138,10 +1138,10 @@
                                     <li>ทนทานต่อความไม่สมดุลของคลาส</li>
                                     <li>วัดความสามารถในการจัดอันดับของโมเดล</li>
                                 </ul>
-                                <p class="text-gray-700 mb-3"><strong>ข้อเสีย:</strong></p>
+                                <p class="text-gray-700 mb-3"><strong>ข้อเสีย / ข้อควรระวัง:</strong></p>
                                 <ul class="list-disc pl-5 text-gray-700 mb-3">
                                     <li>ไม่ได้บอกถึงประสิทธิภาพที่ threshold ใดๆ โดยเฉพาะ</li>
-                                    <li>อาจทำให้เข้าใจผิดในกรณีที่มีความไม่สมดุลของคลาสมาก</li>
+                                    <li><strong>ระวังในข้อมูลไม่สมดุล (Imbalanced Data):</strong> หากคลาส Negative มีปริมาณมหาศาล ค่า FPR อาจมีค่าน้อยมากจนทำให้เส้น ROC ดูดีเกินจริง ในกรณีนี้แนะนำให้ใช้ <strong>Precision-Recall (PR) Curve</strong> หรือ PR-AUC แทน</li>
                                 </ul>
                             </div>
                         </div>
@@ -1525,7 +1525,7 @@
             const subtitle = header.querySelector('p')?.cloneNode(true);
             
             if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border border-sky-800/30 px-3 py-1 rounded-full mb-4";
                 coverNode.appendChild(badge);
             }
             if (title) {
@@ -1691,7 +1691,7 @@
                 });
                 el.querySelectorAll('td').forEach(td => {
                     if (!td.hasAttribute('data-original-class')) td.setAttribute('data-original-class', td.className);
-                    td.className = 'py-2 px-4 border-b border-slate-850 text-slate-350';
+                    td.className = 'py-2 px-4 border-b border-slate-800 text-slate-300';
                 });
             }
             

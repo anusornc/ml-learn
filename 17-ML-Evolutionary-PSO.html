@@ -63,7 +63,7 @@
     <header class="bg-gradient-to-r from-slate-900 via-rose-950 to-pink-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-955/60 border-rose-900/30 px-3 py-1 rounded-full border">Evolutionary Algorithms &bull; บทที่ 17</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-950/60 border-rose-900/30 px-3 py-1 rounded-full border">Evolutionary Algorithms &bull; บทที่ 17</span>
             <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Evolutionary & PSO</h1>
             <p class="text-slate-350 text-sm md:text-base mt-2 font-light">ขั้นตอนวิธีทางพันธุกรรม (Genetic Algorithm) และการหาความเหมาะสมด้วยฝูงอนุภาค (PSO)</p>
         </div>
@@ -95,12 +95,24 @@
                 <h3 class="font-bold text-rose-900 text-lg mb-2">ตัวอย่าง GA หนึ่งรุ่น: หาสตริง 4 บิตที่มีเลข 1 มากที่สุด</h3>
                 <p class="text-sm text-slate-700 mb-3">ให้ Fitness = จำนวนเลข 1 ในโครโมโซม ดังนั้นยิ่งมี 1 มาก ยิ่งดี</p>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-700">
-                    <div class="rounded-lg bg-white border border-rose-100 p-4"><p class="font-semibold text-rose-900">1. Selection</p><p class="mt-2">พ่อ A = <code>1100</code>, Fitness 2<br>แม่ B = <code>1011</code>, Fitness 3</p><p class="mt-2 text-xs">B มีโอกาสถูกเลือกมากกว่า แต่ GA ยังรักษาความหลากหลายไว้</p></div>
-                    <div class="rounded-lg bg-white border border-rose-100 p-4"><p class="font-semibold text-rose-900">2. Crossover</p><p class="mt-2">ตัดหลังบิตที่ 2</p><p><code>11|00</code> + <code>10|11</code></p><p class="mt-2">ลูกตัวที่ 1 = <code>11|11</code> = <strong>1111</strong>, Fitness 4</p></div>
-                    <div class="rounded-lg bg-white border border-rose-100 p-4"><p class="font-semibold text-rose-900">3. Mutation</p><p class="mt-2">ลูกอีกตัว <code>1000</code> อาจกลายพันธุ์ที่บิตสุดท้ายเป็น <code>1001</code></p><p class="mt-2 text-xs">การกลายพันธุ์เปิดโอกาสให้เจอคำตอบใหม่ แม้พ่อแม่ยังไม่มีรูปแบบนั้น</p></div>
+                อัลกอริทึมเชิงพันธุกรรม (Genetic Algorithms - GA)
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                <strong>Genetic Algorithms (GA)</strong> คือการประยุกต์ใช้ทฤษฎีวิวัฒนาการของชาร์ลส์ ดาร์วิน (Charles Darwin) เพื่อแก้ปัญหาการค้นหาและการหาค่าที่เหมาะสมที่สุด (Optimization) โดยสร้างประชากรของคำตอบที่เข้ารหัสเป็น <strong>โครโมโซม (Chromosome)</strong> แล้ววิวัฒนาการผ่านรุ่นต่าง ๆ เพื่อค้นหาคำตอบที่ดีที่สุด
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-4 text-xs">
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <span class="font-bold text-rose-700 block mb-1">1. การคัดเลือก (Selection)</span>
+                    <p class="text-slate-600">คัดเลือกโครโมโซมที่มีค่า Fitness สูงกว่า เพื่อเป็นพ่อแม่พันธุ์ (เช่น Roulette Wheel, Tournament Selection)</p>
                 </div>
-                <p class="mt-3 text-sm text-rose-950"><strong>แปลผล:</strong> crossover รวมส่วนดีจากพ่อแม่ได้ในตัวอย่างนี้ แต่หนึ่งรุ่นไม่รับประกันว่าดีขึ้นเสมอไป จึงต้องประเมินและทำซ้ำหลายรุ่น</p>
-                <details class="mt-3 rounded-lg bg-white p-3 text-sm text-rose-950"><summary class="cursor-pointer font-semibold">ลองตอบ: Fitness ของ <code>0101</code> เป็นเท่าไร?</summary><p class="mt-2">เท่ากับ 2 เพราะมีเลข 1 อยู่สองตำแหน่ง</p></details>
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <span class="font-bold text-rose-700 block mb-1">2. การสลับสายพันธุ์ (Crossover)</span>
+                    <p class="text-slate-600">ผสมยีนของพ่อแม่เข้าด้วยกัน เพื่อสร้างลูกหลานที่มีคุณลักษณะผสมผสานที่ดีขึ้น</p>
+                </div>
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <span class="font-bold text-rose-700 block mb-1">3. การกลายพันธุ์ (Mutation)</span>
+                    <p class="text-slate-600">สุ่มเปลี่ยนค่ายีนบางตำแหน่งด้วยความน่าจะเป็นต่ำ เพื่อป้องกันไม่ให้ประชากรติดอยู่ใน Local Optimum</p>
+                </div>
             </div>
         </section>
 
@@ -139,6 +151,41 @@
                 <h4 class="font-bold text-slate-800 text-sm mb-2">2. การคำนวณตำแหน่งพิกัดใหม่ (Position Update)</h4>
                 <div class="font-mono text-sm overflow-x-auto py-2">
                     $$x_i(t+1) = x_i(t) + v_i(t+1)$$
+                </div>
+            </div>
+
+            <!-- Velocity Clamping & Weight Decay Note -->
+            <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-4 mb-6 text-xs text-amber-950">
+                <h4 class="font-bold text-amber-900 text-sm mb-1.5 flex items-center gap-2">
+                    <span>⚙️</span> เทคนิคสำคัญ: Velocity Clamping ($v_{\max}$) และ Inertia Weight Decay
+                </h4>
+                <ul class="list-disc list-inside space-y-1 text-slate-700">
+                    <li><strong>Velocity Clamping ($v_{\max}$):</strong> หากความเร็วพุ่งสูงเกินไป อนุภาคจะกระเด็นหลุดออกนอกขอบเขตพื้นที่ค้นหา จึงต้องกำหนดให้ $-v_{\max} \le v_i \le v_{\max}$ เสมอ</li>
+                    <li><strong>Inertia Decay ($w$):</strong> ค่อยๆ ลดค่าความเฉื่อยลงตามรอบเวลา (เช่น จาก 0.9 เหลือ 0.4) เพื่อให้ช่วงแรกเน้นการสำรวจพื้นที่กว้าง (Exploration) และช่วงท้ายเน้นการบีบเข้าหาจุดที่ดีที่สุด (Exploitation)</li>
+                </ul>
+            </div>
+
+            <!-- ML Applications Card -->
+            <div class="bg-gradient-to-r from-rose-50 via-slate-50 to-orange-50 border border-rose-200 rounded-xl p-5 mb-6">
+                <h3 class="font-bold text-rose-950 text-base mb-2 flex items-center gap-2">
+                    <span class="text-rose-600 font-mono text-lg">✦</span> การประยุกต์ใช้ GA และ PSO ใน Machine Learning
+                </h3>
+                <p class="text-slate-600 text-xs leading-relaxed mb-3">
+                    เนื่องจาก GA และ PSO เป็น <em>Derivative-Free Optimization</em> (ไม่ต้องคำนวณอนุพันธ์หรือเกรเดียนต์) จึงมีบทบาทสำคัญอย่างมากในงาน ML:
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="bg-white p-3 rounded-lg border border-rose-100 shadow-sm">
+                        <strong class="text-rose-700 block mb-1">1. Hyperparameter Tuning</strong>
+                        <p class="text-slate-600">ค้นหาพารามิเตอร์ที่ดีที่สุด (learning rate, tree depth, batch size) ในพื้นที่ที่ไม่ต่อเนื่องหรือไม่นูน (Non-convex space)</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-rose-100 shadow-sm">
+                        <strong class="text-rose-700 block mb-1">2. Feature Selection</strong>
+                        <p class="text-slate-600">ใช้ Binary GA / PSO เข้ารหัสโครโมโซมเป็นบิต 0/1 เพื่อเลือกชุดตัวแปรที่ให้คะแนน CV สูงสุดและลดมิติข้อมูล</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-rose-100 shadow-sm">
+                        <strong class="text-rose-700 block mb-1">3. Neuroevolution (NAS)</strong>
+                        <p class="text-slate-600">วิวัฒนาการทั้งโครงสร้าง (Architecture) และค่าน้ำหนักของ Neural Network โดยไม่ต้องใช้ Backpropagation</p>
+                    </div>
                 </div>
             </div>
 
@@ -611,7 +658,7 @@
             const subtitle = header.querySelector('p')?.cloneNode(true);
             
             if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border border-sky-800/30 px-3 py-1 rounded-full mb-4";
                 coverNode.appendChild(badge);
             }
             if (title) {
@@ -777,7 +824,7 @@
                 });
                 el.querySelectorAll('td').forEach(td => {
                     if (!td.hasAttribute('data-original-class')) td.setAttribute('data-original-class', td.className);
-                    td.className = 'py-2 px-4 border-b border-slate-850 text-slate-350';
+                    td.className = 'py-2 px-4 border-b border-slate-800 text-slate-300';
                 });
             }
             

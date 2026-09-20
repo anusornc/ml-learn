@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jev Model Interactive Decision Sandbox - System 1 AI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Sarabun', 'Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        darkbg: '#0b0f19',
+                        panelbg: '#111827',
+                        bordercolor: '#1f293d',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: 'Sarabun', sans-serif;
+        }
+        .glow-btn {
+            box-shadow: 0 0 20px -3px rgba(244, 63, 94, 0.4);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 20px -3px rgba(6, 182, 212, 0.35);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0b0f19]">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <a href="../index.html" class="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition" title="กลับสู่สารบัญหลัก">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </a>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded font-mono">System 1 AI</span>
+                        <h1 class="text-base md:text-lg font-bold text-white tracking-tight">Jev Model Interactive Decision Sandbox</h1>
+                        <span class="hidden sm:inline-block text-[10px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">typesafe/jev-1.13</span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-light">ทดลองการตัดสินใจแบบมีโครงสร้าง (Choice, Score, Noul) ด้วยความหน่วงระดับ ~100ms</p>
+                </div>
+            </div>
+
+            <!-- Top Actions -->
+            <div class="flex items-center space-x-2">
+                <button onclick="openApiKeyModal()" id="api-key-status-btn" class="text-xs font-semibold px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition flex items-center space-x-1.5">
+                    <span id="key-indicator" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                    <span id="key-label">ตั้งค่า API Key</span>
+                </button>
+                <a href="https://www.jevai.org/th/docs" target="_blank" rel="noopener" class="text-xs font-semibold px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg transition flex items-center space-x-1">
+                    <span>📖 เอกสาร Jev</span>
+                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="container mx-auto px-4 py-6 flex-1 flex flex-col lg:flex-row gap-6 max-w-7xl">
+
+        <!-- Left Column: Input Builder -->
+        <div class="lg:w-1/2 flex flex-col space-y-5">
+            
+            <!-- Preset & State Panel -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <label class="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                        <span>1. โหลดตัวอย่างการใช้งาน (Preset)</span>
+                    </label>
+                    <select id="preset-select" onchange="loadPreset(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1 outline-none focus:border-rose-500 transition">
+                        <option value="support">💬 คัดกรองและแบ่งระดับตั๋วลูกค้า (Support Triage)</option>
+                        <option value="guard">🛡️ ตรวจสอบความปลอดภัย Tool-Calling (Agent Guardrail)</option>
+                        <option value="router">🤖 เลือกรุ่นโมเดล ML ที่เหมาะสม (ML Model Router)</option>
+                        <option value="custom">✏️ กำหนดเอง (Custom State & Questions)</option>
+                    </select>
+                </div>
+
+                <!-- State Context -->
+                <div class="mt-4">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="state-input" class="text-xs font-semibold text-slate-300">บริบทร่วม (State Context):</label>
+                        <span class="text-[10px] text-slate-500 font-mono">ข้อความ / JSON ร่วมทุกคำถาม</span>
+                    </div>
+                    <textarea id="state-input" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 outline-none transition resize-y" placeholder="ระบุข้อความหรือ JSON ของ State เช่น ข้อความจากลูกค้า หรือประวัติคำสั่ง..."></textarea>
+                </div>
+            </div>
+
+            <!-- Typed Questions Panel -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+                    <div>
+                        <label class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                            <span>2. คำถามแบบมีโครงสร้าง (Typed Questions)</span>
+                        </label>
+                        <p class="text-[11px] text-slate-400 font-light mt-0.5">Choice (ตัวเลือก), Score (คะแนนถ่วงน้ำหนัก), Noul (ความน่าจะเป็นใช่)</p>
+                    </div>
+                    <button onclick="addQuestion()" class="text-xs font-semibold px-3 py-1 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-lg transition flex items-center space-x-1">
+                        <span>+ เพิ่มคำถาม</span>
+                    </button>
+                </div>
+
+                <!-- Questions Container -->
+                <div id="questions-container" class="space-y-4 overflow-y-auto max-h-[480px] pr-1">
+                    <!-- Dynamic Question Cards injected by JS -->
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="pt-2">
+                <button onclick="runDecision()" id="run-btn" class="w-full py-3 px-6 bg-gradient-to-r from-rose-600 via-rose-500 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white font-bold rounded-xl text-sm transition shadow-lg glow-btn flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span>ส่งคำขอประเมินผล (Run Decision)</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Results & Inspector -->
+        <div class="lg:w-1/2 flex flex-col space-y-5">
+            
+            <!-- Execution Status Banner -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div id="status-icon" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm">
+                        💤
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span id="status-text" class="text-xs font-bold text-slate-300">พร้อมรับคำขอ</span>
+                            <span id="mode-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">โหมดจำลอง (Mock Demo)</span>
+                        </div>
+                        <p id="latency-text" class="text-[11px] text-slate-500 font-mono mt-0.5">Latency: -- ms</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2 text-xs font-mono">
+                    <span class="text-slate-500 text-[11px]">Server:</span>
+                    <span class="text-rose-400 font-semibold bg-rose-950/50 px-2 py-0.5 rounded border border-rose-900/40">typesafe/jev-1.13</span>
+                </div>
+            </div>
+
+            <!-- Decision Results Cards -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+                    <label class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>3. ผลลัพธ์การตัดสินใจ (Decisions & Probabilities)</span>
+                    </label>
+                    <span class="text-[10px] text-slate-500 font-mono">Type-Safe 100% Guaranteed</span>
+                </div>
+
+                <!-- Results Container -->
+                <div id="results-container" class="space-y-4 flex-1 overflow-y-auto max-h-[380px] pr-1">
+                    <div class="h-full min-h-[220px] flex flex-col items-center justify-center text-center p-6 border border-dashed border-slate-800 rounded-xl text-slate-500">
+                        <svg class="w-10 h-10 text-slate-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-xs font-medium text-slate-400">ยังไม่มีผลลัพธ์</p>
+                        <p class="text-[11px] text-slate-600 mt-1 max-w-xs">กดปุ่ม «ส่งคำขอประเมินผล» เพื่อรัน State และ Questions ผ่านโมเดล Jev</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Developer Inspector Tabs -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                    <div class="flex space-x-2">
+                        <button onclick="switchTab('response')" id="tab-response-btn" class="px-2.5 py-1 rounded text-xs font-semibold bg-slate-800 text-rose-400 border border-slate-700">
+                            Raw JSON
+                        </button>
+                        <button onclick="switchTab('curl')" id="tab-curl-btn" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition">
+                            cURL / Python
+                        </button>
+                        <button onclick="switchTab('architecture')" id="tab-arch-btn" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition">
+                            ทำไมต้อง System 1?
+                        </button>
+                    </div>
+                    <button onclick="copyCode()" class="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800 border border-slate-700 transition">
+                        คัดลอก
+                    </button>
+                </div>
+
+                <div id="inspector-content" class="text-xs font-mono text-slate-300 bg-slate-950 p-3 rounded-xl border border-slate-800 overflow-x-auto max-h-48">
+                    // ผลลัพธ์ดิบจะแสดงที่นี่หลังส่งคำขอ
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- API Key Modal -->
+    <div id="api-key-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl animate-fade-in">
+            <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                    <h3 class="text-base font-bold text-white">ตั้งค่า Jev API Key</h3>
+                </div>
+                <button onclick="closeApiKeyModal()" class="text-slate-400 hover:text-white transition">✕</button>
+            </div>
+
+            <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                หากคุณมี API Key ของ Jev AI ให้กรอกที่นี่เพื่อส่งคำขอจริงไปยัง <code class="text-rose-400 font-mono">https://www.jevai.org/api/v1/decisions</code> โดยคีย์จะถูกส่งผ่าน Bearer Header โดยตรงจากเบราว์เซอร์ของคุณ
+            </p>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs font-semibold text-slate-300 block mb-1">API Key:</label>
+                    <div class="relative">
+                        <input type="password" id="api-key-input" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:border-rose-500 outline-none pr-10" placeholder="jev_xxxxxxxxxxxxxxxxxxxxxxxx">
+                        <button type="button" onclick="toggleKeyVisibility()" class="absolute right-2.5 top-2 text-slate-500 hover:text-slate-300 text-xs">👁️</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2 pt-1">
+                    <input type="checkbox" id="save-key-checkbox" class="rounded bg-slate-800 border-slate-700 text-rose-500 focus:ring-0">
+                    <label for="save-key-checkbox" class="text-xs text-slate-400 select-none">จำคีย์ไว้ในเบราว์เซอร์นี้ (localStorage)</label>
+                </div>
+
+                <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
+                    <div class="font-semibold text-slate-300">🔒 นโยบายความปลอดภัย:</div>
+                    <p>คีย์ของคุณจะถูกจัดเก็บในเครื่องของคุณเท่านั้น และไม่เคยถูกส่งไปยังเซิร์ฟเวอร์อื่นใดนอกจาก Jev AI</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-2 mt-6">
+                <button onclick="clearApiKey()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">
+                    ล้างคีย์ (ใช้โหมด Mock)
+                </button>
+                <button onclick="saveApiKey()" class="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white transition shadow-md">
+                    บันทึกและใช้งาน
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // Preset Definitions
+        const PRESETS = {
+            support: {
+                state: "Customer: 'I was charged twice for my subscription invoice #INV-9821 on Sept 18. Please refund the extra $49 immediately or I will contact my credit card company!'",
+                questions: [
+                    {
+                        id: "intent",
+                        type: "choice",
+                        instructions: "ระบุความประสงค์หลักของลูกค้าจากข้อความนี้",
+                        criteria: {
+                            "refund": "ต้องการเงินคืนเนื่องจากถูกตัดเงินซ้ำซ้อนหรือบริการมีปัญหา",
+                            "inquiry": "สอบถามข้อมูลทั่วไปเกี่ยวกับค่าบริการ",
+                            "cancellation": "ต้องการยกเลิกการใช้บริการทั้งหมด",
+                            "other": "เรื่องอื่นๆ ที่ไม่อยู่ในตัวเลือกข้างต้น"
+                        }
+                    },
+                    {
+                        id: "urgency",
+                        type: "score",
+                        instructions: "ประเมินระดับความเร่งด่วนและอารมณ์ของลูกค้า (0: ต่ำ, 1: ปานกลาง, 2: สูง/ขู่ดำเนินคดี)",
+                        criteria: [
+                            "ปกติ สอบถามทั่วไป ไม่มีท่าทีไม่พอใจ",
+                            "เริ่มไม่พอใจ ต้องการคำตอบในเวลาอันควร",
+                            "เร่งด่วนมาก ไม่พอใจรุนแรง ขู่ยกเลิกหรือติดต่อธนาคาร"
+                        ]
+                    },
+                    {
+                        id: "needs_human",
+                        type: "noul",
+                        instructions: "กรณีนี้จำเป็นต้องส่งต่อให้เจ้าหน้าที่มนุษย์ (Human Agent) ดูแลโดยตรงหรือไม่",
+                        criteria: {
+                            "true": "ต้องใช้ดุลยพินิจของมนุษย์ หรือมีการพิพาททางการเงิน",
+                            "false": "ระบบอัตโนมัติหรือบอทสามารถคืนเงินตามนโยบายได้เอง"
+                        }
+                    }
+                ]
+            },
+            guard: {
+                state: "Agent Action Request:\nTool: execute_terminal_command\nCommand: 'rm -rf /var/log/app/* && docker restart api_service'\nContext: User requested to free up disk space on production server.",
+                questions: [
+                    {
+                        id: "risk_level",
+                        type: "choice",
+                        instructions: "ประเมินระดับความเสี่ยงของคำสั่งนี้ต่อระบบ",
+                        criteria: {
+                            "safe": "คำสั่งอ่านข้อมูลอย่างเดียว ไม่มีผลกระทบข้างเคียง",
+                            "medium": "ลบไฟล์ชั่วคราว ไม่กระทบดาต้าเบสหรือความต่อเนื่องของระบบ",
+                            "critical": "รีสตาร์ตเซอร์วิส หรือลบข้อมูลสำคัญ มีความเสี่ยงต่อ Downtime"
+                        }
+                    },
+                    {
+                        id: "requires_human_approval",
+                        type: "noul",
+                        instructions: "ต้องได้รับการยืนยันจากวิศวกรผู้ดูแลระบบ (Human-in-the-loop) ก่อนรันหรือไม่",
+                        criteria: {
+                            "true": "ความเสี่ยงระดับสูงหรือกระทบ Production ต้องรอการอนุมัติ",
+                            "false": "สามารถดำเนินการอัตโนมัติได้ทันที"
+                        }
+                    },
+                    {
+                        id: "reversibility_score",
+                        type: "score",
+                        instructions: "ความสามารถในการย้อนกลับการกระทำ (Reversibility: 0=ย้อนกลับไม่ได้เลย, 2=ย้อนกลับได้สมบูรณ์)",
+                        criteria: [
+                            "ไม่สามารถย้อนกลับได้ (Irreversible)",
+                            "ย้อนกลับได้บางส่วนด้วยความพยายามสูง",
+                            "ย้อนกลับได้ง่ายดาย (Reversible)"
+                        ]
+                    }
+                ]
+            },
+            router: {
+                state: "Project Spec: 'ต้องการพัฒนาระบบทำนายการผิดนัดชำระหนี้ (Credit Default) จากตารางฐานข้อมูลลูกค้า 500,000 แถว มีฟีเจอร์ตัวเลข 40 ตัว และข้อมูลกลุ่ม 10 ตัว พร้อมทั้งต้องการคำอธิบาย Feature Importance สำหรับฝ่ายตรวจสอบ'",
+                questions: [
+                    {
+                        id: "best_architecture",
+                        type: "choice",
+                        instructions: "เลือกสถาปัตยกรรม Machine Learning ที่เหมาะสมที่สุดสำหรับงานนี้",
+                        criteria: {
+                            "gbdt_xgboost": "Gradient Boosted Decision Trees (XGBoost/LightGBM/CatBoost) เหมาะกับ Tabular Data",
+                            "deep_neural_net": "Deep MLP หรือ TabNet โครงข่ายประสาทลึก",
+                            "linear_logistic": "Logistic Regression แบบคลาสสิก",
+                            "svm": "Support Vector Machine"
+                        }
+                    },
+                    {
+                        id: "explainability_demand",
+                        type: "score",
+                        instructions: "ระดับความต้องการในการอธิบายโมเดล (Explainability 0-2)",
+                        criteria: [
+                            "ต้องการแค่ความแม่นยำ กล่องดำยอมรับได้",
+                            "ต้องการคำอธิบายระดับกลุ่มฟีเจอร์",
+                            "เข้มงวดมาก ต้องมี SHAP/Feature attribution ตามกฎหมาย"
+                        ]
+                    }
+                ]
+            },
+            custom: {
+                state: "ใส่ State หรือข้อความของคุณที่นี่...",
+                questions: [
+                    {
+                        id: "q1",
+                        type: "choice",
+                        instructions: "คำถามตัวเลือกของคุณ",
+                        criteria: {
+                            "option_a": "คำอธิบายตัวเลือก A",
+                            "option_b": "คำอธิบายตัวเลือก B"
+                        }
+                    }
+                ]
+            }
+        };
+
+        let currentQuestions = [];
+        let activeTab = 'response';
+        let lastResponseData = null;
+        let lastRequestPayload = null;
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            checkStoredApiKey();
+            loadPreset('support');
+        });
+
+        function checkStoredApiKey() {
+            const key = localStorage.getItem('JEV_API_KEY');
+            if (key) {
+                document.getElementById('api-key-input').value = key;
+                document.getElementById('save-key-checkbox').checked = true;
+                setKeyIndicator(true);
+            } else {
+                setKeyIndicator(false);
+            }
+        }
+
+        function setKeyIndicator(hasKey) {
+            const indicator = document.getElementById('key-indicator');
+            const label = document.getElementById('key-label');
+            const modeBadge = document.getElementById('mode-badge');
+            if (hasKey) {
+                indicator.className = "w-2 h-2 rounded-full bg-emerald-400";
+                label.innerText = "API Key พร้อมใช้งาน";
+                modeBadge.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40";
+                modeBadge.innerText = "Live API (Jev Server)";
+            } else {
+                indicator.className = "w-2 h-2 rounded-full bg-amber-400";
+                label.innerText = "ตั้งค่า API Key";
+                modeBadge.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700";
+                modeBadge.innerText = "โหมดจำลอง (Mock Demo)";
+            }
+        }
+
+        function openApiKeyModal() {
+            document.getElementById('api-key-modal').classList.remove('hidden');
+            document.getElementById('api-key-modal').classList.add('flex');
+        }
+
+        function closeApiKeyModal() {
+            document.getElementById('api-key-modal').classList.add('hidden');
+            document.getElementById('api-key-modal').classList.remove('flex');
+        }
+
+        function toggleKeyVisibility() {
+            const input = document.getElementById('api-key-input');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            const remember = document.getElementById('save-key-checkbox').checked;
+            if (remember && key) {
+                localStorage.setItem('JEV_API_KEY', key);
+            } else {
+                localStorage.removeItem('JEV_API_KEY');
+            }
+            setKeyIndicator(!!key);
+            closeApiKeyModal();
+        }
+
+        function clearApiKey() {
+            document.getElementById('api-key-input').value = '';
+            localStorage.removeItem('JEV_API_KEY');
+            setKeyIndicator(false);
+            closeApiKeyModal();
+        }
+
+        function loadPreset(key) {
+            const preset = PRESETS[key] || PRESETS.custom;
+            document.getElementById('state-input').value = preset.state;
+            currentQuestions = JSON.parse(JSON.stringify(preset.questions));
+            renderQuestions();
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            currentQuestions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = "p-4 bg-slate-950/80 border border-slate-800 rounded-xl space-y-3 relative group transition hover:border-slate-700";
+
+                let criteriaHtml = '';
+                if (q.type === 'choice') {
+                    const optionsList = Object.entries(q.criteria || {}).map(([optKey, optDesc]) => `
+                        <div class="flex items-center space-x-2 text-xs font-mono">
+                            <span class="px-2 py-0.5 bg-rose-950/60 text-rose-300 border border-rose-900/40 rounded">${optKey}</span>
+                            <span class="text-slate-400 font-sans truncate">${optDesc || '(ไม่มีคำอธิบาย)'}</span>
+                        </div>
+                    `).join('');
+                    criteriaHtml = `<div class="space-y-1.5 pl-2 border-l-2 border-rose-500/40 mt-2">${optionsList}</div>`;
+                } else if (q.type === 'score') {
+                    const levelsList = (q.criteria || []).map((lvl, lIdx) => `
+                        <div class="flex items-center space-x-2 text-xs font-mono">
+                            <span class="w-5 h-5 flex items-center justify-center bg-cyan-950/60 text-cyan-300 border border-cyan-900/40 rounded">${lIdx}</span>
+                            <span class="text-slate-400 font-sans truncate">${lvl}</span>
+                        </div>
+                    `).join('');
+                    criteriaHtml = `<div class="space-y-1.5 pl-2 border-l-2 border-cyan-500/40 mt-2">${levelsList}</div>`;
+                } else if (q.type === 'noul') {
+                    criteriaHtml = `
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono mt-2">
+                            <div class="p-2 bg-emerald-950/30 border border-emerald-900/30 rounded">
+                                <span class="text-emerald-400 font-bold block mb-0.5">True (ใช่):</span>
+                                <span class="text-slate-400 font-sans">${q.criteria?.true || 'สอดคล้อง'}</span>
+                            </div>
+                            <div class="p-2 bg-slate-900 border border-slate-800 rounded">
+                                <span class="text-slate-400 font-bold block mb-0.5">False (ไม่ใช่):</span>
+                                <span class="text-slate-400 font-sans">${q.criteria?.false || 'ไม่สอดคล้อง'}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2 font-mono">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${
+                                q.type === 'choice' ? 'bg-rose-900/40 text-rose-400 border border-rose-800/50' :
+                                q.type === 'score' ? 'bg-cyan-900/40 text-cyan-400 border border-cyan-800/50' :
+                                'bg-emerald-900/40 text-emerald-400 border border-emerald-800/50'
+                            }">[${q.type.toUpperCase()}]</span>
+                            <span class="text-xs font-bold text-slate-200">${q.id}</span>
+                        </div>
+                        <button onclick="removeQuestion(${idx})" class="text-slate-500 hover:text-rose-400 text-xs transition">ลบ</button>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">${q.instructions}</p>
+                    ${criteriaHtml}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function removeQuestion(idx) {
+            currentQuestions.splice(idx, 1);
+            renderQuestions();
+        }
+
+        function addQuestion() {
+            const id = prompt("ระบุ Question ID (เช่น intent, urgency, is_valid):", `q_${currentQuestions.length + 1}`);
+            if (!id) return;
+            const type = prompt("ระบุประเภทคำถาม (choice / score / noul):", "choice");
+            if (!['choice', 'score', 'noul'].includes(type?.toLowerCase())) {
+                alert("ประเภทต้องเป็น choice, score, หรือ noul");
+                return;
+            }
+            const instructions = prompt("ระบุคำถาม (Instructions):", "กรุณาประเมิน...");
+            
+            let criteria = null;
+            if (type === 'choice') {
+                criteria = { "opt_1": "ตัวเลือกที่ 1", "opt_2": "ตัวเลือกที่ 2" };
+            } else if (type === 'score') {
+                criteria = ["ระดับต่ำสุด (0)", "ระดับปานกลาง (1)", "ระดับสูงสุด (2)"];
+            } else if (type === 'noul') {
+                criteria = { "true": "ใช่", "false": "ไม่ใช่" };
+            }
+
+            currentQuestions.push({
+                id,
+                type: type.toLowerCase(),
+                instructions: instructions || id,
+                criteria
+            });
+            renderQuestions();
+        }
+
+        async function runDecision() {
+            const state = document.getElementById('state-input').value.trim();
+            if (!state) {
+                alert("กรุณาระบุ State ก่อนรัน");
+                return;
+            }
+            if (currentQuestions.length === 0) {
+                alert("กรุณาเพิ่มอย่างน้อย 1 คำถาม");
+                return;
+            }
+
+            const questionsPayload = {};
+            currentQuestions.forEach(q => {
+                questionsPayload[q.id] = {
+                    type: q.type,
+                    instructions: q.instructions,
+                    criteria: q.criteria
+                };
+            });
+
+            const payload = {
+                model: "typesafe/jev-1.13",
+                state: state,
+                questions: questionsPayload
+            };
+
+            lastRequestPayload = payload;
+
+            const apiKey = document.getElementById('api-key-input').value.trim();
+            const statusIcon = document.getElementById('status-icon');
+            const statusText = document.getElementById('status-text');
+            const latencyText = document.getElementById('latency-text');
+            const runBtn = document.getElementById('run-btn');
+
+            runBtn.disabled = true;
+            runBtn.classList.add('opacity-70');
+            statusIcon.innerText = "⏳";
+            statusText.innerText = "กำลังประเมินผล...";
+
+            const startTime = performance.now();
+
+            try {
+                let data = null;
+                let elapsedMs = 0;
+
+                if (apiKey) {
+                    // Determine endpoint: if opened via localhost proxy, use relative /api/v1/decisions
+                    // otherwise try configured endpoint (local proxy or direct)
+                    let endpoint = localStorage.getItem('JEV_API_ENDPOINT') || 
+                        (window.location.origin.includes('localhost') ? '/api/v1/decisions' : 'https://www.jevai.org/api/v1/decisions');
+
+                    const response = await fetch(endpoint, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    elapsedMs = Math.round(performance.now() - startTime);
+
+                    if (!response.ok) {
+                        const errBody = await response.text();
+                        throw new Error(`HTTP ${response.status}: ${errBody || response.statusText}`);
+                    }
+
+                    data = await response.json();
+                } else {
+                    // Simulated / Mock Execution
+                    await new Promise(r => setTimeout(r, 115));
+                    elapsedMs = Math.round(performance.now() - startTime);
+                    data = generateMockResponse(currentQuestions, elapsedMs);
+                }
+
+                lastResponseData = data;
+                statusIcon.innerText = "⚡";
+                statusText.innerText = "ประเมินสำเร็จ (200 OK)";
+                latencyText.innerText = `Latency: ${data.elapsedMs || elapsedMs} ms`;
+
+                renderResults(data);
+                updateInspector();
+
+            } catch (err) {
+                statusIcon.innerText = "❌";
+                statusText.innerText = "เกิดข้อผิดพลาด";
+                latencyText.innerText = `Error: ${err.message}`;
+                
+                const isCors = err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('network');
+                if (isCors) {
+                    renderCorsErrorBanner();
+                } else {
+                    alert(`API Error: ${err.message}`);
+                }
+            } finally {
+                runBtn.disabled = false;
+                runBtn.classList.remove('opacity-70');
+            }
+        }
+
+        function renderCorsErrorBanner() {
+            const container = document.getElementById('results-container');
+            container.innerHTML = `
+                <div class="p-5 bg-amber-950/30 border border-amber-800/60 rounded-2xl space-y-3 text-xs animate-fade-in">
+                    <div class="flex items-center space-x-2 text-amber-300 font-bold text-sm">
+                        <span class="text-base">⚠️</span>
+                        <span>สาเหตุ: ติดข้อจำกัด Browser CORS (Failed to fetch)</span>
+                    </div>
+                    <p class="text-slate-300 leading-relaxed">
+                        เซิร์ฟเวอร์ <code class="text-rose-400 font-mono">https://www.jevai.org</code> ได้รับการออกแบบมาสำหรับ Server-to-Server และยังไม่ได้เปิดส่ง Header <code class="text-amber-400 font-mono">Access-Control-Allow-Origin</code> ทำให้เบราว์เซอร์บล็อกคำขอ JavaScript โดยอัตโนมัติ
+                    </p>
+                    <div class="p-3 bg-slate-950 rounded-xl font-mono text-xs text-emerald-400 border border-slate-800 space-y-1">
+                        <div class="text-slate-500 text-[10px]"># วิธีแก้ไขง่ายๆ ใน 1 ขั้นตอน: รัน Local Proxy</div>
+                        <div class="text-white font-bold select-all">python3 lab-jev-decision/proxy.py</div>
+                    </div>
+                    <div class="text-slate-300 text-[11px] leading-relaxed">
+                        เมื่อรันคำสั่งด้านบนแล้ว ให้เปิดใช้งาน Sandbox ผ่าน:
+                        <a href="http://localhost:8000/lab-jev-decision/index.html" class="text-cyan-400 font-bold underline ml-1 hover:text-cyan-300">
+                            http://localhost:8000/lab-jev-decision/index.html
+                        </a>
+                        <br>Proxy จะส่งคำขอพร้อมแนบ CORS Header ให้อัตโนมัติ ทำให้ยิง API ได้ราบรื่น 100%!
+                    </div>
+                    <div class="pt-2 border-t border-amber-900/40 flex justify-between items-center text-[11px]">
+                        <span class="text-slate-500">หรือทดสอบผ่าน Python Terminal โดยตรง:</span>
+                        <code class="text-amber-400 font-mono">python3 lab-jev-decision/test_jev_api.py</code>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateMockResponse(questions, elapsedMs) {
+            const answers = {};
+            questions.forEach(q => {
+                if (q.type === 'choice') {
+                    const keys = Object.keys(q.criteria || {});
+                    const chosen = keys[0] || 'default';
+                    const probs = {};
+                    let rem = 1.0;
+                    keys.forEach((k, i) => {
+                        if (i === 0) {
+                            probs[k] = 0.88;
+                            rem -= 0.88;
+                        } else {
+                            probs[k] = parseFloat((rem / (keys.length - 1)).toFixed(2));
+                        }
+                    });
+                    answers[q.id] = {
+                        choice: chosen,
+                        probabilities: probs,
+                        confidence: 0.88
+                    };
+                } else if (q.type === 'score') {
+                    const count = (q.criteria || []).length || 3;
+                    answers[q.id] = {
+                        score: parseFloat((count - 1.2).toFixed(2)),
+                        legend: q.criteria?.[count - 1] || 'ระดับสูง',
+                        probabilities: Array.from({length: count}, (_, i) => i === count - 1 ? 0.75 : 0.25 / (count - 1)),
+                        confidence: 0.75
+                    };
+                } else if (q.type === 'noul') {
+                    answers[q.id] = {
+                        noul: 0.94
+                    };
+                }
+            });
+
+            return {
+                result: { answers },
+                elapsedMs: elapsedMs || 118
+            };
+        }
+
+        function renderResults(data) {
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+
+            // Check if there is an error code in the response
+            if (data.code !== undefined && data.code !== 0 && data.code !== 200) {
+                container.innerHTML = `
+                    <div class="p-4 bg-rose-950/40 border border-rose-800/60 rounded-xl space-y-2 text-xs animate-fade-in">
+                        <div class="flex items-center space-x-2 text-rose-400 font-bold">
+                            <span>❌ เซิร์ฟเวอร์ตอบกลับรหัสข้อผิดพลาด (Code: ${data.code})</span>
+                        </div>
+                        <p class="text-slate-300 font-mono">${data.message || 'ไม่มีข้อความอธิบาย'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Robust extraction of answers
+            let answers = null;
+            if (data.result?.answers) answers = data.result.answers;
+            else if (data.data?.result?.answers) answers = data.data.result.answers;
+            else if (data.data?.answers) answers = data.data.answers;
+            else if (data.answers) answers = data.answers;
+            else if (data.data && typeof data.data === 'object' && !Array.isArray(data.data)) answers = data.data;
+            else if (data.result && typeof data.result === 'object' && !Array.isArray(data.result)) answers = data.result;
+            else answers = {};
+
+            const entries = Object.entries(answers);
+            if (entries.length === 0) {
+                container.innerHTML = `
+                    <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2 text-xs animate-fade-in">
+                        <div class="flex items-center justify-between text-amber-400 font-bold">
+                            <span>ℹ️ ได้รับผลลัพธ์จากเซิร์ฟเวอร์เรียบร้อย (HTTP 200 OK)</span>
+                            <span class="text-[10px] text-slate-500 font-mono">Status 200</span>
+                        </div>
+                        <p class="text-slate-400 leading-relaxed">
+                            โครงสร้างข้อมูลที่ส่งกลับมาไม่ได้อยู่ในฟิลด์ answers ทั่วไป กรุณาดูข้อมูล JSON เต็มด้านล่างนี้:
+                        </p>
+                        <pre class="p-3 bg-slate-950 rounded-lg text-emerald-400 font-mono text-[11px] overflow-x-auto border border-slate-800">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+                return;
+            }
+
+            entries.forEach(([qId, ans]) => {
+                const card = document.createElement('div');
+                card.className = "p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-3";
+
+                let bodyHtml = '';
+
+                // Case 1: Choice
+                if (ans && typeof ans === 'object' && ans.choice !== undefined) {
+                    const probBars = Object.entries(ans.probabilities || {}).map(([opt, p]) => `
+                        <div>
+                            <div class="flex justify-between text-[11px] font-mono mb-1">
+                                <span class="${opt === ans.choice ? 'text-rose-400 font-bold' : 'text-slate-400'}">${opt}</span>
+                                <span class="text-slate-400">${(p * 100).toFixed(1)}%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                <div class="${opt === ans.choice ? 'bg-rose-500' : 'bg-slate-600'} h-1.5 rounded-full" style="width: ${p * 100}%"></div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    bodyHtml = `
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                            <span class="text-xs text-slate-400 font-mono">ID: <strong class="text-slate-200">${qId}</strong></span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold font-mono border border-rose-500/30">
+                                🎯 Choice: ${ans.choice}
+                            </span>
+                        </div>
+                        <div class="space-y-2 mt-2">${probBars || '<span class="text-slate-500 text-[11px]">ไม่มีข้อมูล Probability Distribution</span>'}</div>
+                        <div class="text-[11px] text-slate-400 pt-1 flex justify-between font-mono">
+                            <span>Confidence:</span>
+                            <span class="text-emerald-400 font-bold">${ans.confidence !== undefined ? ((ans.confidence || 0) * 100).toFixed(1) + '%' : 'N/A'}</span>
+                        </div>
+                    `;
+
+                // Case 2: Score
+                } else if (ans && typeof ans === 'object' && ans.score !== undefined) {
+                    const scoreVal = ans.score;
+                    bodyHtml = `
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                            <span class="text-xs text-slate-400 font-mono">ID: <strong class="text-slate-200">${qId}</strong></span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-bold font-mono border border-cyan-500/30">
+                                📊 Score: ${scoreVal}
+                            </span>
+                        </div>
+                        <div class="mt-2 text-xs text-slate-300 font-light">
+                            Legend: <span class="font-medium text-cyan-400">${ans.legend || 'ระดับค่าเฉลี่ย'}</span>
+                        </div>
+                        <div class="text-[11px] text-slate-400 pt-1 flex justify-between font-mono">
+                            <span>Confidence:</span>
+                            <span class="text-emerald-400 font-bold">${ans.confidence !== undefined ? ((ans.confidence || 0) * 100).toFixed(1) + '%' : 'N/A'}</span>
+                        </div>
+                    `;
+
+                // Case 3: Noul
+                } else if (ans && typeof ans === 'object' && ans.noul !== undefined) {
+                    const pct = (ans.noul * 100).toFixed(1);
+                    const isHigh = ans.noul >= 0.5;
+                    bodyHtml = `
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                            <span class="text-xs text-slate-400 font-mono">ID: <strong class="text-slate-200">${qId}</strong></span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-md ${isHigh ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'} font-bold font-mono">
+                                ⚖️ Noul (Prob Yes): ${pct}%
+                            </span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden mt-3">
+                            <div class="${isHigh ? 'bg-emerald-500' : 'bg-slate-600'} h-2 rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                        <div class="text-[11px] text-slate-400 pt-2 font-mono flex justify-between">
+                            <span>ความน่าจะเป็นใช่:</span>
+                            <span class="${isHigh ? 'text-emerald-400 font-bold' : 'text-slate-400'}">${pct}%</span>
+                        </div>
+                    `;
+
+                // Case 4: Generic / Primitive
+                } else {
+                    bodyHtml = `
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                            <span class="text-xs text-slate-400 font-mono">ID: <strong class="text-slate-200">${qId}</strong></span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-bold font-mono border border-indigo-500/30">
+                                Result: ${typeof ans === 'object' ? JSON.stringify(ans) : ans}
+                            </span>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = bodyHtml;
+                container.appendChild(card);
+            });
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+            document.getElementById('tab-response-btn').className = tab === 'response' ? 
+                "px-2.5 py-1 rounded text-xs font-semibold bg-slate-800 text-rose-400 border border-slate-700" :
+                "px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition";
+            document.getElementById('tab-curl-btn').className = tab === 'curl' ? 
+                "px-2.5 py-1 rounded text-xs font-semibold bg-slate-800 text-rose-400 border border-slate-700" :
+                "px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition";
+            document.getElementById('tab-arch-btn').className = tab === 'architecture' ? 
+                "px-2.5 py-1 rounded text-xs font-semibold bg-slate-800 text-rose-400 border border-slate-700" :
+                "px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition";
+            updateInspector();
+        }
+
+        function updateInspector() {
+            const container = document.getElementById('inspector-content');
+            if (activeTab === 'response') {
+                container.innerText = lastResponseData ? JSON.stringify(lastResponseData, null, 2) : "// ยังไม่มีผลลัพธ์ดิบ";
+            } else if (activeTab === 'curl') {
+                const apiKey = document.getElementById('api-key-input').value.trim() || "YOUR_JEV_API_KEY";
+                const payloadStr = JSON.stringify(lastRequestPayload || { model: "typesafe/jev-1.13" }, null, 2);
+                container.innerText = `# 1. cURL Command:
+curl -X POST https://www.jevai.org/api/v1/decisions \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer ${apiKey}" \\
+  -d '${payloadStr}'
+
+# 2. Python Requests:
+import requests
+
+url = "https://www.jevai.org/api/v1/decisions"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer ${apiKey}"
+}
+payload = ${payloadStr}
+
+resp = requests.post(url, headers=headers, json=payload)
+print(resp.json())`;
+            } else if (activeTab === 'architecture') {
+                container.innerText = `[Architecture Insight: System 1 vs System 2 AI]
+
+1. System 1 (Intuitive & Fast):
+   - ตอบคำถามทันทีใน 70–200 ms โดยไม่มีการสร้างข้อความยืดยาว (No token wastage)
+   - รับประกัน Output เป็น Typed Schema (Choice, Score, Noul)
+   - มีการปรับเทียบ Probability Distribution อย่างแม่นยำ
+
+2. System 2 (Deliberative & Slow):
+   - เช่น GPT-4o หรือ Claude 3.5 Sonnet ที่คิดเป็นขั้นเป็นตอน (CoT)
+   - มี Latency สูง (1.5 - 15 วินาที) และใช้ค่าใช้จ่ายต่อ Token สูง
+
+3. Best Practice ในระบบ Agent:
+   - ใช้ Jev (System 1) คัดกรอง Intent, ตรวจสอบความปลอดภัย Tool-Calling, และตัดทอน Context
+   - ส่งเฉพาะภารกิจที่ต้องใช้เหตุผลซับซ้อนให้ LLM หลัก (System 2)`;
+            }
+        }
+
+        function copyCode() {
+            const text = document.getElementById('inspector-content').innerText;
+            navigator.clipboard.writeText(text);
+            alert("คัดลอกลงคลิปบอร์ดแล้ว!");
+        }
+    </script>
+</body>
+</html>

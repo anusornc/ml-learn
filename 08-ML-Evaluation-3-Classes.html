@@ -53,10 +53,10 @@
         
 
                             <!-- Header -->
-    <header class="bg-gradient-to-r from-indigo-955 via-slate-900 to-indigo-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
+    <header class="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-955/60 border-indigo-900/30 px-3 py-1 rounded-full border">Model Validation & Metrics &bull; บทที่ 08</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-950/60 border-indigo-900/30 px-3 py-1 rounded-full border">Model Validation & Metrics &bull; บทที่ 08</span>
             <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">การคำนวณค่าประเมิน (3 คลาส)</h1>
             <p class="text-slate-350 text-sm md:text-base mt-2 font-light">วิธีการคำนวณ Precision, Recall, F1 สำหรับปัญหาจำแนกประเภทหลายคลาส (Multiclass)</p>
         </div>
@@ -219,6 +219,9 @@
                         <tr class="border-t"><th class="p-3 text-left">Weighted</th><td class="p-3">เฉลี่ยโดยถ่วงน้ำหนักด้วย support ของแต่ละคลาส</td><td class="p-3 text-center">Weighted F1 = 0.757</td><td class="p-3">ต้องการสะท้อนสัดส่วนข้อมูลจริง แต่ไม่อยากให้คลาสใหญ่ครอบงำทั้งหมด</td></tr>
                     </tbody>
                 </table>
+            </div>
+            <div class="mt-4 bg-indigo-50 border border-indigo-200 p-3 rounded-lg text-xs text-indigo-950">
+                <p><strong>💡 ข้อสังเกตสำคัญของ Micro-average:</strong> ในปัญหา Single-label Multiclass ที่แต่ละตัวอย่างถูกจัดเข้าเพียง 1 คลาสเท่านั้น ผลรวมของ False Positive (FP) ทั้งระบบจะเท่ากับผลรวมของ False Negative (FN) เสมอ ส่งผลให้ <strong>Micro-Precision = Micro-Recall = Micro-F1 = Overall Accuracy</strong> (ในตัวอย่างนี้คือ 53/70 = 0.757 หรือ 75.7%) นี่คือเหตุผลที่ตารางสรุปของ Scikit-Learn มักแสดงเฉพาะค่า Accuracy เพียงบรรทัดเดียวสำหรับค่า Micro</p>
             </div>
             <p class="mt-3 text-xs text-slate-500">Weighted F1 คำนวณจากค่าจริงก่อนปัดเศษ: $(20\times0.78947+25\times0.75472+25\times0.73469)/70\approx0.7575$ จึงอาจต่างเล็กน้อยหากนำค่า F1 ที่ปัดเศษแล้วมาคิดต่อ</p>
         </section>
@@ -625,7 +628,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const subtitle = header.querySelector('p')?.cloneNode(true);
             
             if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border border-sky-800/30 px-3 py-1 rounded-full mb-4";
                 coverNode.appendChild(badge);
             }
             if (title) {
@@ -791,7 +794,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
                 el.querySelectorAll('td').forEach(td => {
                     if (!td.hasAttribute('data-original-class')) td.setAttribute('data-original-class', td.className);
-                    td.className = 'py-2 px-4 border-b border-slate-850 text-slate-350';
+                    td.className = 'py-2 px-4 border-b border-slate-800 text-slate-300';
                 });
             }
             

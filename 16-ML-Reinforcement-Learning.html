@@ -64,8 +64,8 @@
     <header class="bg-gradient-to-r from-purple-950 via-slate-900 to-fuchsia-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-fuchsia-400 bg-fuchsia-955/60 border-fuchsia-900/30 px-3 py-1 rounded-full border">Reinforcement Learning &bull; บทที่ 16</span>
-            <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Reinforcement Learning (การเรียนรู้เสริมแรง)</h1>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-fuchsia-400 bg-fuchsia-950/60 border-fuchsia-900/30 px-3 py-1 rounded-full border">Reinforcement Learning &bull; บทที่ 16</span>
+            <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Reinforcement Learning (การเรียนรู้แบบเสริมแรง)</h1>
             <p class="text-slate-350 text-sm md:text-base mt-2 font-light">เอเจนต์เรียนรู้ในสิ่งแวดล้อมจำลอง กระบวนการตัดสินใจ MDP และ Q-Learning</p>
         </div>
     </header>
@@ -77,10 +77,10 @@
         <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
             <h2 class="text-2xl font-bold text-emerald-800 mb-4 border-b-2 border-emerald-100 pb-2 flex items-center">
                 <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mr-3 font-semibold text-lg">1</span>
-                การเรียนรู้เสริมความแกร่ง (Reinforcement Learning)
+                การเรียนรู้แบบเสริมแรง (Reinforcement Learning)
             </h2>
             <p class="text-slate-600 leading-relaxed mb-4">
-                <strong>การเรียนรู้เสริมความแกร่ง (Reinforcement Learning)</strong> แตกต่างจากแนวทางการเรียนรู้แบบอื่น ๆ เพราะโมเดลไม่ได้ถูกสอนด้วยคู่คำตอบสำเร็จรูป แต่จะใช้วิธีให้โมเดลจำลองตัวตนเป็นตัวแทนกระทำ <strong>(Agent)</strong> ลงไปทดลองแก้ปัญหาในสภาพแวดล้อม <strong>(Environment)</strong> จริง และเรียนรู้ผ่านผลการสะท้อนกลับในรูปของรางวัล <strong>(Reward)</strong> หรือบทลงโทษเชิงคะแนนลบ
+                <strong>การเรียนรู้แบบเสริมแรง (Reinforcement Learning)</strong> แตกต่างจากแนวทางการเรียนรู้แบบอื่น ๆ เพราะโมเดลไม่ได้ถูกสอนด้วยคู่คำตอบสำเร็จรูป แต่จะใช้วิธีให้โมเดลจำลองตัวตนเป็นตัวแทนกระทำ <strong>(Agent)</strong> ลงไปทดลองแก้ปัญหาในสภาพแวดล้อม <strong>(Environment)</strong> จริง และเรียนรู้ผ่านผลการสะท้อนกลับในรูปของรางวัล <strong>(Reward)</strong> หรือบทลงโทษเชิงคะแนนลบ
             </p>
 
             <div class="border border-slate-200 rounded-xl p-6 bg-slate-50 flex flex-col items-center mb-6">
@@ -139,14 +139,57 @@
             </div>
 
             <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
-                <h3 class="font-bold text-amber-900 text-lg mb-2">คำนวณ Q-update หนึ่งครั้งก่อนกด Train</h3>
-                <p class="text-sm text-slate-700">สมมติค่าเดิม $Q(s,a)=0$, $\alpha=0.2$, ได้รางวัลทันที $r=100$, และสถานะถัดไปยังไม่มีความรู้จึงมี $\max Q(s',a')=0$</p>
-                <div class="mt-3 overflow-x-auto rounded-lg bg-white border border-amber-100 p-3 text-sm text-amber-950">$$Q_{new}=0+0.2\left(100+0.9\times0-0\right)=20$$</div>
-                <p class="mt-3 text-sm text-amber-950">ค่า 20 ไม่ได้แปลว่ารางวัลจริงมีแค่ 20 แต่เป็นการขยับจากค่าเดิมทีละ 20% เพื่อเก็บหลักฐานว่าการกระทำนี้ดี เมื่อฝึกซ้ำและสถานะถัดไปมีค่า Q แล้ว รางวัลในอนาคตจะค่อย ๆ ส่งย้อนกลับมาด้วย</p>
-                <details class="mt-3 rounded-lg bg-white p-3 text-sm text-amber-950">
-                    <summary class="cursor-pointer font-semibold">ลองตอบ: ถ้าได้รางวัล $-100$ และค่าอื่นเท่าเดิม ค่าใหม่จะเป็นเท่าไร?</summary>
+                <h3 class="font-bold text-amber-900 text-lg mb-2">คำนวณ Q-update: การส่งต่อคุณค่ารางวัลย้อนกลับ (Credit Assignment)</h3>
+                <p class="text-sm text-slate-700 mb-3">พิจารณาตัวอย่าง 2 ขั้นตอนใน Gridworld ที่มี $\alpha=0.2$ และ $\gamma=0.9$:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <!-- Step 1 -->
+                    <div class="bg-white p-4 rounded-xl border border-amber-200">
+                        <span class="font-bold text-amber-900 block mb-1">ก้าวที่ 1: เดินเข้าสู่ช่องรางวัลโดยตรง ($s_1 \rightarrow s_{\text{goal}}$)</span>
+                        <p class="text-slate-600 mb-2 leading-relaxed">
+                            เดิม $Q(s_1, a)=0$, ได้รางวัลทันที $r=100$, ที่เป้าหมายไม่มีแอ็กชันถัดไป ($\max Q(s_{\text{goal}}, a')=0$):
+                        </p>
+                        <div class="bg-slate-50 p-2.5 rounded font-mono text-[11px] text-center text-slate-800">
+                            $$Q(s_1, a) \leftarrow 0 + 0.2(100 + 0.9(0) - 0) = \mathbf{20.0}$$
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="bg-white p-4 rounded-xl border border-amber-200">
+                        <span class="font-bold text-amber-900 block mb-1">ก้าวที่ 2: ในรอบถัดไป เดินเข้าสู่ $s_1$ ($s_0 \rightarrow s_1$)</span>
+                        <p class="text-slate-600 mb-2 leading-relaxed">
+                            เดิม $Q(s_0, a)=0$, ไม่มีรางวัลทันที ($r=0$), แต่สถานะถัดไป $s_1$ มี $\max Q(s_1, a')=20.0$:
+                        </p>
+                        <div class="bg-slate-50 p-2.5 rounded font-mono text-[11px] text-center text-slate-800">
+                            $$Q(s_0, a) \leftarrow 0 + 0.2(0 + 0.9(20.0) - 0) = \mathbf{3.6}$$
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-3 text-xs text-amber-950 leading-relaxed">
+                    <strong>💡 ข้อสังเกต:</strong> แม้จุดเริ่มต้น ($s_0$) จะไม่ได้รางวัลทันที ($r=0$) แต่ค่า $Q$ ของมันก็เพิ่มขึ้นเป็น $3.6$ ได้ เพราะสมการเบลล์แมนช่วย <strong>"ส่งต่อคุณค่ารางวัลในอนาคตย้อนกลับมายังจุดเริ่มต้น"</strong> ทำให้ Agent ค่อยๆ เรียนรู้เส้นทางเดินที่ถูกต้องได้
+                </p>
+                <details class="mt-3 rounded-lg bg-white p-3 text-xs text-amber-950">
+                    <summary class="cursor-pointer font-semibold">ลองตอบ: ถ้าเดินตกกองไฟได้รางวัล $-100$ และค่าอื่นเท่าเดิม ค่าใหม่จะเป็นเท่าไร?</summary>
                     <p class="mt-2">$Q_{new}=0+0.2(-100)=-20$ จึงเป็นสัญญาณว่าไม่ควรเลือกการกระทำนี้ในสถานการณ์เดิม</p>
                 </details>
+            </div>
+
+            <!-- Deep Q-Networks (DQN) Note -->
+            <div class="mt-6 bg-slate-50 border border-slate-200 rounded-xl p-5">
+                <h3 class="font-bold text-slate-800 text-base mb-2 flex items-center gap-2">
+                    <span class="text-emerald-600 font-mono text-lg">✦</span> จาก Q-Table สู่ Deep Q-Networks (DQN)
+                </h3>
+                <p class="text-slate-600 text-xs leading-relaxed mb-3">
+                    ในปัญหาจริง (เช่น รถยนต์ขับเคลื่อนอัตโนมัติ หรือเกม Atari) ตัวแปรสถานะ $s$ เป็นภาพพิกเซลหรือตัวเลขต่อเนื่อง ซึ่งมีจำนวนสถานะเป็นอนันต์ เราไม่สามารถสร้าง <strong>Q-Table</strong> ขนาดใหญ่พอที่จะเก็บทุกคู่ $(s, a)$ ได้ (Curse of Dimensionality)
+                </p>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed space-y-2">
+                    <p>
+                        <strong>Deep Q-Network (DQN - DeepMind, 2015):</strong> ใช้โครงข่ายประสาทเทียมเชิงลึก (Deep Neural Network) เข้ามาทำหน้าที่เป็น <em>Function Approximator</em> เพื่อประมาณค่า $Q(s, a; \theta)$ โดยตรง
+                    </p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-600 pl-1">
+                        <li><strong>Experience Replay:</strong> บันทึกประสบการณ์ $(s, a, r, s')$ ลงใน Memory Buffer แล้วสุ่มมินิแบทช์มาเทรน เพื่อตัดความสัมพันธ์ของข้อมูลที่เรียงตามลำดับเวลา (Break temporal correlation)</li>
+                        <li><strong>Target Network:</strong> แยกโครงข่ายเป้าหมายสำหรับคำนวณ $\max_{a'} Q_{\text{target}}(s', a')$ เพื่อให้การคำนวณค่าสูญเสียมีเสถียรภาพ ไม่แกว่งไปมา</li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Interactive Q-learning Visualizer -->
@@ -588,7 +631,7 @@
             const subtitle = header.querySelector('p')?.cloneNode(true);
             
             if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border border-sky-800/30 px-3 py-1 rounded-full mb-4";
                 coverNode.appendChild(badge);
             }
             if (title) {
@@ -754,7 +797,7 @@
                 });
                 el.querySelectorAll('td').forEach(td => {
                     if (!td.hasAttribute('data-original-class')) td.setAttribute('data-original-class', td.className);
-                    td.className = 'py-2 px-4 border-b border-slate-850 text-slate-350';
+                    td.className = 'py-2 px-4 border-b border-slate-800 text-slate-300';
                 });
             }
             

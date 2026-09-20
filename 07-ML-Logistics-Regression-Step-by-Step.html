@@ -345,10 +345,10 @@
 
     <div class="container">
                                 <!-- Header -->
-    <header class="bg-gradient-to-r from-indigo-950 via-slate-900 to-blue-955 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
+    <header class="bg-gradient-to-r from-indigo-950 via-slate-900 to-blue-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border-sky-900/30 px-3 py-1 rounded-full border">Supervised Learning: Classification &bull; บทที่ 07</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border-sky-900/30 px-3 py-1 rounded-full border">Supervised Learning: Classification &bull; บทที่ 07</span>
             <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Logistic Regression Step-by-Step</h1>
             <p class="text-slate-350 text-sm md:text-base mt-2 font-light">ตัวอย่างคำนวณและปรับเปลี่ยนค่าน้ำหนักตามฟังก์ชัน Loss ทีละขั้นตอน</p>
         </div>
@@ -367,16 +367,6 @@
                 </ul>
             </div>
             
-            <h3>รากฐานทางคณิตศาสตร์</h3>
-            <p>แก่นของ Logistic regression คือฟังก์ชัน sigmoid:</p>
-            
-            <div class="formula">
-                $$\sigma(z) = \frac{1}{1 + e^{-z}}$$
-            </div>
-            
-            <p>โดยที่ $$z = w_1 x_1 + w_2 x_2 + \dots + w_n x_n + b$$</p>
-            
-            <p>ฟังก์ชันต้นทุนที่เราลดลงคือ:</p>
             
             <div class="formula">
                 $$J = -\frac{1}{m} \sum_{i=1}^{m} \left[ y^{(i)} \ln(\hat{y}^{(i)}) + (1 - y^{(i)}) \ln(1 - \hat{y}^{(i)}) \right]$$
@@ -566,6 +556,18 @@
         <div class="section">
             <h2>รอบที่ 1: การคำนวณย้อนกลับ (Backward Pass - การหา Gradient)</h2>
             
+            <div class="explanation">
+                <p><strong>💡 ที่มาทางคณิตศาสตร์ของสูตร Gradient:</strong></p>
+                <p>ด้วยความสวยงามของการจับคู่ระหว่าง <strong>Sigmoid</strong> ($\hat{y} = \sigma(z)$) และ <strong>Binary Cross-Entropy Loss</strong> ($L = -[y\ln\hat{y} + (1-y)\ln(1-\hat{y})]$) เมื่อหาอนุพันธ์ย่อยตามกฎลูกโซ่ (Chain Rule):</p>
+                <div class="formula" style="font-size: 1rem;">
+                    $$\frac{\partial L}{\partial z} = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial z} = \left(-\frac{y}{\hat{y}} + \frac{1-y}{1-\hat{y}}\right) \cdot \hat{y}(1-\hat{y}) = \hat{y} - y$$
+                </div>
+                <p>ทำให้เกรเดียนต์เทียบกับค่าน้ำหนักแต่ละตัวตัดทอนเหลือรูปฟอร์มที่เรียบง่ายอย่างยิ่ง:</p>
+                <div class="formula" style="font-size: 1rem;">
+                    $$\frac{\partial L}{\partial w_j} = \frac{\partial L}{\partial z} \cdot \frac{\partial z}{\partial w_j} = (\hat{y} - y) X_j$$
+                </div>
+            </div>
+
             <p>สำหรับแต่ละตัวอย่าง เราจะคำนวณเกรเดียนต์เพื่ออัปเดตพารามิเตอร์:</p>
             <ul>
                 <li>ความผิดพลาด = ŷ - y</li>
@@ -1218,7 +1220,7 @@
             const subtitle = header.querySelector('p')?.cloneNode(true);
             
             if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border border-sky-800/30 px-3 py-1 rounded-full mb-4";
                 coverNode.appendChild(badge);
             }
             if (title) {
@@ -1384,7 +1386,7 @@
                 });
                 el.querySelectorAll('td').forEach(td => {
                     if (!td.hasAttribute('data-original-class')) td.setAttribute('data-original-class', td.className);
-                    td.className = 'py-2 px-4 border-b border-slate-850 text-slate-350';
+                    td.className = 'py-2 px-4 border-b border-slate-800 text-slate-300';
                 });
             }
             

@@ -65,10 +65,10 @@
         
 
                             <!-- Header -->
-    <header class="bg-gradient-to-r from-indigo-950 via-slate-900 to-blue-955 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
+    <header class="bg-gradient-to-r from-indigo-950 via-slate-900 to-blue-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border-sky-900/30 px-3 py-1 rounded-full border">Supervised Learning: Regression &bull; บทที่ 03</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border-sky-900/30 px-3 py-1 rounded-full border">Supervised Learning: Regression &bull; บทที่ 03</span>
             <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">พื้นฐาน: Linear Regression</h1>
             <p class="text-slate-350 text-sm md:text-base mt-2 font-light">ทำความเข้าใจหลักการสร้างโมเดลถดถอยเชิงเส้นและการฝึกฝนค่าน้ำหนัก</p>
         </div>
@@ -76,38 +76,49 @@
 
     <main class="container mx-auto px-4 py-8 max-w-4xl">
         <section class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">Machine Learning คืออะไร?</h2>
-            <p class="mb-4 text-gray-700">Machine Learning (การเรียนรู้ของเครื่อง) เป็นสาขาหนึ่งของปัญญาประดิษฐ์ (AI) ที่ให้คอมพิวเตอร์สามารถเรียนรู้จากข้อมูลโดยไม่ต้องเขียนโปรแกรมอย่างชัดเจน</p>
-            
-            <h3 class="text-xl font-semibold mt-6 mb-3 text-gray-800">ประเภทของ Machine Learning</h3>
-            <ul class="list-disc pl-6 mb-4 text-gray-700">
-                <li class="mb-2"><strong>Supervised Learning</strong> - การเรียนรู้แบบมีผู้สอน: เรียนรู้จากข้อมูลที่มีคำตอบ (Label) กำกับไว้แล้ว</li>
-                <li class="mb-2"><strong>Unsupervised Learning</strong> - การเรียนรู้แบบไม่มีผู้สอน: เรียนรู้จากข้อมูลที่ไม่มีคำตอบกำกับ</li>
-                <li class="mb-2"><strong>Reinforcement Learning</strong> - การเรียนรู้แบบเสริมแรง: เรียนรู้จากการลองผิดลองถูกและรางวัล</li>
-            </ul>
+            <h2 class="text-2xl font-bold mb-3 text-gray-800">เชื่อมโยงสู่ Supervised Learning</h2>
+            <p class="text-gray-700 leading-relaxed">
+                จากบทเรียนก่อนหน้า (บทที่ 01 และ 02) เราได้เห็นภาพรวมของประเภท Machine Learning และกระบวนการพัฒนาโมเดลแล้ว ในบทนี้เราจะเริ่มต้นศึกษาอัลกอริทึมรากฐานที่สำคัญที่สุดในกลุ่ม <strong>Supervised Learning</strong> สำหรับงานทำนายตัวเลขต่อเนื่อง (Continuous Numerical Value) นั่นคือ <strong>Linear Regression (การถดถอยเชิงเส้น)</strong>
+            </p>
+            <div class="mt-4 bg-sky-50 border-l-4 border-sky-500 p-3 rounded-r-lg text-sm text-sky-900">
+                <strong>เป้าหมายของบทนี้:</strong> เข้าใจความสัมพันธ์เชิงเส้นตรงระหว่างตัวแปรต้น ($x$) และตัวแปรตาม ($y$), รู้จักสูตรสมการทั้งแบบเรขาคณิตและแบบเวกเตอร์ใน ML, และทดลองคำนวณทำนายผลด้วยกราฟจำลองแบบโต้ตอบ
+            </div>
         </section>
 
         <section class="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 class="text-2xl font-bold mb-4 text-gray-800">Linear Regression คืออะไร?</h2>
-            <p class="mb-4 text-gray-700">Linear Regression เป็นอัลกอริทึมการเรียนรู้แบบมีผู้สอน (Supervised Learning) ที่ใช้ในการทำนายค่าต่อเนื่อง โดยหาความสัมพันธ์เชิงเส้นระหว่างตัวแปรอิสระ (x) และตัวแปรตาม (y)</p>
+            <p class="mb-4 text-gray-700">Linear Regression เป็นอัลกอริทึมการเรียนรู้แบบมีผู้สอนที่ใช้ในการทำนายค่าต่อเนื่อง โดยหาความสัมพันธ์เชิงเส้นตรงระหว่างตัวแปรอิสระ (Features: $x$) และตัวแปรตาม (Target: $y$)</p>
             
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3 text-gray-800">สมการ Linear Regression</h3>
-                <div class="bg-blue-50 p-4 rounded-lg text-center">
-                    <p class="text-lg font-medium text-gray-800">$$y = mx + b$$</p>
-                    <p class="text-gray-600 mt-2">โดยที่ m คือความชัน (slope) และ b คือจุดตัดแกน y (y-intercept)</p>
+                <h3 class="text-xl font-semibold mb-3 text-gray-800">สมการ Linear Regression: จากเรขาคณิตสู่ Machine Learning</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-3">
+                    <div class="bg-blue-50 p-4 rounded-lg text-center">
+                        <p class="text-xs font-bold uppercase text-blue-700 font-mono mb-1">สมการเส้นตรงพื้นฐาน</p>
+                        <p class="text-lg font-bold text-gray-800">$$y = mx + b$$</p>
+                        <p class="text-xs text-gray-600 mt-2">$m$ คือความชัน (slope) และ $b$ คือจุดตัดแกน y (intercept)</p>
+                    </div>
+                    <div class="bg-indigo-50 p-4 rounded-lg text-center">
+                        <p class="text-xs font-bold uppercase text-indigo-700 font-mono mb-1">สัญลักษณ์เวกเตอร์ใน Machine Learning</p>
+                        <p class="text-lg font-bold text-gray-800">$$\hat{y} = \theta_0 + \theta_1 x_1 = \mathbf{w}^T \mathbf{x} + b$$</p>
+                        <p class="text-xs text-gray-600 mt-2">$\mathbf{w}$ หรือ $\theta$ คือค่าน้ำหนัก (Weights) และ $b$ หรือ $\theta_0$ คือค่าไบแอส (Bias)</p>
+                    </div>
                 </div>
             </div>
 
             <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3 text-gray-800">การทำงานของ Linear Regression</h3>
-                <ol class="list-decimal pl-6 text-gray-700">
-                    <li class="mb-2">เริ่มต้นด้วยค่า m และ b สุ่ม</li>
-                    <li class="mb-2">คำนวณค่าทำนาย (ŷ) สำหรับแต่ละค่า x</li>
-                    <li class="mb-2">คำนวณค่าความผิดพลาด (error) ระหว่างค่าทำนายและค่าจริง</li>
-                    <li class="mb-2">ปรับค่า m และ b เพื่อลดความผิดพลาด</li>
-                    <li class="mb-2">ทำซ้ำจนกว่าจะได้ค่า m และ b ที่เหมาะสม</li>
-                </ol>
+                <h3 class="text-xl font-semibold mb-3 text-gray-800">โมเดลหาค่าสัมประสิทธิ์ (Weights & Bias) ได้อย่างไร?</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                    <div class="border border-slate-200 p-4 rounded-lg bg-slate-50">
+                        <h4 class="font-bold text-slate-800 mb-1">1. Analytical Solution (Normal Equation)</h4>
+                        <p class="text-xs text-slate-600 mb-2">$$\hat{\theta} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}$$</p>
+                        <p class="text-xs text-slate-600">คำนวณทางพีชคณิตเชิงเส้นรอบเดียวได้คำตอบที่ดีที่สุดทันที เหมาะกับข้อมูลขนาดเล็กถึงปานกลาง</p>
+                    </div>
+                    <div class="border border-slate-200 p-4 rounded-lg bg-slate-50">
+                        <h4 class="font-bold text-slate-800 mb-1">2. Numerical Optimization (Gradient Descent)</h4>
+                        <p class="text-xs text-slate-600 mb-2">$$\mathbf{w} \leftarrow \mathbf{w} - \alpha \nabla_{\mathbf{w}} \text{MSE}$$</p>
+                        <p class="text-xs text-slate-600">เริ่มต้นสุ่มค่าน้ำหนัก แล้วค่อย ๆ ปรับลดทอนความผิดพลาดทีละก้าว เหมาะกับชุดข้อมูลขนาดใหญ่และมิติสูง</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -590,7 +601,7 @@
             const subtitle = header.querySelector('p')?.cloneNode(true);
             
             if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border border-sky-800/30 px-3 py-1 rounded-full mb-4";
                 coverNode.appendChild(badge);
             }
             if (title) {
@@ -756,7 +767,7 @@
                 });
                 el.querySelectorAll('td').forEach(td => {
                     if (!td.hasAttribute('data-original-class')) td.setAttribute('data-original-class', td.className);
-                    td.className = 'py-2 px-4 border-b border-slate-850 text-slate-350';
+                    td.className = 'py-2 px-4 border-b border-slate-800 text-slate-300';
                 });
             }
             

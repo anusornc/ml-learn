@@ -64,7 +64,7 @@
     <header class="bg-gradient-to-r from-slate-900 via-emerald-950 to-teal-900 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-955/60 border-emerald-900/30 px-3 py-1 rounded-full border">Supervised Learning: Trees &bull; บทที่ 10</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 border-emerald-900/30 px-3 py-1 rounded-full border">Supervised Learning: Trees &bull; บทที่ 10</span>
             <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Inductive Learning & Decision Trees</h1>
             <p class="text-slate-350 text-sm md:text-base mt-2 font-light">การวิเคราะห์ต้นไม้ตัดสินใจ การคำนวณหา Entropy และ Information Gain</p>
         </div>
@@ -609,8 +609,109 @@
             </script>
         </section>
 
-    
-                        <!-- Section: Practical Labs -->
+        <!-- Section 4: CART, Gini Impurity & Hyperparameter Regularization -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-sky-800 mb-4 border-b-2 border-sky-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center mr-3 font-semibold text-lg">4</span>
+                CART, ดัชนีความไม่บริสุทธิ์จินี (Gini Impurity) และการควบคุม Overfitting
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                ในขณะที่ <strong>ID3</strong> สร้างกิ่งตามจำนวนค่าของแอตทริบิวต์ (Multi-way splits) และใช้ Entropy แต่ในไลบรารีสมัยใหม่อย่าง <strong>Scikit-Learn</strong> อัลกอริทึมหลักที่ใช้คือ <strong>CART (Classification and Regression Trees)</strong> ซึ่งทำการแบ่งแบบทวิภาค (Binary Splits: ซ้าย/ขวา) เสมอ และใช้ <strong>Gini Impurity</strong> เป็นค่าเริ่มต้น
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                <!-- Gini Impurity Card -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-slate-800 text-base mb-2 flex items-center gap-2">
+                        <span class="text-emerald-500 font-mono text-lg">✦</span> ค่าดัชนีจินี (Gini Impurity)
+                    </h3>
+                    <p class="text-slate-600 text-xs leading-relaxed mb-3">
+                        วัดความน่าจะเป็นที่ตัวอย่างที่สุ่มมาจะถูกจัดประเภทผิดพลาด หากเราสุ่มคลาสตามการกระจายตัวของข้อมูล:
+                    </p>
+                    <div class="bg-white p-3 rounded-lg border border-slate-200 text-center font-mono text-sm mb-3">
+                        $$Gini(S) = 1 - \sum_{i=1}^{c} p_i^2$$
+                    </div>
+                    <ul class="text-xs text-slate-600 space-y-1.5 list-disc list-inside">
+                        <li><strong>Pure Node ($Gini = 0$):</strong> ตัวอย่างทุกตัวอยู่ในคลาสเดียวกันทั้งหมด</li>
+                        <li><strong>Max Impurity (2 classes):</strong> $p_1 = 0.5, p_2 = 0.5 \implies Gini = 0.5$</li>
+                        <li><strong>ข้อดีเมื่อเทียบกับ Entropy:</strong> คำนวณได้เร็วกว่ามากเพราะไม่ต้องหาค่า $\log_2$ แต่ได้ผลลัพธ์ของโครงสร้างต้นไม้ที่ใกล้เคียงกันเกือบ 98%</li>
+                    </ul>
+                </div>
+
+                <!-- Comparison Table Card -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-slate-800 text-base mb-2 flex items-center gap-2">
+                        <span class="text-sky-500 font-mono text-lg">✦</span> เปรียบเทียบ ID3, C4.5 และ CART
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left text-slate-600 mt-2">
+                            <thead class="bg-slate-200/60 text-slate-700 font-semibold">
+                                <tr>
+                                    <th class="p-2 rounded-l">คุณสมบัติ</th>
+                                    <th class="p-2">ID3</th>
+                                    <th class="p-2">C4.5</th>
+                                    <th class="p-2 rounded-r">CART (Scikit-Learn)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr>
+                                    <td class="p-2 font-medium">เกณฑ์คัดเลือก</td>
+                                    <td class="p-2">Information Gain</td>
+                                    <td class="p-2">Gain Ratio</td>
+                                    <td class="p-2 font-semibold text-emerald-700">Gini / MSE (Regression)</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 font-medium">ลักษณะการแตกกิ่ง</td>
+                                    <td class="p-2">Multi-way</td>
+                                    <td class="p-2">Multi-way</td>
+                                    <td class="p-2 font-semibold text-emerald-700">Binary Split (ทวิภาค)</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 font-medium">รองรับข้อมูลต่อเนื่อง</td>
+                                    <td class="p-2 text-rose-500">❌ ไม่ได้</td>
+                                    <td class="p-2 text-emerald-600">✅ ได้</td>
+                                    <td class="p-2 text-emerald-600">✅ ได้</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 font-medium">การตัดแต่งกิ่ง (Pruning)</td>
+                                    <td class="p-2 text-rose-500">❌ ไม่มี</td>
+                                    <td class="p-2 text-emerald-600">✅ Rule Post-Pruning</td>
+                                    <td class="p-2 text-emerald-600">✅ Cost-Complexity Pruning</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hyperparameter Regularization -->
+            <div class="bg-indigo-50/70 border border-indigo-200/60 rounded-xl p-5 mt-6">
+                <h3 class="font-bold text-indigo-950 text-base mb-2">🛡️ การป้องกันภาวะพอดีเกิน (Overfitting Prevention & Hyperparameters)</h3>
+                <p class="text-slate-700 text-xs leading-relaxed mb-4">
+                    ต้นไม้ตัดสินใจเป็น <em>Non-parametric Model</em> ที่มีความยืดหยุ่นสูง หากปล่อยให้โตอย่างอิสระโดยไม่จำกัด โมเดลจะแตกกิ่งจนกระทั่งใบทุกใบมีความบริสุทธิ์ $100\%$ ($Gini = 0$) ซึ่งทำให้เกิด <strong>Overfitting</strong> อย่างรุนแรง (จำ noise ใน training set)
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div class="bg-white p-3 rounded-lg border border-indigo-100 shadow-sm">
+                        <span class="font-mono font-bold text-indigo-600 block mb-1">max_depth</span>
+                        <span class="text-slate-600">จำกัดความลึกสูงสุดของต้นไม้ ช่วยป้องกันไม่ให้ต้นไม้แตกกิ่งซับซ้อนเกินไป</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-indigo-100 shadow-sm">
+                        <span class="font-mono font-bold text-indigo-600 block mb-1">min_samples_split</span>
+                        <span class="text-slate-600">จำนวนตัวอย่างขั้นต่ำที่โหนดต้องมี จึงจะได้รับอนุญาตให้ทำการแบ่งต่อได้</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-indigo-100 shadow-sm">
+                        <span class="font-mono font-bold text-indigo-600 block mb-1">min_samples_leaf</span>
+                        <span class="text-slate-600">จำนวนตัวอย่างขั้นต่ำที่ต้องมีอยู่ในโหนดใบ (Leaf node)</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-indigo-100 shadow-sm">
+                        <span class="font-mono font-bold text-indigo-600 block mb-1">ccp_alpha</span>
+                        <span class="text-slate-600">Cost-Complexity Pruning parameter ตัดแต่งกิ่งย่อยหลังสร้างเสร็จ (Post-pruning)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Practical Labs -->
         <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 text-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-slate-800 mt-8">
             <div class="mb-4">
                 <span class="text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 px-3 py-1 rounded-full border border-sky-900/30">ใบงานปฏิบัติการ (Practical Labs)</span>
@@ -812,7 +913,7 @@
             const subtitle = header.querySelector('p')?.cloneNode(true);
             
             if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border border-sky-800/30 px-3 py-1 rounded-full mb-4";
                 coverNode.appendChild(badge);
             }
             if (title) {
@@ -978,7 +1079,7 @@
                 });
                 el.querySelectorAll('td').forEach(td => {
                     if (!td.hasAttribute('data-original-class')) td.setAttribute('data-original-class', td.className);
-                    td.className = 'py-2 px-4 border-b border-slate-850 text-slate-350';
+                    td.className = 'py-2 px-4 border-b border-slate-800 text-slate-300';
                 });
             }
             

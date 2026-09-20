@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บทที่ 24: โมเดลการตัดสินใจเชิงโครงสร้าง และ System 1 AI (Jev Architecture)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f8fafc;
+        }
+        .math-font {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
+    <!-- KaTeX for beautiful math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+</head>
+<body class="text-slate-800 antialiased selection:bg-rose-500 selection:text-white">
+
+    <!-- Floating Smart Navigator -->
+    <div class="fixed top-4 left-4 z-50 flex items-center space-x-1 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md px-2.5 py-1 rounded-full shadow-lg border border-slate-200 transition-all duration-300 hover:shadow-rose-500/10">
+        <a href="23-ML-Deep-Learning-Architectures.html" class="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-slate-100 rounded-full transition flex items-center" title="บทก่อนหน้า (บทที่ 23: Deep Learning Architectures)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <a href="index.html" class="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-slate-100 rounded-full transition flex items-center" title="กลับหน้าแรกสารบัญ">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <span class="p-1.5 text-slate-300 cursor-not-allowed flex items-center" title="บทเรียนล่าสุดของหลักสูตร">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </span>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <button onclick="toggleSlideshow()" class="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-full transition flex items-center" title="โหมดนำเสนอ Slide">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Header Hero -->
+    <header class="bg-gradient-to-r from-slate-950 via-rose-950 to-indigo-950 text-white py-14 shadow-xl relative overflow-hidden border-b border-rose-900/40">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-30"></div>
+        <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-950/70 border border-rose-800/50 px-3.5 py-1.5 rounded-full font-mono">
+                System 1 AI &bull; Structured Decision-Making &bull; บทที่ 24
+            </span>
+            <h1 class="text-3xl md:text-5xl font-extrabold mt-4 tracking-tight">โมเดลการตัดสินใจเชิงโครงสร้าง และ System 1 AI (Jev)</h1>
+            <p class="text-slate-300 text-sm md:text-base mt-3 font-light max-w-2xl mx-auto leading-relaxed">
+                ก้าวข้ามข้อจำกัดของ LLM เชิงสร้างข้อความ (Generative AI) สู่โมเดลการตัดสินใจความเร็วสูงระดับมิลลิวินาที (System 1 AI) ด้วยสถาปัตยกรรม Jev Model ที่การันตี Type-Safe, ปลอด Prose, และปรับเทียบความน่าจะเป็นอย่างแม่นยำ
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+
+        <!-- Section 1: Dual-Process Theory in AI -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-rose-950 mb-4 border-b-2 border-rose-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center mr-3 font-bold text-lg">1</span>
+                ทฤษฎีระบบความคิดคู่ (Dual-Process Theory): ปัญหาคอขวดของ AI ยุคปัจจุบัน
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                ในทางจิตวิทยาและวิทยาศาสตร์การรู้คิด นักเศรษฐศาสตร์รางวัลโนเบล <strong>Daniel Kahneman</strong> ได้อธิบายการทำงานของสมองมนุษย์ผ่านหนังสือชื่อดัง <em>"Thinking, Fast and Slow"</em> โดยแบ่งการคิดออกเป็น 2 ระบบ:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 text-xs">
+                <!-- System 1 -->
+                <div class="p-5 rounded-xl border border-emerald-200 bg-emerald-50/40">
+                    <div class="flex items-center justify-between mb-2">
+                        <strong class="text-emerald-900 text-sm">System 1: คิดเร็ว สัญชาตญาณ (Fast, Intuitive)</strong>
+                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-mono font-bold text-[10px]">~100 ms</span>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed mb-3">
+                        การตัดสินใจแบบฉับพลันโดยไม่ต้องอาศัยการแจกแจงเหตุผลเป็นขั้นเป็นตอน เช่น การหลบสิ่งกีดขวาง การอ่านสีหน้าคน การรู้ทันทีว่า $2 \times 2 = 4$ หรือการจัดหมวดหมู่อันตรายทันที
+                    </p>
+                    <ul class="list-disc list-inside text-slate-500 space-y-1">
+                        <li>ทำงานแบบคู่ขนาน (Parallel & Automatic)</li>
+                        <li>ใช้พลังงานต่ำมาก (Low Energy Consumption)</li>
+                        <li>มุ่งเน้น <strong>"การตัดสินใจและการกระทำ (Action & Decision)"</strong></li>
+                    </ul>
+                </div>
+
+                <!-- System 2 -->
+                <div class="p-5 rounded-xl border border-indigo-200 bg-indigo-50/40">
+                    <div class="flex items-center justify-between mb-2">
+                        <strong class="text-indigo-900 text-sm">System 2: คิดช้า ใช้เหตุผลเชิงลึก (Slow, Deliberative)</strong>
+                        <span class="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded font-mono font-bold text-[10px]">2,000 - 15,000 ms</span>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed mb-3">
+                        การคิดที่ต้องใช้สมาธิและการคำนวณตามขั้นตอน (Chain-of-Thought) เช่น การแก้โจทย์แคลคูลัส การวางแผนเขียนโปรแกรม หรือการประพันธ์บทกวี
+                    </p>
+                    <ul class="list-disc list-inside text-slate-500 space-y-1">
+                        <li>ทำงานแบบตามลำดับเวลา (Sequential Reasoning)</li>
+                        <li>ใช้พลังงานและทรัพยากรสูง (High Compute & Cost)</li>
+                        <li>มุ่งเน้น <strong>"การอธิบายและสร้างข้อความ (Reasoning & Prose)"</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- The Architectural Flaw of Modern AI -->
+            <div class="p-5 bg-rose-50/60 border border-rose-200 rounded-xl">
+                <h3 class="font-bold text-rose-900 text-sm mb-2">ข้อผิดพลาดทางสถาปัตยกรรมของระบบ Agent ยุคปัจจุบัน</h3>
+                <p class="text-xs text-slate-700 leading-relaxed">
+                    ระบบ AI และ LLM Agents ส่วนใหญ่ในปัจจุบันถูกสร้างขึ้นโดยใช้โมเดลประเภท <strong>System 2 (เช่น GPT-4o, Claude 3.5 Sonnet, o1)</strong> มาทำงานทุกอย่าง ตั้งแต่งานวิเคราะห์เหตุผลซับซ้อน ไปจนถึงงานเล็กๆ เช่น:
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 my-3 text-[11px] text-slate-600 font-mono">
+                    <div class="p-2.5 bg-white rounded-lg border border-rose-100">
+                        <strong>1. Intent Routing:</strong> เลือกว่าตั๋วนี้คือเรื่อง Refund หรือ Cancellation
+                    </div>
+                    <div class="p-2.5 bg-white rounded-lg border border-rose-100">
+                        <strong>2. Tool-Call Guard:</strong> ตรวจว่าคำสั่ง bash นี้ปลอดภัยหรือไม่
+                    </div>
+                    <div class="p-2.5 bg-white rounded-lg border border-rose-100">
+                        <strong>3. Context Pruning:</strong> เลือกว่าประวัติ tool call ไหนยังสำคัญอยู่
+                    </div>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    ผลลัพธ์คือ: ระบบเกิดความหน่วงสูง (Latency 1-5 วินาทีต่อการตัดสินใจเล็กๆ), ค่าใช้จ่าย Token พุ่งสูงจากการพร่ำพรรณนาคำพูด (Prose), และความเสี่ยงจากการที่ LLM พ่น JSON ไม่ตรง Schema (Schema Hallucination)
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 2: Jev Model Architecture -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-rose-950 mb-4 border-b-2 border-rose-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center mr-3 font-bold text-lg">2</span>
+                สถาปัตยกรรมและหลักการทำงานของ Jev Model
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                <strong>Jev Model (`typesafe/jev-1.13`)</strong> โดย TypeSafe AI ถูกพัฒนาขึ้นเพื่อทำหน้าที่เป็น <strong>System 1 Decision Engine</strong> ที่แท้จริง มันตัดกลไกการสร้างคำพูดทีละคำ (Zero-prose) และมุ่งเน้นการคำนวณการกระจายตัวของความน่าจะเป็น (Probability Distribution) บนปริภูมิการตัดสินใจแบบระบุชนิด (Type-Safe Hypothesis Space)
+            </p>
+
+            <!-- 3 Typed Question Primitives -->
+            <h3 class="font-bold text-slate-800 text-sm mb-3">3 เสาหลักของการตัดสินใจแบบมีโครงสร้าง (The 3 Typed Primitives)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-xs">
+                
+                <!-- Choice -->
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-mono font-bold text-[10px]">1. Choice</span>
+                        <h4 class="font-bold text-slate-800 text-sm mt-2 mb-1">การเลือกตัวเลือกเดี่ยว</h4>
+                        <p class="text-slate-600 leading-relaxed">
+                            รองรับตัวเลือก $2 - 255$ ตัวเลือก โมเดลจะคืนค่าตัวเลือกที่ชนะ พร้อมความน่าจะเป็นแบบสัมพัทธ์ของทุกตัวเลือกและค่าความเชื่อมั่น (Confidence)
+                        </p>
+                    </div>
+                    <div class="mt-3 p-2 bg-white rounded border font-mono text-[10px] text-slate-600">
+                        Output: choice, probabilities, confidence
+                    </div>
+                </div>
+
+                <!-- Score -->
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <span class="px-2 py-0.5 bg-cyan-100 text-cyan-800 rounded font-mono font-bold text-[10px]">2. Score</span>
+                        <h4 class="font-bold text-slate-800 text-sm mt-2 mb-1">การประเมินคะแนนถ่วงน้ำหนัก</h4>
+                        <p class="text-slate-600 leading-relaxed">
+                            จัดลำดับคะแนน $2 - 10$ ระดับ (เริ่มนับจาก 0) ผลลัพธ์ไม่ใช่แค่ตัวเลขสุ่ม แต่คือ <strong>ค่าคาดหมายถ่วงน้ำหนักความน่าจะเป็น (Expected Value)</strong>
+                        </p>
+                    </div>
+                    <div class="mt-3 p-2 bg-white rounded border font-mono text-[10px] text-slate-600">
+                        $$\text{Score} = \sum_{i=0}^{K-1} i \cdot P(\text{level}_i)$$
+                    </div>
+                </div>
+
+                <!-- Noul -->
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-mono font-bold text-[10px]">3. Noul</span>
+                        <h4 class="font-bold text-slate-800 text-sm mt-2 mb-1">ความน่าจะเป็นของ "ใช่" (Prob Yes)</h4>
+                        <p class="text-slate-600 leading-relaxed">
+                            ไม่ใช่แค่การตอบ Boolean (True/False) ทื่อๆ แต่คืนค่าความน่าจะเป็นต่อเนื่อง $P(\text{True}) \in [0.0, 1.0]$ ทำให้กำหนด Guardrail Threshold ได้ยืดหยุ่น
+                        </p>
+                    </div>
+                    <div class="mt-3 p-2 bg-white rounded border font-mono text-[10px] text-slate-600">
+                        Output: noul = 0.94 (94% Probability)
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Calibrated Probability Deep Dive -->
+            <div class="p-5 bg-slate-900 text-white rounded-xl border border-slate-800">
+                <h3 class="font-bold text-rose-400 text-sm mb-2">ทำไม Calibrated Probabilities จึงสำคัญต่อระบบอัตโนมัติ (Automation)?</h3>
+                <p class="text-xs text-slate-300 leading-relaxed mb-3">
+                    ใน LLM ทั่วไป หากเราสั่งให้ตอบความมั่นใจ โมเดลมักจะเกิดอาการ Overconfident (ตอบ 99% เสมอแม้จะเดา) หรือตอบเป็นคำพูด เช่น "ค่อนข้างมั่นใจ" ซึ่งคอมพิวเตอร์นำไปคำนวณทางสถิติต่อไม่ได้
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
+                        <strong class="text-emerald-400 block mb-1">Auto-Execution Gate:</strong>
+                        <p class="text-slate-300 text-[11px]">
+                            หาก $P(\text{Safe}) \ge 0.95$ $\rightarrow$ สั่งให้ระบบรันคำสั่งโดยอัตโนมัติทันทีโดยไม่ต้องรบกวนมนุษย์
+                        </p>
+                    </div>
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
+                        <strong class="text-amber-400 block mb-1">Human-in-the-Loop Escalation:</strong>
+                        <p class="text-slate-300 text-[11px]">
+                            หาก $P(\text{Safe}) < 0.95$ $\rightarrow$ ส่ง Notification ให้วิศวกรกดยืนยันก่อนดำเนินการ
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Interactive Visualizer - System 1 vs System 2 Race -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-rose-950 mb-2 border-b-2 border-rose-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center mr-3 font-bold text-lg">3</span>
+                แบบจำลองเปรียบเทียบการทำงานสด: System 1 (Jev) vs System 2 (LLM)
+            </h2>
+            <p class="text-slate-600 text-sm mb-4">
+                ทดลองกดปุ่มเพื่อจำลองการประมวลผลคำสั่งเดียวกัน: สังเกตความแตกต่างของความหน่วง (Latency), กระบวนการสร้างคำตอบ, และการการันตีโครงสร้าง JSON
+            </p>
+
+            <div class="bg-slate-950 text-white p-6 rounded-2xl border border-slate-800">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-5 pb-4 border-b border-slate-800 text-xs">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-slate-400">สถานการณ์จำลอง:</span>
+                        <span class="px-2.5 py-1 rounded bg-slate-800 text-slate-200 border border-slate-700 font-mono">
+                            คัดกรองตั๋วลูกค้า (Customer Triage)
+                        </span>
+                    </div>
+                    <button onclick="startRace()" id="race-btn" class="px-5 py-2 bg-gradient-to-r from-rose-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center space-x-1.5">
+                        <span>⚡ เริ่มการทดสอบความเร็ว (Run Comparison)</span>
+                    </button>
+                </div>
+
+                <!-- Comparison Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Left: System 2 LLM -->
+                    <div class="p-4 bg-slate-900/90 border border-indigo-900/50 rounded-xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                                    <strong class="text-xs text-indigo-300 font-mono">System 2 (Autoregressive LLM)</strong>
+                                </div>
+                                <span id="s2-latency" class="text-[11px] font-mono text-slate-500">Latency: -- ms</span>
+                            </div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden mb-3">
+                                <div id="s2-progress" class="bg-indigo-500 h-1.5 rounded-full transition-all duration-75" style="width: 0%"></div>
+                            </div>
+                            <div id="s2-output" class="p-3 bg-slate-950 rounded-lg font-mono text-[11px] text-slate-400 h-40 overflow-y-auto leading-relaxed border border-slate-800">
+                                // รอเริ่มการทดสอบ...
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-slate-500 flex justify-between font-mono">
+                            <span>Cost: ~120 Output Tokens</span>
+                            <span id="s2-status" class="text-slate-400">Idle</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: System 1 Jev -->
+                    <div class="p-4 bg-slate-900/90 border border-rose-900/50 rounded-xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                    <strong class="text-xs text-rose-300 font-mono">System 1 (Jev Decision Model)</strong>
+                                </div>
+                                <span id="s1-latency" class="text-[11px] font-mono text-rose-400 font-bold">Latency: -- ms</span>
+                            </div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden mb-3">
+                                <div id="s1-progress" class="bg-rose-500 h-1.5 rounded-full transition-all duration-75" style="width: 0%"></div>
+                            </div>
+                            <div id="s1-output" class="p-3 bg-slate-950 rounded-lg font-mono text-[11px] text-emerald-400 h-40 overflow-y-auto leading-relaxed border border-slate-800">
+                                // รอเริ่มการทดสอบ...
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-slate-500 flex justify-between font-mono">
+                            <span>Cost: 0 Output Tokens (Zero-Prose)</span>
+                            <span id="s1-status" class="text-slate-400">Idle</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Composite AI Architecture -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-rose-950 mb-4 border-b-2 border-rose-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center mr-3 font-bold text-lg">4</span>
+                สถาปัตยกรรมแบบผสมผสาน (Composite AI Architecture): Jev + LLMs
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                ในความเป็นจริง เราไม่ได้นำ Jev มาแทนที่ LLM ทั้งหมด แต่เรานำมาทำงานร่วมกันในลักษณะ <strong>"System 1 กรองหน้าบ้าน และ System 2 คิดหลังบ้าน"</strong> เพื่อดึงจุดเด่นของทั้งสองฝั่งมาผนึกกำลังกัน:
+            </p>
+
+            <div class="space-y-3 text-xs mb-6">
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-start space-x-3">
+                    <span class="px-2.5 py-1 bg-rose-600 text-white font-mono font-bold rounded text-[11px] shrink-0">1. Fast Router</span>
+                    <div>
+                        <strong class="text-slate-800 block mb-0.5">คัดกรอง Intent ในระดับ 100ms</strong>
+                        <p class="text-slate-600 leading-relaxed">
+                            เมื่อผู้ใช้ส่งคำขอเข้ามา Jev จะเลือกว่าคำขอนี้ต้องการค้นหาข้อมูลทั่วไป (FAQ), การทำงานกับฐานข้อมูล, หรือต้องการใช้โมเดลคิดวิเคราะห์ ช่วยประหยัดเวลาและค่าใช้จ่ายได้มากกว่า 80%
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-start space-x-3">
+                    <span class="px-2.5 py-1 bg-amber-600 text-white font-mono font-bold rounded text-[11px] shrink-0">2. Tool Guard</span>
+                    <div>
+                        <strong class="text-slate-800 block mb-0.5">ตรวจสอบความปลอดภัยก่อนรัน Tool Calls</strong>
+                        <p class="text-slate-600 leading-relaxed">
+                            ก่อนที่ Agent จะรันคำสั่ง bash หรือเขียนทับฐานข้อมูล Jev จะประเมินคะแนน Reversibility และความเสี่ยง หากมีความเสี่ยงสูง จะพักคำสั่งเพื่อรอการอนุมัติจากมนุษย์ทันที
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-start space-x-3">
+                    <span class="px-2.5 py-1 bg-cyan-600 text-white font-mono font-bold rounded text-[11px] shrink-0">3. Context Compaction</span>
+                    <div>
+                        <strong class="text-slate-800 block mb-0.5">ตัดทอนประวัติที่ไม่จำเป็นเพื่อประหยัด Context Window</strong>
+                        <p class="text-slate-600 leading-relaxed">
+                            แทนที่จะนำข้อความทั้งหมดมาให้ LLM สรุปแบบคลุมเครือ Jev จะตัดสินใจแบบชี้ชัดว่า Tool Call ใดที่ผลลัพธ์หมดอายุแล้ว และส่วนใดที่ต้องคงไว้แบบคงเดิม (Verbatim) สำหรับเซสชันการเขียนโค้ดยาวๆ
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Integration -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 font-mono text-xs overflow-x-auto border border-slate-800">
+                <div class="text-slate-400 mb-2 flex items-center justify-between">
+                    <span>ตัวอย่างการเรียกใช้ Jev Decision API ใน Python</span>
+                    <span class="text-rose-400 font-bold">Python REST</span>
+                </div>
+<pre><code><span class="text-rose-400">import</span> requests
+
+url = <span class="text-emerald-300">"https://www.jevai.org/api/v1/decisions"</span>
+headers = {
+    <span class="text-emerald-300">"Content-Type"</span>: <span class="text-emerald-300">"application/json"</span>,
+    <span class="text-emerald-300">"Authorization"</span>: <span class="text-emerald-300">"Bearer YOUR_JEV_API_KEY"</span>
+}
+
+payload = {
+    <span class="text-emerald-300">"model"</span>: <span class="text-emerald-300">"typesafe/jev-1.13"</span>,
+    <span class="text-emerald-300">"state"</span>: <span class="text-emerald-300">"Customer: 'Double charged on my card, refund now!'"</span>,
+    <span class="text-emerald-300">"questions"</span>: {
+        <span class="text-emerald-300">"intent"</span>: {
+            <span class="text-emerald-300">"type"</span>: <span class="text-emerald-300">"choice"</span>,
+            <span class="text-emerald-300">"instructions"</span>: <span class="text-emerald-300">"Identify primary customer intent"</span>,
+            <span class="text-emerald-300">"criteria"</span>: {<span class="text-emerald-300">"refund"</span>: <span class="text-emerald-300">"Money back"</span>, <span class="text-emerald-300">"inquiry"</span>: <span class="text-emerald-300">"General question"</span>}
+        },
+        <span class="text-emerald-300">"needs_human"</span>: {
+            <span class="text-emerald-300">"type"</span>: <span class="text-emerald-300">"noul"</span>,
+            <span class="text-emerald-300">"instructions"</span>: <span class="text-emerald-300">"Requires human intervention?"</span>
+        }
+    }
+}
+
+response = requests.post(url, headers=headers, json=payload)
+<span class="text-slate-500"># Response: ~110ms with guaranteed typed schema</span>
+print(response.json())</code></pre>
+            </div>
+        </section>
+
+        <!-- Section 5: Practical Labs & Sandbox App -->
+        <section class="bg-gradient-to-r from-slate-900 via-rose-950 to-indigo-950 text-white rounded-3xl p-6 md:p-8 mb-8 border border-slate-800 shadow-xl">
+            <h2 class="text-2xl font-bold text-white mb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-rose-500/30 text-rose-300 flex items-center justify-center mr-3 font-bold text-sm">5</span>
+                ห้องปฏิบัติการและแอปพลิเคชันแซนด์บ็อกซ์ (Hands-on Labs)
+            </h2>
+            <p class="text-slate-400 text-xs md:text-sm font-light mb-6 leading-relaxed">
+                ทดลองเชื่อมต่อคีย์ของคุณผ่าน Sandbox หรือรันคำสั่งผ่านสคริปต์ Python ในเครื่อง
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- App 1 -->
+                <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-950/60 px-2.5 py-1 rounded border border-rose-800/40 font-mono">Interactive Web App</span>
+                        <h3 class="text-base font-bold text-slate-100 mt-2.5 mb-1.5">Jev Decision Sandbox App</h3>
+                        <p class="text-xs text-slate-400 font-light leading-relaxed mb-4">
+                            ทดลองใส่ State, ตั้งคำถาม Choice, Score, Noul แบบโต้ตอบ วัดค่า Latency สด และดู Probability Charts
+                        </p>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800/80">
+                        <a href="lab-jev-decision/index.html" class="block text-center py-2 px-3 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition shadow-md shadow-rose-600/20">
+                            ⚡ เปิด Sandbox App
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 2 -->
+                <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/60 px-2.5 py-1 rounded border border-cyan-800/40 font-mono">Python Code Lab</span>
+                        <h3 class="text-base font-bold text-slate-100 mt-2.5 mb-1.5">คู่มือและสคริปต์รัน Terminal</h3>
+                        <p class="text-xs text-slate-400 font-light leading-relaxed mb-4">
+                            ศึกษาคู่มือการติดตั้ง Local Proxy และรันสคริปต์ <code class="text-cyan-300">test_jev_api.py</code> ผ่าน Terminal ในโฟลเดอร์ปฏิบัติการ
+                        </p>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800/80">
+                        <a href="lab-jev-decision/README.md" class="block text-center py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition">
+                            📖 อ่านคู่มือแล็บ (README)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-500 text-xs py-8 border-t border-slate-900">
+        <div class="container mx-auto px-4 max-w-4xl text-center space-y-2">
+            <p>Machine Learning Curriculum & Practical Labs &bull; ครอบคลุมตั้งแต่ทฤษฎีพื้นฐานจนถึงสถาปัตยกรรม System 1 AI</p>
+            <p class="text-slate-600 font-mono text-[11px]">บทที่ 24: Structured Decision Models & System 1 AI (Jev Architecture)</p>
+        </div>
+    </footer>
+
+    <!-- Race Comparison Simulation Script -->
+    <script>
+        let raceRunning = false;
+
+        function startRace() {
+            if (raceRunning) return;
+            raceRunning = true;
+
+            const btn = document.getElementById('race-btn');
+            btn.disabled = true;
+            btn.classList.add('opacity-70');
+
+            // Reset UI
+            document.getElementById('s1-progress').style.width = '0%';
+            document.getElementById('s2-progress').style.width = '0%';
+            document.getElementById('s1-latency').innerText = 'กำลังประมวลผล...';
+            document.getElementById('s2-latency').innerText = 'กำลังประมวลผล...';
+            document.getElementById('s1-status').innerText = 'Evaluating...';
+            document.getElementById('s2-status').innerText = 'Generating tokens...';
+            document.getElementById('s1-output').innerText = '';
+            document.getElementById('s2-output').innerText = '';
+
+            const startT = performance.now();
+
+            // 1. System 1 (Jev) - completes in ~115ms
+            setTimeout(() => {
+                const s1Time = Math.round(performance.now() - startT);
+                document.getElementById('s1-progress').style.width = '100%';
+                document.getElementById('s1-latency').innerText = `เสร็จสิ้น: ${s1Time} ms ⚡`;
+                document.getElementById('s1-status').innerText = 'Done (200 OK)';
+                document.getElementById('s1-output').innerHTML = `
+<span class="text-rose-400 font-bold"># TypeSafe Decision Output:</span>
+{
+  "answers": {
+    "intent": "refund",
+    "urgency": 2,
+    "needs_human": true
+  },
+  "confidence": {
+    "intent": 0.94,
+    "urgency": 0.88,
+    "needs_human": 0.92
+  }
+}
+<span class="text-emerald-400 font-bold">✓ 100% Schema Valid (No Parsing Error)</span>`;
+            }, 115);
+
+            // 2. System 2 (LLM) - streams tokens over 3.2 seconds
+            const llmTokens = [
+                "Based", " on", " the", " user's", " emotional", " tone", " and", " the", " mention", " of", " a", " duplicate", " invoice,",
+                "\nI", " have", " analyzed", " the", " request", " step", " by", " step:",
+                "\n1.", " Intent:", " The", " user", " wants", " their", " money", " returned,", " so", " this", " is", " a", " 'refund'.",
+                "\n2.", " Urgency:", " Since", " they", " threatened", " their", " bank,", " urgency", " is", " high.",
+                "\n\n```json\n{\n  \"intent\": \"refund\",\n  \"urgency\": 2,\n  \"needs_human\": true\n}\n```"
+            ];
+
+            let tokenIdx = 0;
+            const tokenInterval = setInterval(() => {
+                if (tokenIdx < llmTokens.length) {
+                    document.getElementById('s2-output').innerText += llmTokens[tokenIdx];
+                    tokenIdx++;
+                    const pct = Math.round((tokenIdx / llmTokens.length) * 100);
+                    document.getElementById('s2-progress').style.width = `${pct}%`;
+                } else {
+                    clearInterval(tokenInterval);
+                    const s2Time = Math.round(performance.now() - startT);
+                    document.getElementById('s2-progress').style.width = '100%';
+                    document.getElementById('s2-latency').innerText = `เสร็จสิ้น: ${s2Time} ms`;
+                    document.getElementById('s2-status').innerText = 'Done';
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-70');
+                    raceRunning = false;
+                }
+            }, 65);
+        }
+    </script>
+
+    <!-- Slide Presentation Mode Script -->
+    <script>
+    (function() {
+        let isSlideshowActive = false;
+        let currentSlide = 0;
+        let slides = [];
+        let originalParents = [];
+
+        window.toggleSlideshow = function() {
+            if (isSlideshowActive) {
+                exitSlideshow();
+            } else {
+                enterSlideshow();
+            }
+        };
+
+        function enterSlideshow() {
+            const mainContent = document.querySelector('main');
+            if (!mainContent) return;
+            isSlideshowActive = true;
+            document.body.style.overflow = 'hidden';
+            slides = buildSlides(mainContent);
+            currentSlide = 0;
+
+            const overlay = document.createElement('div');
+            overlay.id = 'slideshow-overlay';
+            overlay.className = 'fixed inset-0 z-[100] bg-slate-950 text-white flex flex-col justify-between overflow-hidden animate-fade-in';
+
+            const topBar = document.createElement('div');
+            topBar.className = 'flex justify-between items-center p-4 border-b border-slate-800 bg-slate-900/60 backdrop-blur';
+            topBar.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-400">Presentation Mode</span>
+                </div>
+                <div class="text-xs text-slate-400 font-mono" id="slide-counter">1 / ${slides.length}</div>
+                <button onclick="toggleSlideshow()" class="text-slate-400 hover:text-white p-1 rounded transition" title="ออกจากการนำเสนอ (Esc)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            `;
+
+            const viewArea = document.createElement('div');
+            viewArea.id = 'slide-view-area';
+            viewArea.className = 'flex-1 overflow-y-auto p-4 md:p-8 flex items-center justify-center';
+
+            const navBar = document.createElement('div');
+            navBar.className = 'flex justify-between items-center p-4 border-t border-slate-800 bg-slate-900/60 backdrop-blur';
+            navBar.innerHTML = `
+                <button onclick="prevSlide()" id="prev-slide-btn" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition flex items-center space-x-1">
+                    <span>◀ ก่อนหน้า</span>
+                </button>
+                <span class="text-[11px] text-slate-500 hidden sm:inline">กด Space หรือลูกศรซ้าย/ขวา เพื่อเลื่อนสไลด์ &bull; Esc เพื่อออก</span>
+                <button onclick="nextSlide()" id="next-slide-btn" class="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white transition flex items-center space-x-1">
+                    <span>ถัดไป ▶</span>
+                </button>
+            `;
+
+            overlay.appendChild(topBar);
+            overlay.appendChild(viewArea);
+            overlay.appendChild(navBar);
+            document.body.appendChild(overlay);
+
+            document.addEventListener('keydown', handleKeypress);
+            showSlide(currentSlide);
+        }
+
+        function exitSlideshow() {
+            const overlay = document.getElementById('slideshow-overlay');
+            if (overlay) overlay.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', handleKeypress);
+            isSlideshowActive = false;
+            restoreMovedElements();
+        }
+
+        function handleKeypress(e) {
+            if (e.key === 'Escape') exitSlideshow();
+            else if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+        }
+
+        function buildSlides(mainContent) {
+            const header = document.querySelector('header');
+            let slideList = [];
+            if (header) {
+                const coverNode = document.createElement('div');
+                coverNode.className = 'text-center flex flex-col justify-center items-center h-full p-8';
+                const badge = header.querySelector('span')?.cloneNode(true);
+                const title = header.querySelector('h1')?.cloneNode(true);
+                const subtitle = header.querySelector('p')?.cloneNode(true);
+                if (badge) {
+                    badge.className = "text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-950/60 border border-rose-900/40 px-3 py-1 rounded-full mb-4";
+                    coverNode.appendChild(badge);
+                }
+                if (title) {
+                    title.className = "text-3xl md:text-5xl font-extrabold text-white leading-tight mb-4";
+                    coverNode.appendChild(title);
+                }
+                if (subtitle) {
+                    subtitle.className = "text-base md:text-xl text-slate-350 font-light max-w-2xl";
+                    coverNode.appendChild(subtitle);
+                }
+                slideList.push({ title: "บทนำ", content: [coverNode] });
+            }
+            let slideContainers = Array.from(mainContent.querySelectorAll('section'));
+            slideContainers.forEach((sec, idx) => {
+                slideList.push({ title: `ตอนที่ ${idx + 1}`, content: [sec] });
+            });
+            return slideList;
+        }
+
+        function showSlide(index) {
+            const viewArea = document.getElementById('slide-view-area');
+            if (!viewArea) return;
+            viewArea.innerHTML = '';
+            const slideData = slides[index];
+            const slideContainer = document.createElement('div');
+            slideContainer.className = 'w-full max-w-3xl bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8';
+            slideData.content.forEach(node => {
+                if (index === 0) {
+                    slideContainer.appendChild(node);
+                } else {
+                    const placeholderId = `slide-placeholder-${Date.now()}-${Math.random()}`;
+                    const placeholder = document.createElement('div');
+                    placeholder.id = placeholderId;
+                    node.parentNode.insertBefore(placeholder, node);
+                    originalParents.push({ element: node, placeholderId });
+                    slideContainer.appendChild(node);
+                }
+            });
+            viewArea.appendChild(slideContainer);
+            document.getElementById('slide-counter').innerText = `สไลด์ ${index + 1} / ${slides.length}`;
+            document.getElementById('prev-slide-btn').disabled = index === 0;
+            document.getElementById('next-slide-btn').disabled = index === slides.length - 1;
+        }
+
+        function restoreMovedElements() {
+            originalParents.forEach(item => {
+                const placeholder = document.getElementById(item.placeholderId);
+                if (placeholder) {
+                    placeholder.parentNode.insertBefore(item.element, placeholder);
+                    placeholder.remove();
+                }
+            });
+            originalParents = [];
+        }
+
+        window.nextSlide = function() {
+            if (currentSlide < slides.length - 1) {
+                restoreMovedElements();
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        };
+
+        window.prevSlide = function() {
+            if (currentSlide > 0) {
+                restoreMovedElements();
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        };
+    })();
+    </script>
+</body>
+</html>

@@ -92,6 +92,21 @@
                         <p class="text-gray-700">การเรียนรู้แบบเสริมแรง: เรียนรู้จากการลองผิดลองถูกและรางวัล</p>
                     </div>
                 </div>
+
+                <!-- Modern ML Paradigms -->
+                <div class="mt-6 pt-6 border-t border-slate-100">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 font-mono">กระบวนทัศน์การเรียนรู้ยุคใหม่ (Modern Learning Paradigms)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-amber-50/70 rounded-lg p-4 border-l-4 border-amber-500 text-sm">
+                            <h5 class="font-bold text-amber-800 mb-1">Semi-Supervised Learning (การเรียนรู้แบบกึ่งมีผู้สอน)</h5>
+                            <p class="text-gray-600 text-xs leading-relaxed">ผสมผสานข้อมูลที่มี Label จำนวนน้อย กับข้อมูลที่ไม่มี Label จำนวนมหาศาล เพื่อลดต้นทุนและเวลาในการติดป้ายกำกับข้อมูลโดยมนุษย์</p>
+                        </div>
+                        <div class="bg-indigo-50/70 rounded-lg p-4 border-l-4 border-indigo-500 text-sm">
+                            <h5 class="font-bold text-indigo-800 mb-1">Self-Supervised Learning (การเรียนรู้แบบกำกับตนเอง)</h5>
+                            <p class="text-gray-600 text-xs leading-relaxed">โมเดลสร้างฉลากเทียม (Pseudo-labels/Pretext task) ขึ้นมาจากโครงสร้างของข้อมูลเอง เช่น การทำนายคำถัดไปในข้อความ (LLMs) หรือ Masked Autoencoders</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -597,7 +612,7 @@
 
         <!-- Section: ML Algorithm Chooser Wizard -->
         <section class="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-950 text-white rounded-3xl shadow-2xl p-6 md:p-8 mb-12 border border-slate-800">
-            <div class="text-center mb-8 border-b border-slate-850 pb-6">
+            <div class="text-center mb-8 border-b border-slate-800 pb-6">
                 <span class="text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 px-4 py-1.5 rounded-full border border-sky-900/30">เครื่องมือช่วยวิเคราะห์ (ML Chooser Wizard)</span>
                 <h2 class="text-3xl font-extrabold mt-3 text-slate-100">โปรแกรมถาม-ตอบเลือกโมเดลที่ใช่!</h2>
                 <p class="text-slate-400 text-xs md:text-sm mt-2 max-w-xl mx-auto font-light">
@@ -606,7 +621,7 @@
             </div>
 
             <!-- Wizard Content Card -->
-            <div class="max-w-2xl mx-auto bg-slate-900/80 border border-slate-850 rounded-2xl p-6 md:p-8 min-h-[300px] flex flex-col justify-between" id="wizard-container">
+            <div class="max-w-2xl mx-auto bg-slate-900/80 border border-slate-800 rounded-2xl p-6 md:p-8 min-h-[300px] flex flex-col justify-between" id="wizard-container">
                 <!-- Inner Wizard Screen (will be populated dynamically) -->
                 <div id="wizard-screen">
                     <!-- Step 1 will be loaded here -->
@@ -1067,7 +1082,7 @@
             const subtitle = header.querySelector('p')?.cloneNode(true);
             
             if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border border-sky-800/30 px-3 py-1 rounded-full mb-4";
                 coverNode.appendChild(badge);
             }
             if (title) {
@@ -1233,7 +1248,7 @@
                 });
                 el.querySelectorAll('td').forEach(td => {
                     if (!td.hasAttribute('data-original-class')) td.setAttribute('data-original-class', td.className);
-                    td.className = 'py-2 px-4 border-b border-slate-850 text-slate-350';
+                    td.className = 'py-2 px-4 border-b border-slate-800 text-slate-300';
                 });
             }
             

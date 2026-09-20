@@ -110,10 +110,10 @@
 
     <div class="container mx-auto px-4 py-8 max-w-6xl">
                                 <!-- Header -->
-    <header class="bg-gradient-to-r from-indigo-950 via-slate-900 to-blue-955 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
+    <header class="bg-gradient-to-r from-indigo-950 via-slate-900 to-blue-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border-sky-900/30 px-3 py-1 rounded-full border">Supervised Learning: Classification &bull; บทที่ 06</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border-sky-900/30 px-3 py-1 rounded-full border">Supervised Learning: Classification &bull; บทที่ 06</span>
             <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">Logistic Regression ฉบับสมบูรณ์</h1>
             <p class="text-slate-350 text-sm md:text-base mt-2 font-light">เจาะลึกทฤษฎีเบื้องหลังและขอบเขตการตัดสินใจของ Logistic Regression</p>
         </div>
@@ -151,17 +151,26 @@
                         <div class="bg-blue-50 p-4 rounded-lg">
                             <p class="text-gray-700 mb-2"><strong>"Logistic"</strong> มาจากคำว่า "Logistique" ในภาษาฝรั่งเศส หมายถึง "การคำนวณ" หรือ "ตรรกะ"</p>
                             <p class="text-gray-700 mb-2"><strong>"Regression"</strong> หมายถึง "การถดถอย" หรือการหาความสัมพันธ์ระหว่างตัวแปร</p>
-                            <p class="text-gray-700"><strong>รวมกัน:</strong> "การถดถอยแบบลอจิสติก" - การหาความสัมพันธ์โดยใช้ฟังก์ชันลอจิสติก</p>
+                            <p class="text-gray-700"><strong>รวมกัน:</strong> "การถดถอยแบบลอจิสติก" - การหาความสัมพันธ์โดยใช้ฟังก์ชันลอจิสติก (ไม่มีตัว 's' ต่อท้ายคำว่า Logistic ในทางวิชาการสากล)</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="formula-box mt-6">
-                    <h3 class="text-xl font-semibold mb-4">🧮 ฟังก์ชันลอจิสติก (Sigmoid Function)</h3>
+                    <h3 class="text-xl font-semibold mb-4">🧮 ฟังก์ชันลอจิสติก (Sigmoid) และ Log-Odds (Logit)</h3>
                     <div class="text-center text-2xl font-mono mb-4">
                         $$\sigma(z) = \frac{1}{1 + e^{-z}}$$
                     </div>
-                    <p class="text-center">ฟังก์ชันนี้จะให้ค่าระหว่าง 0 ถึง 1 เสมอ เหมาะสำหรับการทำนายความน่าจะเป็น</p>
+                    <p class="text-center text-gray-700 mb-4">ฟังก์ชันนี้จะแปลงค่า $z \in (-\infty, +\infty)$ ให้อยู่ระหว่าง 0 ถึง 1 เสมอ เหมาะสำหรับแทนความน่าจะเป็น $p$</p>
+                    
+                    <div class="bg-blue-50/70 p-4 rounded-xl border border-blue-200 mt-4 text-left text-sm text-gray-700">
+                        <h4 class="font-bold text-blue-900 mb-2">ทำไมจึงเรียกว่า "Regression" ทั้งที่เป็นโมเดล Classification?</h4>
+                        <p class="mb-2">เพราะหากเรานิยาม <strong>อัตราส่วนโอกาสเกิด (Odds)</strong> คือ $Odds = \frac{p}{1-p}$ และนำมาหาค่าลอการิทึมธรรมชาติ จะได้ฟังก์ชันที่เรียกว่า <strong>Logit</strong> หรือ <strong>Log-Odds</strong>:</p>
+                        <div class="text-center font-mono my-2 text-base text-blue-800">
+                            $$\operatorname{logit}(p) = \ln\left(\frac{p}{1-p}\right) = \mathbf{w}^T \mathbf{x} + b = z$$
+                        </div>
+                        <p class="text-xs text-gray-600">จะเห็นได้ว่าแท้จริงแล้วโมเดลนี้กำลังทำ <em>Linear Regression กับค่า Log-Odds</em> นั่นเอง!</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1099,7 +1108,7 @@
             const subtitle = header.querySelector('p')?.cloneNode(true);
             
             if (badge) {
-                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-955/60 border border-sky-850/30 px-3 py-1 rounded-full mb-4";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950/60 border border-sky-800/30 px-3 py-1 rounded-full mb-4";
                 coverNode.appendChild(badge);
             }
             if (title) {
@@ -1265,7 +1274,7 @@
                 });
                 el.querySelectorAll('td').forEach(td => {
                     if (!td.hasAttribute('data-original-class')) td.setAttribute('data-original-class', td.className);
-                    td.className = 'py-2 px-4 border-b border-slate-850 text-slate-350';
+                    td.className = 'py-2 px-4 border-b border-slate-800 text-slate-300';
                 });
             }
             

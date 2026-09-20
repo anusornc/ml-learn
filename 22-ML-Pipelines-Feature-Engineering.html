@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บทที่ 22: ML Pipelines & Feature Engineering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+    <!-- KaTeX for beautiful math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap">
+</head>
+<body>
+    <!-- Floating Smart Navigator -->
+    <div class="fixed top-4 left-4 z-50 flex items-center space-x-1 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md px-2.5 py-1 rounded-full shadow-lg border border-slate-200 transition-all duration-300 hover:shadow-indigo-500/10">
+        <a href="21-ML-Dimensionality-Reduction.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="บทก่อนหน้า (บทที่ 21)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <a href="index.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="กลับหน้าแรกสารบัญ">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <a href="23-ML-Deep-Learning-Architectures.html" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition flex items-center" title="บทถัดไป (บทที่ 23)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </a>
+        <span class="w-[1px] h-3.5 bg-slate-200"></span>
+        <button onclick="toggleSlideshow()" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition flex items-center" title="โหมดนำเสนอ Slide">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-slate-900 via-cyan-950 to-blue-950 text-white py-12 shadow-lg relative overflow-hidden border-b border-white/10">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:20px_20px] opacity-20"></div>
+        <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/60 border border-cyan-900/40 px-3 py-1 rounded-full">Practical ML Engineering &bull; บทที่ 22</span>
+            <h1 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">ML Pipelines & Feature Engineering</h1>
+            <p class="text-slate-350 text-sm md:text-base mt-2 font-light">การจัดการข้อมูลสูญหาย, แปลงข้อมูลเชิงกลุ่ม, ป้องกันภัยเงียบ Data Leakage และสร้าง Scikit-Learn Pipeline สู่โปรดักชัน</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <!-- Section 1: Preprocessing & Imputation -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-cyan-900 mb-4 border-b-2 border-cyan-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center mr-3 font-semibold text-lg">1</span>
+                การเตรียมข้อมูลและการจัดการข้อมูลสูญหาย (Data Preprocessing & Imputation)
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                ในความเป็นจริง ข้อมูลกว่า 80% ที่ได้รับมักมีค่าสูญหาย (Missing Values / NaN), มีสเกลที่แตกต่างกัน และมีตัวแปรประเภทข้อความที่โมเดลทางคณิตศาสตร์ไม่สามารถคำนวณได้โดยตรง
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6 text-xs">
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <strong class="text-cyan-800 block text-sm mb-1">SimpleImputer</strong>
+                    <p class="text-slate-600 leading-relaxed">เติมค่าที่หายไปด้วยค่าทางสถิติ เช่น <code>mean</code>, <code>median</code> (เหมาะกับข้อมูลเบ้/มี Outlier) หรือ <code>most_frequent</code> (สำหรับข้อมูลเชิงกลุ่ม)</p>
+                </div>
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <strong class="text-cyan-800 block text-sm mb-1">KNNImputer</strong>
+                    <p class="text-slate-600 leading-relaxed">ใช้ระยะห่าง Euclidean หา $k$ แถวที่คล้ายคลึงกันที่สุด แล้วนำค่าเฉลี่ยของเพื่อนบ้านมาเติม แม่นยำกว่าแต่กินพลังประมวลผลสูง</p>
+                </div>
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <strong class="text-cyan-800 block text-sm mb-1">IterativeImputer (MICE)</strong>
+                    <p class="text-slate-600 leading-relaxed">จำลองแต่ละฟีเจอร์เป็นโมเดล Regression โดยใช้ฟีเจอร์อื่นๆ เป็นตัวทำนาย แล้ววนซ้ำจนกว่าค่าจะลู่เข้า</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Encoding & Scaling -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-cyan-900 mb-4 border-b-2 border-cyan-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center mr-3 font-semibold text-lg">2</span>
+                การเข้ารหัสตัวแปรกลุ่ม (Categorical Encoding) & การปรับสเกล
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-4 text-xs">
+                <!-- Encoding -->
+                <div class="p-5 rounded-xl border border-slate-200 bg-slate-50">
+                    <h3 class="font-bold text-slate-800 text-sm mb-2">กลยุทธ์การเข้ารหัสตัวแปรกลุ่ม (Categorical Encoding)</h3>
+                    <ul class="space-y-2.5 text-slate-600">
+                        <li>
+                            <strong class="text-indigo-700">Ordinal Encoding:</strong> เหมาะสำหรับข้อมูลที่มีลำดับขั้น เช่น เล็ก (0), กลาง (1), ใหญ่ (2) ห้ามใช้กับข้อมูลที่ไม่มีลำดับ เพราะโมเดลจะเข้าใจผิดว่าค่า 2 มีค่ามากกว่า 0
+                        </li>
+                        <li>
+                            <strong class="text-emerald-700">One-Hot Encoding:</strong> แตกเป็นคอลัมน์ไบนารี 0/1 เหมาะสำหรับข้อมูลที่ไม่มีลำดับ (Nominal) เช่น ประเทศ หรือ สี (ระวังปัญหา Dummy Variable Trap: ควรตั้ง <code>drop='first'</code> สำหรับ Linear Models)
+                        </li>
+                        <li>
+                            <strong class="text-purple-700">Target Encoding:</strong> แทนที่กลุ่มด้วยค่าเฉลี่ยของตัวแปรเป้าหมาย $y$ เหมาะกับกลุ่มที่มีค่าไม่ซ้ำจำนวนมาก (High-cardinality)
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Scaling -->
+                <div class="p-5 rounded-xl border border-slate-200 bg-slate-50">
+                    <h3 class="font-bold text-slate-800 text-sm mb-2">ตัวแปลงสเกลข้อมูลตัวเลข (Feature Scalers)</h3>
+                    <ul class="space-y-2.5 text-slate-600">
+                        <li>
+                            <strong class="text-indigo-700">StandardScaler:</strong> ลบเฉลี่ยแล้วหารด้วย SD: $z = \frac{x - \mu}{\sigma}$ ทำให้ได้ $\mu=0, \sigma=1$ เป็นค่ามาตรฐานสำหรับโมเดลส่วนใหญ่
+                        </li>
+                        <li>
+                            <strong class="text-amber-700">RobustScaler:</strong> ลบมัธยฐานแล้วหารด้วย IQR: $z = \frac{x - Q_2}{Q_3 - Q_1}$ <strong>ไม่ได้รับผลกระทบจาก Outlier</strong>
+                        </li>
+                        <li>
+                            <strong class="text-teal-700">PowerTransformer:</strong> ทำ Box-Cox หรือ Yeo-Johnson แปลงข้อมูลเบ้ให้กลายเป็นการแจกแจงแบบปกติ (Gaussian-like)
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Data Leakage -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-rose-900 mb-4 border-b-2 border-rose-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center mr-3 font-semibold text-lg">3</span>
+                ภัยเงียบที่อันตรายที่สุด: ข้อมูลรั่วไหล (Data Leakage)
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                <strong>Data Leakage</strong> คือปรากฏการณ์ที่ <em>"ข้อมูลจากชุดทดสอบ (Test Set) รั่วไหลเข้าไปอยู่ในกระบวนการฝึกสอน (Training)"</em> ทำให้โมเดลได้คะแนนการประเมินในห้องทดลองสูงลิ่วอย่างผิดธรรมชาติ แต่เมื่อนำไปขึ้นใช้งานจริง (Production) ประสิทธิภาพกลับตกฮวบจนสร้างความเสียหาย
+            </p>
+
+            <div class="bg-rose-50/80 border-l-4 border-rose-500 p-5 rounded-r-xl text-xs text-rose-950 mb-4 space-y-2">
+                <h3 class="font-bold text-rose-900 text-sm">⚠️ ข้อผิดพลาดคลาสสิกที่พบบ่อยที่สุด:</h3>
+                <div class="font-mono bg-white p-3 rounded border border-rose-200 text-slate-800 text-[11px] leading-relaxed">
+                    # ❌ ผิดมหันต์: ทำ Scaling ก่อนแบ่ง Train/Test!<br>
+                    scaler = StandardScaler()<br>
+                    X_scaled = scaler.fit_transform(X)  # &lt;-- คำนวณ Mean และ SD จากทั้งชุดข้อมูลรวมทั้ง Test Set!<br>
+                    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y)<br><br>
+                    # ✅ ถูกต้อง: แบ่ง Train/Test ก่อน แล้ว Fit เฉพาะ Train!<br>
+                    X_train, X_test, y_train, y_test = train_test_split(X, y)<br>
+                    scaler = StandardScaler()<br>
+                    X_train_scaled = scaler.fit_transform(X_train)<br>
+                    X_test_scaled = scaler.transform(X_test)  # &lt;-- ใช้เฉพาะ transform() ห้าม fit()!
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Scikit-Learn Pipeline -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-cyan-900 mb-4 border-b-2 border-cyan-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center mr-3 font-semibold text-lg">4</span>
+                การประกอบร่าง Pipeline และ ColumnTransformer สู่ Production
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                ทางแก้ปัญหา Data Leakage อย่างเบ็ดเสร็จและทำให้โค้ดสะอาดพร้อมใช้งานระดับวิศวกรรม คือการใช้ <code>sklearn.pipeline.Pipeline</code> ร่วมกับ <code>ColumnTransformer</code>
+            </p>
+
+            <div class="bg-slate-900 text-slate-200 p-5 rounded-xl border border-slate-800 font-mono text-xs overflow-x-auto leading-relaxed">
+                <span class="text-cyan-400">from</span> sklearn.pipeline <span class="text-cyan-400">import</span> Pipeline<br>
+                <span class="text-cyan-400">from</span> sklearn.compose <span class="text-cyan-400">import</span> ColumnTransformer<br>
+                <span class="text-cyan-400">from</span> sklearn.impute <span class="text-cyan-400">import</span> SimpleImputer<br>
+                <span class="text-cyan-400">from</span> sklearn.preprocessing <span class="text-cyan-400">import</span> StandardScaler, OneHotEncoder<br>
+                <span class="text-cyan-400">from</span> sklearn.ensemble <span class="text-cyan-400">import</span> RandomForestClassifier<br><br>
+                <span class="text-slate-500"># 1. ไปป์ไลน์สำหรับฟีเจอร์ตัวเลข</span><br>
+                num_pipeline = Pipeline([<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;(<span class="text-amber-300">'imputer'</span>, SimpleImputer(strategy=<span class="text-amber-300">'median'</span>)),<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;(<span class="text-amber-300">'scaler'</span>, StandardScaler())<br>
+                ])<br><br>
+                <span class="text-slate-500"># 2. รวมการจัดการคอลัมน์ประเภทต่างๆ</span><br>
+                preprocessor = ColumnTransformer([<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;(<span class="text-amber-300">'num'</span>, num_pipeline, num_attribs),<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;(<span class="text-amber-300">'cat'</span>, OneHotEncoder(handle_unknown=<span class="text-amber-300">'ignore'</span>), cat_attribs)<br>
+                ])<br><br>
+                <span class="text-slate-500"># 3. ประกอบรวมโมเดลเป็น Full Pipeline ชิ้นเดียว</span><br>
+                full_pipeline = Pipeline([<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;(<span class="text-amber-300">'preprocessor'</span>, preprocessor),<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;(<span class="text-amber-300">'classifier'</span>, RandomForestClassifier())<br>
+                ])<br><br>
+                <span class="text-slate-500"># ฟิตและทำนายได้ในคำสั่งเดียว ปลอดภัยจาก Data Leakage 100%!</span><br>
+                full_pipeline.fit(X_train, y_train)<br>
+                predictions = full_pipeline.predict(X_test)
+            </div>
+        </section>
+
+        <!-- Section 5: Practical Labs -->
+        <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 text-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-slate-800 mt-8">
+            <div class="mb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/60 px-3 py-1 rounded-full border border-cyan-900/30">ใบงานปฏิบัติการ (Practical Labs)</span>
+                <h3 class="text-xl font-bold mt-2 text-slate-100">ลงมือปฏิบัติด้วย Jupyter Notebook</h3>
+                <p class="text-slate-400 text-xs mt-1">สร้างโมเดลทำนายราคาบ้าน California Housing ตั้งแต่ต้นจนจบด้วย Scikit-Learn Pipelines</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <!-- Main Lab Card -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between hover:border-cyan-900 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 font-semibold">ใบงานหลัก (Main Lab)</span>
+                            <span class="text-[10px] font-medium text-slate-500 font-mono">Repo: handson-ml3</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-200 bg-slate-950/40 p-2 rounded border border-slate-800 font-mono mb-2">02_end_to_end_machine_learning_project.ipynb</h4>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">ฝึกทำความสะอาดข้อมูล, สร้าง Custom Transformer, ประกอบ ColumnTransformer และรัน Cross-Validation ผ่าน Pipeline</p>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <a href="https://github.com/anusornc/handson-ml3/blob/main/02_end_to_end_machine_learning_project.ipynb" target="_blank" rel="noopener" class="flex-1 text-center bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 px-3 rounded-lg border border-slate-700 transition">
+                            GitHub
+                        </a>
+                        <a href="https://colab.research.google.com/github/anusornc/handson-ml3/blob/main/02_end_to_end_machine_learning_project.ipynb" target="_blank" rel="noopener" class="flex-1 text-center bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold py-2 px-3 rounded-lg transition shadow-sm hover:shadow">
+                            Colab 🚀
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Supplementary Labs Card -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between hover:border-emerald-950 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 font-semibold">ใบงานเสริม (Supplementary Labs)</span>
+                            <span class="text-[10px] font-medium text-slate-500">หัวข้อขยายความเข้าใจเพิ่มเติม</span>
+                        </div>
+                        <div class="space-y-2.5 mt-2">
+                            <div class="flex items-center justify-between p-3 bg-slate-950/40 border border-slate-800 rounded-lg hover:border-slate-700 transition">
+                                <div class="flex-1 min-w-0 pr-2">
+                                    <p class="text-xs font-semibold text-slate-200 truncate">Feature Engineering & Pipelines</p>
+                                    <p class="text-[9px] text-slate-500 font-mono truncate">Repo: python-ml-notebooks</p>
+                                </div>
+                                <div class="flex gap-1.5 shrink-0">
+                                    <a href="https://github.com/anusornc/python-ml-notebooks/blob/master/notebooks/2-feature-engineering.ipynb" target="_blank" rel="noopener" class="p-1 px-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[10px] rounded font-semibold transition">
+                                        GitHub
+                                    </a>
+                                    <a href="https://colab.research.google.com/github/anusornc/python-ml-notebooks/blob/master/notebooks/2-feature-engineering.ipynb" target="_blank" rel="noopener" class="p-1 px-2.5 bg-sky-500 hover:bg-sky-600 text-white text-[10px] rounded font-semibold transition shadow-sm">
+                                        Colab
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 text-slate-400 text-xs border-t border-slate-200">
+        หลักสูตรการเรียนรู้ของเครื่อง (Machine Learning Curriculum) &bull; ภาควิชาวิทยาการคอมพิวเตอร์
+    </footer>
+
+    <!-- Slideshow Generator Script -->
+    <script>
+    (function() {
+        let currentSlide = 0;
+        let slides = [];
+        let isSlideshowActive = false;
+        let originalParents = [];
+
+        window.toggleSlideshow = function() {
+            if (isSlideshowActive) exitSlideshow();
+            else enterSlideshow();
+        };
+
+        function enterSlideshow() {
+            const mainContent = document.querySelector('main');
+            if (!mainContent) return;
+            slides = buildSlides(mainContent);
+            if (slides.length === 0) return;
+
+            isSlideshowActive = true;
+            document.body.style.overflow = 'hidden';
+
+            const overlay = document.createElement('div');
+            overlay.id = 'slideshow-overlay';
+            overlay.className = 'fixed inset-0 z-50 bg-slate-950 text-white flex flex-col justify-between p-6 md:p-12 overflow-y-auto';
+
+            const topBar = document.createElement('div');
+            topBar.className = 'flex justify-between items-center w-full border-b border-slate-800 pb-4';
+            topBar.innerHTML = `
+                <div class="text-xs font-mono text-slate-400" id="slide-counter">สไลด์ 1 / ${slides.length}</div>
+                <button onclick="toggleSlideshow()" class="text-slate-400 hover:text-white px-3 py-1 rounded-lg border border-slate-800 bg-slate-900 text-xs">Esc ปิดสไลด์</button>
+            `;
+
+            const viewArea = document.createElement('div');
+            viewArea.id = 'slide-view-area';
+            viewArea.className = 'flex-1 flex items-center justify-center my-6';
+
+            const navBar = document.createElement('div');
+            navBar.className = 'flex justify-between items-center w-full border-t border-slate-800 pt-4';
+            navBar.innerHTML = `
+                <button id="prev-slide-btn" onclick="prevSlide()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg">← ก่อนหน้า (Space/←)</button>
+                <button id="next-slide-btn" onclick="nextSlide()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg">ถัดไป (→)</button>
+            `;
+
+            overlay.appendChild(topBar);
+            overlay.appendChild(viewArea);
+            overlay.appendChild(navBar);
+            document.body.appendChild(overlay);
+
+            document.addEventListener('keydown', handleKeypress);
+            showSlide(currentSlide);
+        }
+
+        function exitSlideshow() {
+            const overlay = document.getElementById('slideshow-overlay');
+            if (overlay) overlay.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', handleKeypress);
+            isSlideshowActive = false;
+            restoreMovedElements();
+        }
+
+        function handleKeypress(e) {
+            if (e.key === 'Escape') exitSlideshow();
+            else if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+        }
+
+        function buildSlides(mainContent) {
+            const header = document.querySelector('header');
+            let slideList = [];
+            if (header) {
+                const coverNode = document.createElement('div');
+                coverNode.className = 'text-center flex flex-col justify-center items-center h-full p-8';
+                const badge = header.querySelector('span')?.cloneNode(true);
+                const title = header.querySelector('h1')?.cloneNode(true);
+                const subtitle = header.querySelector('p')?.cloneNode(true);
+                if (badge) {
+                    badge.className = "text-xs font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/60 border border-cyan-900/40 px-3 py-1 rounded-full mb-4";
+                    coverNode.appendChild(badge);
+                }
+                if (title) {
+                    title.className = "text-3xl md:text-5xl font-extrabold text-white leading-tight mb-4";
+                    coverNode.appendChild(title);
+                }
+                if (subtitle) {
+                    subtitle.className = "text-base md:text-xl text-slate-350 font-light max-w-2xl";
+                    coverNode.appendChild(subtitle);
+                }
+                slideList.push({ title: "บทนำ", content: [coverNode] });
+            }
+            let slideContainers = Array.from(mainContent.querySelectorAll('section'));
+            slideContainers.forEach((sec, idx) => {
+                slideList.push({ title: `ตอนที่ ${idx + 1}`, content: [sec] });
+            });
+            return slideList;
+        }
+
+        function showSlide(index) {
+            const viewArea = document.getElementById('slide-view-area');
+            if (!viewArea) return;
+            viewArea.innerHTML = '';
+            const slideData = slides[index];
+            const slideContainer = document.createElement('div');
+            slideContainer.className = 'w-full max-w-3xl bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8';
+            slideData.content.forEach(node => {
+                if (index === 0) {
+                    slideContainer.appendChild(node);
+                } else {
+                    const placeholderId = `slide-placeholder-${Date.now()}-${Math.random()}`;
+                    const placeholder = document.createElement('div');
+                    placeholder.id = placeholderId;
+                    node.parentNode.insertBefore(placeholder, node);
+                    originalParents.push({ element: node, placeholderId });
+                    slideContainer.appendChild(node);
+                }
+            });
+            viewArea.appendChild(slideContainer);
+            document.getElementById('slide-counter').innerText = `สไลด์ ${index + 1} / ${slides.length}`;
+            document.getElementById('prev-slide-btn').disabled = index === 0;
+            document.getElementById('next-slide-btn').disabled = index === slides.length - 1;
+        }
+
+        function restoreMovedElements() {
+            originalParents.forEach(item => {
+                const placeholder = document.getElementById(item.placeholderId);
+                if (placeholder) {
+                    placeholder.parentNode.insertBefore(item.element, placeholder);
+                    placeholder.remove();
+                }
+            });
+            originalParents = [];
+        }
+
+        window.nextSlide = function() {
+            if (currentSlide < slides.length - 1) {
+                restoreMovedElements();
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        };
+
+        window.prevSlide = function() {
+            if (currentSlide > 0) {
+                restoreMovedElements();
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        };
+    })();
+    </script>
+</body>
+</html>
