@@ -194,7 +194,7 @@
                         </li>
                         <li class="flex items-start gap-1.5">
                             <span class="text-blue-500 font-bold">•</span>
-                            <span><b>SSense (Sentiment)</b>: วิเคราะห์อารมณ์ ข้อความเชิงบวก/ลบ/เป็นกลาง</span>
+                            <span><b>SSense / EmoNews</b>: วิเคราะห์ความรู้สึกและ 7 มิติอารมณ์จากหัวข้อข่าวด้วย fastText</span>
                         </li>
                         <li class="flex items-start gap-1.5">
                             <span class="text-blue-500 font-bold">•</span>
@@ -552,14 +552,211 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
             </div>
         </section>
 
-        <!-- Section 5: การประยุกต์ใช้งานจริงในเชิงสถาปัตยกรรม (Real-World Architectures) -->
+        <!-- Section 5: กรณีศึกษา Thai NLP - EmoNews -->
         <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 space-y-6">
             <div class="border-b border-slate-100 pb-4">
-                <span class="text-xs font-bold uppercase tracking-wider text-blue-600 font-mono">ส่วนที่ 4: การประยุกต์ใช้งานในอุตสาหกรรม</span>
-                <h2 class="text-2xl font-bold text-slate-800 mt-1">สถาปัตยกรรมระบบอัจฉริยะด้วย Thai LPR</h2>
+                <span class="text-xs font-bold uppercase tracking-wider text-purple-600 font-mono">ส่วนที่ 4: กรณีศึกษา Thai NLP (Deep Dive)</span>
+                <h2 class="text-2xl font-bold text-slate-800 mt-1">ระบบทำนายอารมณ์ผู้อ่านจากหัวข้อข่าวด้วย fastText (EmoNews)</h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <p class="text-slate-600 leading-relaxed text-sm md:text-base">
+                ในยุค Information Overload การวิเคราะห์พาดหัวข่าว (News Headlines) ไม่ได้จำกัดอยู่เพียงแค่การจัดหมวดหมู่ข่าว (Topic Classification) หรือการวิเคราะห์ขั้วบวก/ลบ (Sentiment Polarity) เท่านั้น แต่ <b>"อารมณ์ที่เกิดขึ้นในใจของผู้อ่าน (Reader Emotion)"</b> มีอิทธิพลต่อการกดอ่าน (CTR), การแชร์ต่อในโซเชียลมีเดีย, และการเฝ้าระวังภาพลักษณ์องค์กร (Brand Safety & Crisis Monitoring)
+            </p>
+
+            <!-- fastText & 7 Emotions Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs md:text-sm">
+                <div class="p-5 rounded-xl border border-purple-200 bg-purple-50/50 space-y-2.5">
+                    <div class="flex items-center gap-2 text-purple-800 font-bold text-sm">
+                        <span>⚡</span>
+                        <span>ทำไมโมเดล EmoNews ถึงเลือกใช้ fastText?</span>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">
+                        <b>fastText</b> พัฒนาโดย Facebook AI Research (FAIR) ใช้เทคนิค <b>Character n-grams (Subword Information)</b> แทนการมองคำภาษาไทยเป็นคำโดดๆ:
+                    </p>
+                    <ul class="text-xs text-slate-600 space-y-2 list-disc list-inside">
+                        <li><b>แก้ปัญหาคำนอกคลัง (OOV - Out-Of-Vocabulary):</b> รับมือกับคำสแลง คำย่อ หรือคำสะกดผิดในพาดหัวข่าวได้ดีเยี่ยม เพราะโมเดลเข้าใจชิ้นส่วนย่อยของตัวอักษร</li>
+                        <li><b>ความเร็วระดับมิลลิวินาที (Sub-millisecond):</b> เบากว่าโมเดล Large Language Models หรือ BERT หลายสิบเท่า ทำให้สแกนฟีดข่าวหมื่นข่าวต่อนาทีได้อย่างรวดเร็วโดยไม่ต้องใช้ GPU ขนาดใหญ่</li>
+                    </ul>
+                </div>
+
+                <div class="p-5 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-2.5">
+                    <div class="flex items-center gap-2 text-indigo-800 font-bold text-sm">
+                        <span>🎭</span>
+                        <span>7 มิติอารมณ์ของ EmoNews (Emotion Taxonomy)</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="p-2 rounded-lg bg-white border border-slate-100 flex items-center gap-1.5 shadow-sm">
+                            <span>😲</span><span><b>Surprise:</b> ตื่นตกใจ / แปลกใจ</span>
+                        </div>
+                        <div class="p-2 rounded-lg bg-white border border-slate-100 flex items-center gap-1.5 shadow-sm">
+                            <span>😐</span><span><b>Neutral:</b> เป็นกลาง / ข้อมูล</span>
+                        </div>
+                        <div class="p-2 rounded-lg bg-white border border-slate-100 flex items-center gap-1.5 shadow-sm">
+                            <span>😢</span><span><b>Sadness:</b> เศร้าสลด / สูญเสีย</span>
+                        </div>
+                        <div class="p-2 rounded-lg bg-white border border-slate-100 flex items-center gap-1.5 shadow-sm">
+                            <span>😊</span><span><b>Pleasant:</b> พึงพอใจ / ชื่นมื่น</span>
+                        </div>
+                        <div class="p-2 rounded-lg bg-white border border-slate-100 flex items-center gap-1.5 shadow-sm">
+                            <span>😨</span><span><b>Fear:</b> หวาดกลัว / วิตกกังวล</span>
+                        </div>
+                        <div class="p-2 rounded-lg bg-white border border-slate-100 flex items-center gap-1.5 shadow-sm">
+                            <span>😡</span><span><b>Anger:</b> โกรธแค้น / ไม่พอใจ</span>
+                        </div>
+                        <div class="p-2 rounded-lg bg-white border border-slate-100 flex items-center gap-1.5 shadow-sm col-span-2">
+                            <span>🎉</span><span><b>Joy:</b> ปีติยินดี / สนุกสนาน / ชัยชนะ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schema Table -->
+            <div class="space-y-3">
+                <h3 class="text-base font-bold text-slate-800">โครงสร้างข้อมูลผลลัพธ์ (JSON Response Schema)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+                        <thead class="bg-slate-100 text-slate-700 font-mono uppercase">
+                            <tr>
+                                <th class="p-2.5 border-b border-slate-200">ฟิลด์ (JSON Key)</th>
+                                <th class="p-2.5 border-b border-slate-200">ประเภท</th>
+                                <th class="p-2.5 border-b border-slate-200">ตัวอย่างค่า</th>
+                                <th class="p-2.5 border-b border-slate-200">คำอธิบายความหมาย</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-mono">
+                            <tr class="hover:bg-slate-50/80">
+                                <td class="p-2.5 font-bold text-purple-700">text</td>
+                                <td class="p-2.5 text-slate-500">string</td>
+                                <td class="p-2.5 text-slate-800">"นักวิจัยออสเตรเลียเผยสาเหตุฉลามโจมตีมนุษย์"</td>
+                                <td class="p-2.5 font-sans text-slate-600">ข้อความหัวข้อข่าวที่ส่งไปวิเคราะห์</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/80">
+                                <td class="p-2.5 font-bold text-purple-700">status</td>
+                                <td class="p-2.5 text-slate-500">string</td>
+                                <td class="p-2.5 text-slate-800">"success"</td>
+                                <td class="p-2.5 font-sans text-slate-600">สถานะการทำงานของ API ("success" หรือ "error")</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/80">
+                                <td class="p-2.5 font-bold text-indigo-700">result</td>
+                                <td class="p-2.5 text-slate-500">object</td>
+                                <td class="p-2.5 text-slate-800">{ "surprise": 0.301, "neutral": 0.274, ... }</td>
+                                <td class="p-2.5 font-sans text-slate-600">คะแนนความน่าจะเป็น 7 กลุ่มอารมณ์ (0.0 ถึง 1.0)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: ห้องทดลองอินเทอร์แอคทีฟ EmoNews Sandbox -->
+        <section class="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-950 text-white rounded-3xl shadow-2xl p-6 md:p-8 border border-purple-900/50 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-2">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">ห้องทดลองภาษาไทย (Thai NLP Sandbox)</span>
+                    <h2 class="text-2xl font-extrabold text-white mt-1">ห้องทดสอบระบบทำนายอารมณ์ข่าว (EmoNews Playground)</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="emonews-mode-badge" class="text-xs font-mono px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                        โหมดจำลอง (Mock Demo)
+                    </span>
+                    <button onclick="toggleKeySettings()" class="text-xs px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-medium transition shadow-sm">
+                        🔑 ตั้งค่า API Key
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left: Presets & Custom Input (5 cols) -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-purple-300 uppercase tracking-wider block">
+                            📰 เลือกหัวข้อข่าวตัวอย่าง (Preset Headlines):
+                        </label>
+                        <div class="space-y-1.5" id="emonews-preset-list">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-300 block">
+                            ✍️ หรือพิมพ์หัวข้อข่าวที่ต้องการวิเคราะห์เอง:
+                        </label>
+                        <textarea id="emonews-input-text" rows="3" class="w-full bg-slate-950/80 border border-slate-800 focus:border-purple-500 rounded-xl p-3 text-xs md:text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-purple-500 transition" placeholder="พิมพ์หัวข้อข่าวภาษาไทยที่นี่..."></textarea>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <button onclick="runEmoNewsAnalysis(false)" id="run-emonews-btn" class="flex-1 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-2">
+                            <span>🔍</span>
+                            <span>วิเคราะห์อารมณ์ข่าว (Live API)</span>
+                        </button>
+                        <button onclick="runEmoNewsAnalysis(true)" id="mock-emonews-btn" title="ทดสอบผลลัพธ์จำลองทันที (ไม่ยิง API จริง / ไม่กินโควตา Rate Limit)" class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold rounded-xl text-xs transition border border-slate-700 flex items-center justify-center gap-1.5 whitespace-nowrap shadow">
+                            <span>🧪 รันโหมด Mock</span>
+                        </button>
+                    </div>
+
+                    <!-- Notification Banner Container -->
+                    <div id="emonews-notification" class="hidden"></div>
+                </div>
+
+                <!-- Right: Visual Emotion Breakdown (7 cols) -->
+                <div class="lg:col-span-7 bg-slate-950/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <span class="text-xs font-bold text-slate-300 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+                            <span>ผลการวิเคราะห์ 7 มิติอารมณ์ (Emotion Distribution)</span>
+                        </span>
+                        <span id="emonews-latency" class="text-[11px] font-mono text-purple-300">Latency: -- ms</span>
+                    </div>
+
+                    <!-- Dominant Emotion Spotlight Card -->
+                    <div id="dominant-emotion-card" class="p-4 rounded-xl border border-purple-500/40 bg-purple-950/40 flex items-center justify-between shadow-inner">
+                        <div class="flex items-center gap-3">
+                            <span id="dominant-emoji" class="text-4xl">😲</span>
+                            <div>
+                                <span class="text-[10px] uppercase font-mono tracking-wider text-purple-300 font-bold block">อารมณ์เด่นที่สุด (Dominant Emotion)</span>
+                                <h3 id="dominant-name" class="text-base sm:text-lg font-extrabold text-white">Surprise (ประหลาดใจ / ตื่นตกใจ)</h3>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span id="dominant-score" class="text-2xl sm:text-3xl font-black font-mono text-purple-300">30.1%</span>
+                            <span class="text-[10px] text-slate-400 block font-mono">Confidence</span>
+                        </div>
+                    </div>
+
+                    <!-- Emotion Progress Bars -->
+                    <div class="space-y-2" id="emotion-bars-container">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Snippets for EmoNews -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-300">ตัวอย่างโค้ดเรียกใช้งาน EmoNews API (GET Request)</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] bg-purple-900/60 text-purple-300 border border-purple-800 font-mono font-bold">GET</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="switchEmoCodeTab('python')" id="btn-emo-tab-python" class="px-2.5 py-1 rounded text-[11px] font-mono font-semibold bg-purple-600 text-white">Python</button>
+                        <button onclick="switchEmoCodeTab('curl')" id="btn-emo-tab-curl" class="px-2.5 py-1 rounded text-[11px] font-mono font-semibold bg-slate-800 text-slate-400 hover:text-white">cURL</button>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <pre id="emo-code-display" class="bg-slate-900 text-slate-200 p-4 rounded-xl text-xs font-mono overflow-x-auto border border-slate-800 leading-relaxed"></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: การประยุกต์ใช้งานจริงในเชิงสถาปัตยกรรม (Real-World Architectures) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 space-y-6">
+            <div class="border-b border-slate-100 pb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-blue-600 font-mono">ส่วนที่ 5: การประยุกต์ใช้งานในอุตสาหกรรม</span>
+                <h2 class="text-2xl font-bold text-slate-800 mt-1">สถาปัตยกรรมระบบอัจฉริยะด้วย Thai AI Services</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
                     <span class="text-xl">🅿️</span>
                     <h3 class="font-bold text-slate-800 text-sm">1. ระบบไม้กั้นอัจฉริยะ (Smart Parking)</h3>
@@ -570,7 +767,7 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
 
                 <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
                     <span class="text-xl">🛣️</span>
-                    <h3 class="font-bold text-slate-800 text-sm">2. ระบบเก็บค่าผ่านทางอัตโนมัติ (M-Flow)</h3>
+                    <h3 class="font-bold text-slate-800 text-sm">2. เก็บค่าผ่านทางอัตโนมัติ (M-Flow)</h3>
                     <p class="text-xs text-slate-600 leading-relaxed">
                         จับภาพรถยนต์ที่วิ่งด้วยความเร็วสูง ตรวจสอบป้ายทะเบียน ยี่ห้อ สี และประเภทรถ เพื่อคิดค่าผ่านทางและส่งใบแจ้งหนี้อัตโนมัติ พร้อมตรวจจับป้ายทะเบียนปลอมแปลง
                     </p>
@@ -578,9 +775,17 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
 
                 <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
                     <span class="text-xl">🚚</span>
-                    <h3 class="font-bold text-slate-800 text-sm">3. ระบบบริหารคลังและกองยานพาหนะ (Fleet)</h3>
+                    <h3 class="font-bold text-slate-800 text-sm">3. บริหารคลังสินค้าและยานพาหนะ</h3>
                     <p class="text-xs text-slate-600 leading-relaxed">
                         บันทึกเวลาเข้า-ออกของรถบรรทุกสินค้า ตรวจเช็กว่าประเภทตัวถังตรงกับใบสั่งงานหรือไม่ ป้องกันการนำรถผิดประเภทเข้ามาในพื้นที่ควบคุม
+                    </p>
+                </div>
+
+                <div class="p-4 rounded-xl border border-purple-200 bg-purple-50/50 space-y-2">
+                    <span class="text-xl">📡</span>
+                    <h3 class="font-bold text-slate-800 text-sm">4. ตรวจจับวิกฤตสื่อ (Media Monitoring)</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        ดึงฟีดข่าวและโซเชียลมีเดียผ่าน EmoNews หากตรวจพบกระแสความรู้สึก <b>Anger</b> หรือ <b>Fear</b> พุ่งสูงผิดปกติ ระบบจะแจ้งเตือนทีม PR เพื่อบริหารภาวะวิกฤต (Crisis Management) ทันที
                     </p>
                 </div>
             </div>
@@ -653,6 +858,52 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
                     <button onclick="checkQuiz(2, 'a')" class="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-500 transition">ตรวจคำตอบ</button>
                     <div id="q2-result" class="hidden text-xs font-bold"></div>
                 </div>
+
+                <!-- Q3 -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <div class="font-bold text-slate-800">
+                        3. จุดเด่นสำคัญของโมเดล fastText ที่ใช้ในบริการ EmoNews สำหรับภาษาไทยคือข้อใด?
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-100">
+                            <input type="radio" name="q3" value="a" class="text-purple-600">
+                            <span>ก. ใช้เทคนิค Character n-grams (Subword) รับมือกับคำนอกคลัง (OOV) และคำสะกดผิดได้ดี ประมวลผลรวดเร็วระดับมิลลิวินาที</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-100">
+                            <input type="radio" name="q3" value="b" class="text-purple-600">
+                            <span>ข. มีขนาดพารามิเตอร์ใหญ่กว่า GPT-4 จึงเข้าใจบริบทภาษาไทยได้ลึกซึ้งกว่า</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-100">
+                            <input type="radio" name="q3" value="c" class="text-purple-600">
+                            <span>ค. ต้องรันบนคลัสเตอร์ Multi-GPU ประสิทธิภาพสูงเท่านั้นจึงจะทำงานได้</span>
+                        </label>
+                    </div>
+                    <button onclick="checkQuiz(3, 'a')" class="px-3 py-1 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-500 transition">ตรวจคำตอบ</button>
+                    <div id="q3-result" class="hidden text-xs font-bold"></div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <div class="font-bold text-slate-800">
+                        4. บริการ EmoNews บน AI For Thai รับคำขอด้วย HTTP Method ใด และส่งข้อความผ่านทางใด?
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-100">
+                            <input type="radio" name="q4" value="a" class="text-purple-600">
+                            <span>ก. POST ส่งผ่าน Multipart Form-data</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-100">
+                            <input type="radio" name="q4" value="b" class="text-purple-600">
+                            <span>ข. GET ส่งผ่าน Query Parameter `text` (เช่น <code>?text=...</code>)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-100">
+                            <input type="radio" name="q4" value="c" class="text-purple-600">
+                            <span>ค. PUT ส่งผ่าน Raw Binary Stream</span>
+                        </label>
+                    </div>
+                    <button onclick="checkQuiz(4, 'b')" class="px-3 py-1 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-500 transition">ตรวจคำตอบ</button>
+                    <div id="q4-result" class="hidden text-xs font-bold"></div>
+                </div>
             </div>
         </section>
 
@@ -660,7 +911,7 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
 
     <!-- Footer -->
     <footer class="text-center py-8 text-xs text-slate-400 border-t border-slate-200 bg-white">
-        ML-Learn Curriculum &bull; บทที่ 25: AI For Thai Ecosystem &amp; Thai LPR &bull; ขับเคลื่อนด้วย NECTEC API
+        ML-Learn Curriculum &bull; บทที่ 25: AI For Thai Ecosystem (Thai LPR &amp; EmoNews) &bull; ขับเคลื่อนด้วย NECTEC API
     </footer>
 
     <!-- JavaScript Application Logic -->
@@ -714,18 +965,35 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
         window.addEventListener('DOMContentLoaded', () => {
             checkStoredKey();
             updateVehicleDisplay(PRESETS.hilux);
+            renderEmoPresets();
+            selectEmoPreset(0);
+            switchCodeTab('python');
+            switchEmoCodeTab('python');
         });
 
         function checkStoredKey() {
             const key = localStorage.getItem('AIFORTHAI_API_KEY');
-            const badge = document.getElementById('lpr-mode-badge');
+            const lprBadge = document.getElementById('lpr-mode-badge');
+            const emoBadge = document.getElementById('emonews-mode-badge');
             if (key) {
                 document.getElementById('aiforthai-key-input').value = key;
-                badge.className = "text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800/60";
-                badge.innerText = "Live API (AI For Thai)";
+                if (lprBadge) {
+                    lprBadge.className = "text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800/60";
+                    lprBadge.innerText = "Live API (AI For Thai)";
+                }
+                if (emoBadge) {
+                    emoBadge.className = "text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800/60";
+                    emoBadge.innerText = "Live API (AI For Thai)";
+                }
             } else {
-                badge.className = "text-xs font-mono px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700";
-                badge.innerText = "โหมดจำลอง (Mock Demo)";
+                if (lprBadge) {
+                    lprBadge.className = "text-xs font-mono px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700";
+                    lprBadge.innerText = "โหมดจำลอง (Mock Demo)";
+                }
+                if (emoBadge) {
+                    emoBadge.className = "text-xs font-mono px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700";
+                    emoBadge.innerText = "โหมดจำลอง (Mock Demo)";
+                }
             }
         }
 
@@ -932,6 +1200,335 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
                 display.innerText = `curl --location --request POST 'https://api.aiforthai.in.th/lpr-iapp' \\
 --header 'apikey: YOUR_AIFORTHAI_API_KEY' \\
 --form 'file=@"/your/path/to/car.jpg"'`;
+            }
+        }
+
+        // ==========================================
+        // EmoNews (Thai NLP fastText) Application Logic
+        // ==========================================
+        const EMO_PRESETS = [
+            {
+                id: 'shark',
+                text: "นักวิจัยออสเตรเลียเผยสาเหตุฉลามโจมตีมนุษย์",
+                category: "🔬 วิทยาศาสตร์ / สิ่งแวดล้อม",
+                result: {
+                    surprise: 0.3010271489620209,
+                    neutral: 0.27431520819664,
+                    sadness: 0.1652153879404068,
+                    pleasant: 0.14013561606407166,
+                    fear: 0.08124914020299911,
+                    anger: 0.0,
+                    joy: 0.0
+                }
+            },
+            {
+                id: 'olympics',
+                text: "ไทยคว้าเหรียญทองประวัติศาสตร์ โอลิมปิกเกมส์ แฟนกีฬาเฮลั่นสนาม",
+                category: "🏆 กีฬา / ชัยชนะ",
+                result: {
+                    joy: 0.542018412,
+                    pleasant: 0.285124981,
+                    surprise: 0.113045621,
+                    neutral: 0.040120194,
+                    sadness: 0.010120194,
+                    fear: 0.005120194,
+                    anger: 0.004450404
+                }
+            },
+            {
+                id: 'fire',
+                text: "เกิดเหตุเพลิงไหม้โรงงานสารเคมี สั่งอพยพประชาชนรัศมี 5 กม. ด่วน",
+                category: "🚨 ภัยพิบัติ / อุบัติเหตุ",
+                result: {
+                    fear: 0.465120481,
+                    sadness: 0.283154819,
+                    surprise: 0.142091482,
+                    anger: 0.080120481,
+                    neutral: 0.029512737,
+                    pleasant: 0.0,
+                    joy: 0.0
+                }
+            },
+            {
+                id: 'economy',
+                text: "ราคาน้ำมันโลกและทองคำปรับตัวผันผวนตามการประชุมธนาคารกลางสหรัฐ",
+                category: "📈 เศรษฐกิจ / การเงิน",
+                result: {
+                    neutral: 0.621045182,
+                    surprise: 0.154120941,
+                    fear: 0.125091824,
+                    pleasant: 0.050120481,
+                    sadness: 0.030120481,
+                    anger: 0.019501091,
+                    joy: 0.0
+                }
+            },
+            {
+                id: 'traffic',
+                text: "ชาวเน็ตจวกยับ! รถกระบะซิ่งชนแล้วหนี ปฏิเสธความรับผิดชอบ",
+                category: "⚖️ สังคม / ดราม่า",
+                result: {
+                    anger: 0.582104918,
+                    sadness: 0.215091824,
+                    surprise: 0.113045182,
+                    fear: 0.059812491,
+                    neutral: 0.029945585,
+                    pleasant: 0.0,
+                    joy: 0.0
+                }
+            }
+        ];
+
+        const EMOTIONS_META = {
+            surprise: { nameTh: 'Surprise (ประหลาดใจ / ตื่นตกใจ)', emoji: '😲', barBg: 'bg-gradient-to-r from-amber-500 to-yellow-400' },
+            neutral: { nameTh: 'Neutral (เป็นกลาง / ข้อมูล)', emoji: '😐', barBg: 'bg-gradient-to-r from-slate-400 to-slate-300' },
+            sadness: { nameTh: 'Sadness (เศร้าสลด / สูญเสีย)', emoji: '😢', barBg: 'bg-gradient-to-r from-blue-600 to-cyan-500' },
+            pleasant: { nameTh: 'Pleasant (พึงพอใจ / ชื่นมื่น)', emoji: '😊', barBg: 'bg-gradient-to-r from-emerald-500 to-teal-400' },
+            fear: { nameTh: 'Fear (หวาดกลัว / วิตกกังวล)', emoji: '😨', barBg: 'bg-gradient-to-r from-purple-600 to-violet-400' },
+            anger: { nameTh: 'Anger (โกรธแค้น / ไม่พอใจ)', emoji: '😡', barBg: 'bg-gradient-to-r from-rose-600 to-red-500' },
+            joy: { nameTh: 'Joy (ปีติยินดี / มีความสุข)', emoji: '🎉', barBg: 'bg-gradient-to-r from-pink-500 to-rose-400' }
+        };
+
+        function renderEmoPresets() {
+            const container = document.getElementById('emonews-preset-list');
+            if (!container) return;
+            container.innerHTML = '';
+            EMO_PRESETS.forEach((preset, idx) => {
+                const btn = document.createElement('button');
+                btn.id = `emo-preset-${idx}`;
+                btn.className = `w-full text-left p-2.5 rounded-xl border text-xs transition ${idx === 0 ? 'bg-purple-950/50 border-purple-500 text-white font-semibold' : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'}`;
+                btn.onclick = () => selectEmoPreset(idx);
+                btn.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono text-purple-300 font-bold">${preset.category}</span>
+                        <span class="text-[10px] text-slate-500">คลิกเพื่อเลือก</span>
+                    </div>
+                    <div class="mt-1 text-slate-200 line-clamp-1">${preset.text}</div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function selectEmoPreset(idx) {
+            EMO_PRESETS.forEach((_, i) => {
+                const btn = document.getElementById(`emo-preset-${i}`);
+                if (btn) {
+                    if (i === idx) {
+                        btn.className = "w-full text-left p-2.5 rounded-xl border text-xs transition bg-purple-950/50 border-purple-500 text-white font-semibold shadow-sm";
+                    } else {
+                        btn.className = "w-full text-left p-2.5 rounded-xl border text-xs transition bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700";
+                    }
+                }
+            });
+
+            const preset = EMO_PRESETS[idx];
+            const inputEl = document.getElementById('emonews-input-text');
+            if (inputEl) inputEl.value = preset.text;
+            updateEmoNewsDisplay(preset.result, preset.text, 12);
+        }
+
+        function updateEmoNewsDisplay(result, text, latencyMs) {
+            const latencyEl = document.getElementById('emonews-latency');
+            if (latencyEl) latencyEl.innerText = `Infer Time: ${latencyMs ? (latencyMs / 1000).toFixed(2) + 's' : '~0.01s'}`;
+
+            // Find dominant emotion
+            let maxEmotion = 'neutral';
+            let maxScore = -1;
+            for (const [emo, score] of Object.entries(result)) {
+                if (score > maxScore) {
+                    maxScore = score;
+                    maxEmotion = emo;
+                }
+            }
+
+            const dominantMeta = EMOTIONS_META[maxEmotion] || EMOTIONS_META.neutral;
+            const emojiEl = document.getElementById('dominant-emoji');
+            const nameEl = document.getElementById('dominant-name');
+            const scoreEl = document.getElementById('dominant-score');
+
+            if (emojiEl) emojiEl.innerText = dominantMeta.emoji;
+            if (nameEl) nameEl.innerText = dominantMeta.nameTh;
+            if (scoreEl) scoreEl.innerText = `${(maxScore * 100).toFixed(1)}%`;
+
+            // Render bars sorted by score descending
+            const sortedEmotions = Object.entries(result).sort((a, b) => b[1] - a[1]);
+            const barsContainer = document.getElementById('emotion-bars-container');
+            if (!barsContainer) return;
+
+            barsContainer.innerHTML = '';
+            sortedEmotions.forEach(([emo, score]) => {
+                const meta = EMOTIONS_META[emo] || { nameTh: emo, emoji: '🔹', barBg: 'bg-blue-500' };
+                const pct = (score * 100).toFixed(1);
+                const isDominant = emo === maxEmotion;
+
+                const row = document.createElement('div');
+                row.className = `p-2 rounded-xl transition ${isDominant ? 'bg-purple-950/30 border border-purple-500/30' : 'bg-slate-900/40 border border-slate-800/60'}`;
+                row.innerHTML = `
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="flex items-center gap-1.5 font-medium ${isDominant ? 'text-white font-bold' : 'text-slate-300'}">
+                            <span>${meta.emoji}</span>
+                            <span>${meta.nameTh}</span>
+                        </span>
+                        <span class="font-mono font-bold ${isDominant ? 'text-purple-300 text-sm' : 'text-slate-400'}">${pct}%</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-500 ${meta.barBg}" style="width: ${Math.max(score * 100, 1.5)}%"></div>
+                    </div>
+                `;
+                barsContainer.appendChild(row);
+            });
+        }
+
+        function showEmoNotification(type, message) {
+            const el = document.getElementById('emonews-notification');
+            if (!el) return;
+            el.classList.remove('hidden');
+
+            const styles = {
+                warning: 'bg-amber-950/80 border-amber-500/60 text-amber-200',
+                error: 'bg-rose-950/80 border-rose-500/60 text-rose-200',
+                info: 'bg-purple-950/80 border-purple-500/60 text-purple-200',
+                success: 'bg-emerald-950/80 border-emerald-500/60 text-emerald-200'
+            };
+
+            el.className = `p-3.5 rounded-xl border text-xs leading-relaxed transition-all duration-200 ${styles[type] || styles.info}`;
+            el.innerHTML = message;
+        }
+
+        async function runEmoNewsAnalysis(forceMock = false) {
+            const btn = document.getElementById('run-emonews-btn');
+            const notif = document.getElementById('emonews-notification');
+            if (notif) notif.classList.add('hidden');
+
+            const text = document.getElementById('emonews-input-text').value.trim();
+            if (!text) {
+                showEmoNotification('warning', '⚠️ <b>กรุณาระบุหัวข้อข่าว:</b> พิมพ์หัวข้อข่าวหรือคลิกเลือกจากพรีเซตด้านบนก่อนเริ่มวิเคราะห์');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.classList.add('opacity-70');
+            btn.innerText = "⏳ กำลังวิเคราะห์...";
+
+            const key = localStorage.getItem('AIFORTHAI_API_KEY');
+
+            if (forceMock) {
+                // Mock simulation requested
+                await new Promise(r => setTimeout(r, 180));
+                const matched = EMO_PRESETS.find(p => p.text === text);
+                const mockResult = matched ? matched.result : generateFallbackMockResult(text);
+                updateEmoNewsDisplay(mockResult, text, 15);
+                showEmoNotification('info', '🧪 <b>โหมดจำลอง (Mock Simulation):</b> แสดงการกระจายตัวของอารมณ์จำลองโดยไม่ตัดโควตา API');
+            } else if (key) {
+                // Live API call
+                try {
+                    btn.innerText = "⏳ ยิงคำขอไปยัง AI For Thai (emonews)...";
+                    const startTime = performance.now();
+                    const url = `https://api.aiforthai.in.th/emonews/prediction?text=${encodeURIComponent(text)}`;
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'apikey': key
+                        }
+                    });
+
+                    const elapsedMs = Math.round(performance.now() - startTime);
+
+                    if (response.status === 429) {
+                        showEmoNotification('warning', `
+                            <div class="font-bold flex items-center gap-1.5 text-amber-300">
+                                <span>⚠️</span>
+                                <span>API Error 429: Too Many Requests (ติด Rate Limit ของ AI For Thai)</span>
+                            </div>
+                            <div class="mt-1.5 text-[11px] text-amber-200/90 space-y-1">
+                                <p>• <b>สาเหตุ:</b> บัญชี Free-tier มีการจำกัดคำขอต่อนาที/ต่อวัน</p>
+                                <p>• <b>แก้ไขอัตโนมัติ:</b> ระบบสลับมาแสดง <b>ผลลัพธ์จำลอง (Mock Output)</b> ให้คุณศึกษาการกระจายตัวของอารมณ์ได้อย่างต่อเนื่อง</p>
+                                <p>• <b>คำแนะนำ:</b> เว้นระยะการส่งคำขอ 10-30 วินาทีก่อนลองใหม่ หรือใช้ปุ่ม <b>🧪 รันโหมด Mock</b></p>
+                            </div>
+                        `);
+                        const matched = EMO_PRESETS.find(p => p.text === text);
+                        updateEmoNewsDisplay(matched ? matched.result : generateFallbackMockResult(text), text, elapsedMs);
+                    } else if (!response.ok) {
+                        showEmoNotification('error', `
+                            <div class="font-bold">❌ API Error HTTP ${response.status}: ${response.statusText}</div>
+                            <div class="text-[11px] mt-0.5 text-rose-200/90">ระบบสลับมาแสดงผลจำลอง (Mock Data) แทนเพื่อให้ศึกษาข้อมูลได้ต่อเนื่อง</div>
+                        `);
+                        const matched = EMO_PRESETS.find(p => p.text === text);
+                        updateEmoNewsDisplay(matched ? matched.result : generateFallbackMockResult(text), text, elapsedMs);
+                    } else {
+                        const json = await response.json();
+                        if (json.status === 'success' && json.result) {
+                            updateEmoNewsDisplay(json.result, text, elapsedMs);
+                            showEmoNotification('success', '✅ <b>วิเคราะห์สำเร็จ (Live Prediction):</b> ได้รับผลลัพธ์ 7 มิติอารมณ์จาก EmoNews fastText API สำเร็จ!');
+                        } else {
+                            throw new Error(json.message || 'API ตอบกลับสถานะไม่สำเร็จ');
+                        }
+                    }
+                } catch (err) {
+                    showEmoNotification('error', `
+                        <div class="font-bold">❌ การเชื่อมต่อล้มเหลว: ${err.message}</div>
+                        <div class="text-[11px] mt-0.5 text-rose-200/90">อาจเกิดจาก CORS หรือเครือข่ายขัดข้อง ระบบสลับมาแสดงผลจำลอง (Mock Data) ให้แทน</div>
+                    `);
+                    const matched = EMO_PRESETS.find(p => p.text === text);
+                    updateEmoNewsDisplay(matched ? matched.result : generateFallbackMockResult(text), text, 20);
+                }
+            } else {
+                // No key stored -> show mock
+                await new Promise(r => setTimeout(r, 180));
+                const matched = EMO_PRESETS.find(p => p.text === text);
+                updateEmoNewsDisplay(matched ? matched.result : generateFallbackMockResult(text), text, 15);
+                showEmoNotification('info', 'ℹ️ <b>ทำงานในโหมด Mock:</b> ยังไม่ได้ระบุ API Key ด้านบน — หากต้องการยิง Live API จริง กรุณาคลิก "🔑 ตั้งค่า API Key" ด้านบน');
+            }
+
+            btn.disabled = false;
+            btn.classList.remove('opacity-70');
+            btn.innerHTML = "<span>🔍</span><span>วิเคราะห์อารมณ์ข่าว (Live API)</span>";
+        }
+
+        function generateFallbackMockResult(text) {
+            let scores = { surprise: 0.1, neutral: 0.2, sadness: 0.1, pleasant: 0.1, fear: 0.1, anger: 0.1, joy: 0.1 };
+            if (/ทอง|ชนะ|ฉลอง|สำเร็จ|ยินดี|เฮ/i.test(text)) {
+                scores.joy = 0.55; scores.pleasant = 0.25; scores.surprise = 0.12; scores.neutral = 0.08; scores.fear = 0; scores.sadness = 0; scores.anger = 0;
+            } else if (/ไฟไหม้|ตาย|เจ็บ|ด่วน|หนี|ระเบิด|ภัย/i.test(text)) {
+                scores.fear = 0.50; scores.sadness = 0.30; scores.surprise = 0.12; scores.anger = 0.05; scores.neutral = 0.03; scores.joy = 0; scores.pleasant = 0;
+            } else if (/จวก|โกง|ชนแล้วหนี|ด่า|แย่|ประณาม/i.test(text)) {
+                scores.anger = 0.55; scores.sadness = 0.20; scores.surprise = 0.15; scores.fear = 0.05; scores.neutral = 0.05; scores.joy = 0; scores.pleasant = 0;
+            } else {
+                scores.neutral = 0.50; scores.surprise = 0.25; scores.pleasant = 0.10; scores.sadness = 0.05; scores.fear = 0.05; scores.anger = 0.03; scores.joy = 0.02;
+            }
+            return scores;
+        }
+
+        function switchEmoCodeTab(tab) {
+            const display = document.getElementById('emo-code-display');
+            const btnPy = document.getElementById('btn-emo-tab-python');
+            const btnCurl = document.getElementById('btn-emo-tab-curl');
+            if (!display || !btnPy || !btnCurl) return;
+
+            if (tab === 'python') {
+                btnPy.className = "px-2.5 py-1 rounded text-[11px] font-mono font-semibold bg-purple-600 text-white";
+                btnCurl.className = "px-2.5 py-1 rounded text-[11px] font-mono font-semibold bg-slate-800 text-slate-400 hover:text-white";
+                display.innerText = `import requests
+
+url = "https://api.aiforthai.in.th/emonews/prediction"
+headers = { 'apikey': 'YOUR_AIFORTHAI_API_KEY' }
+params = { 'text': 'นักวิจัยออสเตรเลียเผยสาเหตุฉลามโจมตีมนุษย์' }
+
+response = requests.get(url, params=params, headers=headers)
+data = response.json()
+
+print(f"หัวข้อข่าว: {data.get('text')}")
+print(f"สถานะ: {data.get('status')}")
+print("คะแนนอารมณ์ผู้อ่าน (7 มิติ):")
+for emotion, score in data.get('result', {}).items():
+    print(f"  - {emotion:10s}: {score * 100:.2f}%")`;
+            } else {
+                btnCurl.className = "px-2.5 py-1 rounded text-[11px] font-mono font-semibold bg-purple-600 text-white";
+                btnPy.className = "px-2.5 py-1 rounded text-[11px] font-mono font-semibold bg-slate-800 text-slate-400 hover:text-white";
+                display.innerText = `curl --get 'https://api.aiforthai.in.th/emonews/prediction' \\
+--data-urlencode 'text=นักวิจัยออสเตรเลียเผยสาเหตุฉลามโจมตีมนุษย์' \\
+--header 'apikey: YOUR_AIFORTHAI_API_KEY'`;
             }
         }
 

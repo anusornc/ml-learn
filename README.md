@@ -47,7 +47,7 @@
 | **22** | [`22-ML-Pipelines-Feature-Engineering.html`](file:///Users/anusornchaikaew/Work/lecture/ml-learn/22-ML-Pipelines-Feature-Engineering.html) | ไพป์ไลน์และวิศวกรรมฟีเจอร์ | ML Pipelines & Feature Engineering | ป้องกัน Data Leakage, การจัดการ Missing Values (MICE/KNN), Encoding, Scikit-Learn Pipeline |
 | **23** | [`23-ML-Deep-Learning-Architectures.html`](file:///Users/anusornchaikaew/Work/lecture/ml-learn/23-ML-Deep-Learning-Architectures.html) | สถาปัตยกรรม Deep Learning ยุคใหม่ | Modern Deep Learning: CNNs & Transformers | จำลองการคำนวณ Convolution 2D สด, ResNet Skip Connections, Multi-Head Attention ($Q,K,V$), Transfer Learning |
 | **24** | [`24-ML-System1-Decision-Models-Jev.html`](file:///Users/anusornchaikaew/Work/lecture/ml-learn/24-ML-System1-Decision-Models-Jev.html) | โมเดลการตัดสินใจเชิงโครงสร้าง และ System 1 AI | Structured Decision Models & Jev AI | จำลองการเปรียบเทียบ System 1 vs System 2 Race สด, Kahneman Dual-Process, 3 Typed Primitives, Calibrated Probabilities |
-| **25** | [`25-ML-Thai-AI-Ecosystem-AIForThai.html`](file:///Users/anusornchaikaew/Work/lecture/ml-learn/25-ML-Thai-AI-Ecosystem-AIForThai.html) | ระบบนิเวศ AI ภาษาไทย และ AI For Thai | Thai AI Ecosystem & AI For Thai LPR | จำลอง Thai License Plate Recognition (LPR) สด, รู้จำยี่ห้อ รุ่น สี ปี และจังหวัด, REST API & Python |
+| **25** | [`25-ML-Thai-AI-Ecosystem-AIForThai.html`](file:///Users/anusornchaikaew/Work/lecture/ml-learn/25-ML-Thai-AI-Ecosystem-AIForThai.html) | ระบบนิเวศ AI ภาษาไทย และ AI For Thai | Thai AI Ecosystem: LPR & EmoNews (fastText) | ป้ายทะเบียนไทย (LPR) สด, วิเคราะห์ 7 มิติอารมณ์ข่าวด้วย fastText (EmoNews), REST API, Python & cURL |
 
 ---
 
