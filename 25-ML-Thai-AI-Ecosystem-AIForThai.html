@@ -458,10 +458,18 @@
                         <img id="image-preview" src="" class="hidden max-h-48 mx-auto rounded-lg object-contain shadow-md border border-slate-800">
                     </div>
 
-                    <button onclick="runLprRecognition()" id="run-lpr-btn" class="w-full py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-2">
-                        <span>🔍</span>
-                        <span>ส่งตรวจจับป้ายทะเบียนและรถยนต์ (Run LPR)</span>
-                    </button>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <button onclick="runLprRecognition(false)" id="run-lpr-btn" class="flex-1 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-2">
+                            <span>🔍</span>
+                            <span>ส่งตรวจจับป้ายทะเบียน (Live API)</span>
+                        </button>
+                        <button onclick="runLprRecognition(true)" id="mock-lpr-btn" title="ทดสอบผลลัพธ์จำลองทันที (ไม่ยิง API จริง / ไม่กินโควตา Rate Limit)" class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold rounded-xl text-xs transition border border-slate-700 flex items-center justify-center gap-1.5 whitespace-nowrap shadow">
+                            <span>🧪 รันโหมด Mock</span>
+                        </button>
+                    </div>
+
+                    <!-- Notification Banner Container -->
+                    <div id="lpr-notification" class="hidden"></div>
                 </div>
 
                 <!-- Right: Visual Thai License Plate & Vehicle Specs -->
@@ -585,8 +593,9 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
                 </div>
                 <p class="text-amber-900 leading-relaxed">
                     1. <b>การจัดการ Timeout & Retry</b>: ควรตั้งค่า Request Timeout ไว้ที่ประมาณ 3-5 วินาที และใช้ Circuit Breaker หากเครือข่ายขัดข้อง<br>
-                    2. <b>การตรวจสอบ Confidence Threshold</b>: ควรกำหนดเกณฑ์ (เช่น <code>conf >= 85.0</code>) หากความเชื่อมั่นต่ำกว่าเกณฑ์ ควรส่งต่อไปยัง Human-in-the-loop เพื่อยืนยันด้วยสายตามนุษย์<br>
-                    3. <b>การรักษาความปลอดภัยของ API Key</b>: ห้ามใส่ API Key ฝั่ง Frontend หรือ Client-side เด็ดขาด ควรเรียกผ่าน Backend Server เพื่อป้องกันคีย์รั่วไหล
+                    2. <b>การรับมือกับ Rate Limit (HTTP 429 Too Many Requests)</b>: เมื่อเรียกใช้งานถี่เกินโควตา Free Tier ของแพลตฟอร์ม ควรใช้เทคนิค <b>Exponential Backoff with Jitter</b> ในการหน่วงเวลาก่อนลองใหม่ และใช้ <b>Message Queue (เช่น Redis / BullMQ)</b> ควบคุม Concurrency<br>
+                    3. <b>การตรวจสอบ Confidence Threshold</b>: ควรกำหนดเกณฑ์ (เช่น <code>conf >= 85.0</code>) หากความเชื่อมั่นต่ำกว่าเกณฑ์ ควรส่งต่อไปยัง Human-in-the-loop เพื่อยืนยันด้วยสายตามนุษย์<br>
+                    4. <b>การรักษาความปลอดภัยของ API Key</b>: ห้ามใส่ API Key ฝั่ง Frontend หรือ Client-side เด็ดขาด ควรเรียกผ่าน Backend Server เพื่อป้องกันคีย์รั่วไหล
                 </p>
             </div>
         </section>
@@ -788,17 +797,42 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
             document.getElementById('lpr-latency').innerText = `Infer Time: ${data.infer_time}s`;
         }
 
-        async function runLprRecognition() {
+        function showLprNotification(type, message) {
+            const el = document.getElementById('lpr-notification');
+            if (!el) return;
+            el.classList.remove('hidden');
+
+            const styles = {
+                warning: 'bg-amber-950/80 border-amber-500/60 text-amber-200',
+                error: 'bg-rose-950/80 border-rose-500/60 text-rose-200',
+                info: 'bg-blue-950/80 border-blue-500/60 text-blue-200',
+                success: 'bg-emerald-950/80 border-emerald-500/60 text-emerald-200'
+            };
+
+            el.className = `p-3.5 rounded-xl border text-xs leading-relaxed transition-all duration-200 ${styles[type] || styles.info}`;
+            el.innerHTML = message;
+        }
+
+        async function runLprRecognition(forceMock = false) {
             const btn = document.getElementById('run-lpr-btn');
+            const notif = document.getElementById('lpr-notification');
+            if (notif) notif.classList.add('hidden');
+
             btn.disabled = true;
             btn.classList.add('opacity-70');
-            btn.innerText = "⏳ กำลังประมวลผลผ่าน AI For Thai...";
+            btn.innerText = "⏳ กำลังประมวลผล...";
 
             const key = localStorage.getItem('AIFORTHAI_API_KEY');
 
-            // If key is present and a file is uploaded, attempt live call
-            if (key && uploadedFile) {
+            if (forceMock) {
+                // Explicit user request for mock simulation
+                await new Promise(r => setTimeout(r, 200));
+                updateVehicleDisplay(PRESETS[currentPresetKey]);
+                showLprNotification('info', '🧪 <b>โหมดจำลอง (Mock Simulation):</b> แสดงผลลัพธ์ตัวอย่างตามสเปก JSON โดยไม่ตัดโควตา API เหมาะสำหรับการเรียนรู้และทดสอบ UI ได้อย่างราบรื่น');
+            } else if (key && uploadedFile) {
+                // Live API call
                 try {
+                    btn.innerText = "⏳ ยิงคำขอไปยัง AI For Thai (lpr-iapp)...";
                     const formData = new FormData();
                     formData.append('file', uploadedFile);
 
@@ -813,37 +847,62 @@ print(f"ความเชื่อมั่น: {result.get('conf')}% (ใช�
 
                     const elapsedMs = Math.round(performance.now() - startTime);
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    if (response.status === 429) {
+                        showLprNotification('warning', `
+                            <div class="font-bold flex items-center gap-1.5 text-amber-300">
+                                <span>⚠️</span>
+                                <span>API Error 429: Too Many Requests (ติด Rate Limit ของ AI For Thai)</span>
+                            </div>
+                            <div class="mt-1.5 text-[11px] text-amber-200/90 space-y-1">
+                                <p>• <b>สาเหตุ:</b> บริการ AI For Thai (โดยเฉพาะโมเดล Computer Vision) มีการจำกัดคำขอต่อนาที/ต่อวันสำหรับ Free-tier API Key</p>
+                                <p>• <b>แก้ไขอัตโนมัติ:</b> ระบบสลับมาแสดง <b>ผลลัพธ์จำลอง (Mock Output)</b> จากพรีเซตรถยนต์ เพื่อให้คุณศึกษาโครงสร้างข้อมูล JSON ได้อย่างต่อเนื่อง</p>
+                                <p>• <b>คำแนะนำ:</b> เว้นระยะการส่งคำขอ 10-30 วินาทีก่อนลองใหม่ หรือใช้ปุ่ม <b>🧪 รันโหมด Mock</b> เพื่อทดสอบโดยไม่ใช้โควตา</p>
+                            </div>
+                        `);
+                        updateVehicleDisplay(PRESETS[currentPresetKey]);
+                    } else if (!response.ok) {
+                        showLprNotification('error', `
+                            <div class="font-bold">❌ API Error HTTP ${response.status}: ${response.statusText}</div>
+                            <div class="text-[11px] mt-0.5 text-rose-200/90">ระบบสลับมาแสดงผลจำลอง (Mock Data) แทนเพื่อให้ศึกษาข้อมูลตัวอย่างได้ต่อเนื่อง</div>
+                        `);
+                        updateVehicleDisplay(PRESETS[currentPresetKey]);
+                    } else {
+                        const json = await response.json();
+                        updateVehicleDisplay({
+                            lp_number: json.lp_number || 'ไม่พบป้าย',
+                            province: json.province || '-',
+                            province_display: json.province ? json.province.split(':')[1] || json.province : '-',
+                            vehicle_brand: json.vehicle_brand || '-',
+                            vehicle_model: json.vehicle_model || '-',
+                            vehicle_color: json.vehicle_color || '-',
+                            vehicle_body_type: json.vehicle_body_type || '-',
+                            vehicle_year: json.vehicle_year || '-',
+                            conf: json.conf ? parseFloat(json.conf).toFixed(1) : 0,
+                            infer_time: json['infer_time(s)'] || (elapsedMs / 1000).toFixed(2)
+                        });
+                        showLprNotification('success', '✅ <b>ตรวจจับสำเร็จ (Live Prediction):</b> ผลลัพธ์ตอบกลับจาก AI For Thai API สำเร็จแล้ว!');
                     }
-
-                    const json = await response.json();
-                    updateVehicleDisplay({
-                        lp_number: json.lp_number || 'ไม่พบป้าย',
-                        province: json.province || '-',
-                        province_display: json.province ? json.province.split(':')[1] || json.province : '-',
-                        vehicle_brand: json.vehicle_brand || '-',
-                        vehicle_model: json.vehicle_model || '-',
-                        vehicle_color: json.vehicle_color || '-',
-                        vehicle_body_type: json.vehicle_body_type || '-',
-                        vehicle_year: json.vehicle_year || '-',
-                        conf: json.conf ? parseFloat(json.conf).toFixed(1) : 0,
-                        infer_time: json['infer_time(s)'] || (elapsedMs / 1000).toFixed(2)
-                    });
-
                 } catch (err) {
-                    alert(`API Error: ${err.message}\n(ระบบจะแสดงผลจำลองแทน)`);
+                    showLprNotification('error', `
+                        <div class="font-bold">❌ การเชื่อมต่อล้มเหลว: ${err.message}</div>
+                        <div class="text-[11px] mt-0.5 text-rose-200/90">อาจเกิดจาก CORS หรือเครือข่ายขัดข้อง ระบบสลับมาแสดงผลจำลอง (Mock Data) ให้แทน</div>
+                    `);
                     updateVehicleDisplay(PRESETS[currentPresetKey]);
                 }
             } else {
-                // Mock execution
-                await new Promise(r => setTimeout(r, 220));
+                // Key or file missing -> show helpful mock
+                await new Promise(r => setTimeout(r, 200));
                 updateVehicleDisplay(PRESETS[currentPresetKey]);
+                if (!key) {
+                    showLprNotification('info', 'ℹ️ <b>ทำงานในโหมด Mock:</b> ยังไม่ได้ระบุ API Key ด้านบน — ระบบจึงแสดงผลลัพธ์จำลองตามพรีเซต หากต้องการยิงของจริง ให้ใส่ API Key และอัปโหลดภาพรถยนต์');
+                } else {
+                    showLprNotification('info', 'ℹ️ <b>บันทึก API Key แล้ว:</b> แต่ยังไม่ได้อัปโหลดภาพรถยนต์จริง — กรุณาคลิกอัปโหลดภาพรถยนต์ด้านซ้ายเพื่อทดสอบยิง Live API');
+                }
             }
 
             btn.disabled = false;
             btn.classList.remove('opacity-70');
-            btn.innerHTML = "<span>🔍</span><span>ส่งตรวจจับป้ายทะเบียนและรถยนต์ (Run LPR)</span>";
+            btn.innerHTML = "<span>🔍</span><span>ส่งตรวจจับป้ายทะเบียน (Live API)</span>";
         }
 
         function switchCodeTab(tab) {
