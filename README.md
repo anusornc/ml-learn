@@ -1,6 +1,6 @@
 # ML Learn: Interactive Machine Learning Curriculum & Practical Labs
 
-[![Curriculum](https://img.shields.io/badge/Curriculum-24%20Chapters-blue.svg)](index.html)
+[![Curriculum](https://img.shields.io/badge/Curriculum-25%20Chapters-blue.svg)](index.html)
 [![Labs](https://img.shields.io/badge/Practical%20Labs-Jupyter%20%26%20Colab-orange.svg)](index.html)
 [![Interactive](https://img.shields.io/badge/Interactive-Simulations%20%26%20Sandboxes-emerald.svg)](index.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -11,14 +11,14 @@
 
 ## 🌟 จุดเด่นของชุดบทเรียน (Key Features)
 
-- **Interactive Simulations & Sandboxes:** ทุกบทเรียนมีแบบจำลองภาพเคลื่อนไหวหรือกราฟโต้ตอบ (HTML5 Canvas / SVG) เช่น การปรับระนาบไฮเปอร์เพลน, การลู่เข้าของ Gradient Descent, เครื่องคำนวณ Entropy, การจำลอง Q-Learning Gridworld, K-Means 2D Sandbox, 2D Convolution Visualizer, และ System 1 vs System 2 Race Simulator
+- **Interactive Simulations & Sandboxes:** ทุกบทเรียนมีแบบจำลองภาพเคลื่อนไหวหรือกราฟโต้ตอบ (HTML5 Canvas / SVG) เช่น การปรับระนาบไฮเปอร์เพลน, การลู่เข้าของ Gradient Descent, เครื่องคำนวณ Entropy, การจำลอง Q-Learning Gridworld, K-Means 2D Sandbox, 2D Convolution Visualizer, System 1 vs System 2 Race Simulator, และ Thai License Plate (LPR) Sandbox
 - **Math Rigor with KaTeX:** สูตรคณิตศาสตร์ถูกเรนเดอร์อย่างสวยงามและคมชัดด้วย KaTeX พร้อมการพิสูจน์ที่มาทีละขั้น (Step-by-step calculus & derivations)
 - **Built-in Presentation Slide Mode:** สามารถกดปุ่ม **"นำเสนอสไลด์"** หรือกดปุ่มคีย์บอร์ดเพื่อแปลงหน้าบทเรียนเป็นสไลด์บรรยายเต็มหน้าจอได้ทันที รองรับปุ่ม `Space`, `ArrowRight`, `ArrowLeft` และ `Esc`
 - **Dual-Track Learning (Theory + Code):** เชื่อมโยงเนื้อหาภาคทฤษฎีเข้ากับใบงานปฏิบัติการจริงใน Jupyter Notebook ทั้งจากตำรา *Hands-On Machine Learning (3rd Edition)*, *Python ML Notebooks* และ *Microsoft ML-For-Beginners*
 
 ---
 
-## 📚 แผนผังหลักสูตร 24 บทเรียน (Curriculum Structure)
+## 📚 แผนผังหลักสูตร 25 บทเรียน (Curriculum Structure)
 
 | บทที่ | ไฟล์บทเรียน | หัวข้อภาษาไทย | หัวข้อภาษาอังกฤษ / โมเดลหลัก | การทดลองจำลองสด |
 | :---: | :--- | :--- | :--- | :--- |
@@ -47,6 +47,7 @@
 | **22** | [`22-ML-Pipelines-Feature-Engineering.html`](file:///Users/anusornchaikaew/Work/lecture/ml-learn/22-ML-Pipelines-Feature-Engineering.html) | ไพป์ไลน์และวิศวกรรมฟีเจอร์ | ML Pipelines & Feature Engineering | ป้องกัน Data Leakage, การจัดการ Missing Values (MICE/KNN), Encoding, Scikit-Learn Pipeline |
 | **23** | [`23-ML-Deep-Learning-Architectures.html`](file:///Users/anusornchaikaew/Work/lecture/ml-learn/23-ML-Deep-Learning-Architectures.html) | สถาปัตยกรรม Deep Learning ยุคใหม่ | Modern Deep Learning: CNNs & Transformers | จำลองการคำนวณ Convolution 2D สด, ResNet Skip Connections, Multi-Head Attention ($Q,K,V$), Transfer Learning |
 | **24** | [`24-ML-System1-Decision-Models-Jev.html`](file:///Users/anusornchaikaew/Work/lecture/ml-learn/24-ML-System1-Decision-Models-Jev.html) | โมเดลการตัดสินใจเชิงโครงสร้าง และ System 1 AI | Structured Decision Models & Jev AI | จำลองการเปรียบเทียบ System 1 vs System 2 Race สด, Kahneman Dual-Process, 3 Typed Primitives, Calibrated Probabilities |
+| **25** | [`25-ML-Thai-AI-Ecosystem-AIForThai.html`](file:///Users/anusornchaikaew/Work/lecture/ml-learn/25-ML-Thai-AI-Ecosystem-AIForThai.html) | ระบบนิเวศ AI ภาษาไทย และ AI For Thai | Thai AI Ecosystem & AI For Thai LPR | จำลอง Thai License Plate Recognition (LPR) สด, รู้จำยี่ห้อ รุ่น สี ปี และจังหวัด, REST API & Python |
 
 ---
 
