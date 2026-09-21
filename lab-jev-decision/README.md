@@ -18,8 +18,16 @@
 ## 💻 วิธีเปิดใช้งาน Sandbox ผ่านเว็บ
 
 1. เปิดไฟล์ [`lab-jev-decision/index.html`](file:///Users/anusornchaikaew/Work/lecture/ml-learn/lab-jev-decision/index.html) ในเบราว์เซอร์
-2. หากมี API Key ของ Jev ให้คลิกปุ่ม **"ตั้งค่า API Key"** ด้านบนขวาเพื่อกรอกคีย์ (คีย์จะถูกเก็บใน `localStorage` ของเครื่องคุณเท่านั้น)
-3. หรือหากยังไม่มีคีย์ สามารถทดลองใช้งานผ่าน **โหมดจำลอง (Mock Demo)** ได้ทันที
+2. มี Preset ตัวอย่างการใช้งานจริง 7 รูปแบบให้เลือกทดสอบ:
+   - 💬 **Support Triage:** คัดกรองและแบ่งระดับตั๋วลูกค้า (Intent, Urgency Score, Human Needed)
+   - 🛡️ **Agent Guardrail:** ตรวจสอบความปลอดภัย Tool-Calling ก่อนรันคำสั่ง Terminal
+   - 🤖 **ML Model Router:** คัดกรองและเลือกรุ่นโมเดลที่เหมาะสมตามโจทย์โปรเจกต์
+   - 🚨 **E-Commerce Moderation:** คัดกรองสินค้าและรีวิวต้องห้ามแบบฉับพลัน
+   - ⚡ **SRE Incident Triaging:** ประเมินเหตุการณ์ระบบล่มและปลุก On-call Engineer
+   - 💳 **Financial Anti-Fraud:** ตรวจสอบทุจริตธุรกรรมบัตรเครดิตและการขอ OTP ยืนยันตัวตน
+   - ✂️ **Context Pruning:** บีบอัดประวัติคำสั่ง Tool Call ของ Coding Agent
+3. หากมี API Key ของ Jev ให้คลิกปุ่ม **"ตั้งค่า API Key"** ด้านบนขวาเพื่อกรอกคีย์ (คีย์จะถูกเก็บใน `localStorage` ของเครื่องคุณเท่านั้น)
+4. หรือหากยังไม่มีคีย์ สามารถกดปุ่ม **"🧪 ทดลองโหมด Mock"** เพื่อทดลองดูผลลัพธ์จำลอง 100% ได้ทันทีโดยไม่ติด CORS
 
 ---
 

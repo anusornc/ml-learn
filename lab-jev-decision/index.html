@@ -102,6 +102,10 @@
                         <option value="support">💬 คัดกรองและแบ่งระดับตั๋วลูกค้า (Support Triage)</option>
                         <option value="guard">🛡️ ตรวจสอบความปลอดภัย Tool-Calling (Agent Guardrail)</option>
                         <option value="router">🤖 เลือกรุ่นโมเดล ML ที่เหมาะสม (ML Model Router)</option>
+                        <option value="moderation">🚨 ตรวจจับสินค้า/เนื้อหาผิดกฎหมาย (E-Commerce Moderation)</option>
+                        <option value="devops">⚡ ประเมินเหตุการณ์ระบบล่ม & ปลุก On-call (SRE Incident)</option>
+                        <option value="fraud">💳 ตรวจสอบทุจริตบัตรเครดิต & ธุรกรรม (Anti-Fraud Guard)</option>
+                        <option value="pruning">✂️ บีบอัด Context ประวัติ Tool-calls (Context Pruning)</option>
                         <option value="custom">✏️ กำหนดเอง (Custom State & Questions)</option>
                     </select>
                 </div>
@@ -486,6 +490,123 @@
                             "ต้องการแค่ความแม่นยำ กล่องดำยอมรับได้",
                             "ต้องการคำอธิบายระดับกลุ่มฟีเจอร์",
                             "เข้มงวดมาก ต้องมี SHAP/Feature attribution ตามกฎหมาย"
+                        ]
+                    }
+                ]
+            },
+            moderation: {
+                state: "Product Title: 'Organic Miracle Slimming Pills - Guaranteed 10kg loss in 3 days! No FDA needed.'\nDescription: 'Secret medical formula imported privately. Dissolves fat instantly while sleeping. 100% money back, cash on delivery.'",
+                questions: [
+                    {
+                        id: "violation_type",
+                        type: "choice",
+                        instructions: "ระบุประเภทการละเมิดนโยบายของรายการสินค้านี้",
+                        criteria: {
+                            "medical_claims": "โฆษณาโอ้อวดสรรพคุณทางการแพทย์/ยาลดน้ำหนักเกินจริงโดยไม่มี อย.",
+                            "counterfeit": "สินค้าละเมิดลิขสิทธิ์หรือเลียนแบบตราสินค้า",
+                            "prohibited_items": "อาวุธ สารเสพติด หรือสิ่งของผิดกฎหมายร้ายแรง",
+                            "clean": "ถูกต้องตามนโยบายมาตรฐานของแพลตฟอร์ม"
+                        }
+                    },
+                    {
+                        id: "risk_score",
+                        type: "score",
+                        instructions: "ประเมินระดับความเสี่ยงทางกฎหมายและอันตรายต่อผู้บริโภค (0: ปลอดภัย, 1: สุ่มเสี่ยง, 2: อันตรายร้ายแรง)",
+                        criteria: [
+                            "ปลอดภัย ไม่มีความเสี่ยงต่อผู้บริโภค",
+                            "โฆษณาเกินจริงเล็กน้อย ต้องรอเจ้าหน้าที่ตรวจสอบ",
+                            "ความเสี่ยงสูงมาก เป็นอันตรายต่อสุขภาพหรือผิดกฎหมายสาธารณสุข"
+                        ]
+                    },
+                    {
+                        id: "auto_ban",
+                        type: "noul",
+                        instructions: "ควรระงับ (Block) สินค้านี้ออกจากระบบค้นหาทันทีโดยอัตโนมัติหรือไม่",
+                        criteria: {
+                            "true": "ระงับทันทีเพื่อปกป้องผู้ซื้อ",
+                            "false": "อนุญาตให้อยู่ในสถานะรอการตรวจสอบ (Pending Review)"
+                        }
+                    }
+                ]
+            },
+            devops: {
+                state: "Alert: Pod 'checkout-service-78f9b' CrashLoopBackOff\nError: OOMKilled (Memory limit 2Gi exceeded during flash sale peak)\nImpact: HTTP 500 error rate spiked to 14.8% on payment gateway in production-ap-southeast-1.",
+                questions: [
+                    {
+                        id: "severity",
+                        type: "choice",
+                        instructions: "ประเมินระดับความรุนแรงของอุบัติการณ์ (Incident Severity)",
+                        criteria: {
+                            "sev1_critical": "วิกฤตระดับสูงสุด กระทบรายได้และระบบชำระเงินหลักล่ม",
+                            "sev2_major": "ฟังก์ชันบางส่วนทำงานช้าแต่ยังมีช่องทางสำรอง",
+                            "sev3_minor": "งานเบื้องหลังหรือเครื่องมือภายในล่าช้า ไม่กระทบผู้ใช้ภายนอก"
+                        }
+                    },
+                    {
+                        id: "wake_oncall",
+                        type: "noul",
+                        instructions: "ต้องโทรปลุก On-call Engineer ผ่าน PagerDuty ทันทีหรือไม่",
+                        criteria: {
+                            "true": "ต้องปลุกทันที เกิดความเสียหายต่อธุรกรรมจริง",
+                            "false": "ระบบ Self-healing จัดการได้หรือรอตรวจในเวลาทำการ"
+                        }
+                    },
+                    {
+                        id: "auto_rollback_eligible",
+                        type: "noul",
+                        instructions: "ปลอดภัยพอที่จะรันคำสั่ง Automated Rollback ไปยัง Release ก่อนหน้าหรือไม่",
+                        criteria: {
+                            "true": "ความผิดพลาดสอดคล้องกับการ Deploy ล่าสุด สามารถ Rollback ได้อย่างปลอดภัย",
+                            "false": "เป็นปัญหาที่ Database หรือ External API การ Rollback อาจไม่ช่วยแก้ปัญหา"
+                        }
+                    }
+                ]
+            },
+            fraud: {
+                state: "Transaction Details:\nAmount: $1,450.00 to 'CryptoExchange_KY'\nCardholder Home: Bangkok, Thailand\nDevice IP: Lagos, Nigeria (Via TOR Exit Node)\nTime: 03:22 AM local time\nHistorical Cardholder Spend: Average $35/day, never purchased crypto.",
+                questions: [
+                    {
+                        id: "action",
+                        type: "choice",
+                        instructions: "มาตรการความปลอดภัยที่ต้องดำเนินการกับรายการนี้",
+                        criteria: {
+                            "approve": "อนุมัติรายการทันที รูปแบบการใช้จ่ายปกติ",
+                            "step_up_otp": "ระงับชั่วคราวและร้องขอการยืนยันตัวตนขั้นสอง (SMS/Biometric OTP)",
+                            "block_and_freeze": "ปฏิเสธรายการและระงับบัตรชั่วคราวเนื่องจากมีความน่าจะเป็นของการขโมยข้อมูลบัตรสูงมาก"
+                        }
+                    },
+                    {
+                        id: "fraud_probability",
+                        type: "noul",
+                        instructions: "ความน่าจะเป็นที่รายการนี้เป็นการทุจริต (Fraudulent Transaction)",
+                        criteria: {
+                            "true": "เป็นการโจรกรรมหรือการใช้บัตรโดยไม่ได้รับอนุญาต",
+                            "false": "เจ้าของบัตรทำรายการเองจริง"
+                        }
+                    }
+                ]
+            },
+            pruning: {
+                state: "Agent Tool History:\nRan 'pytest tests/test_payment.py' 10 times consecutively during debugging.\nAttempt 1-9: Failed with 450 lines of Python tracebacks showing typo in mock token.\nAttempt 10: Succeeded! (All 28 tests passed in 1.4s).",
+                questions: [
+                    {
+                        id: "retention_strategy",
+                        type: "choice",
+                        instructions: "เลือกกลยุทธ์การบีบอัด Context เพื่อส่งต่อให้ LLM ในรอบถัดไป",
+                        criteria: {
+                            "drop_entirely": "ทิ้งทั้งหมด ไม่มีประโยชน์ต่อรอบถัดไป",
+                            "keep_summary_only": "ตัด Error Traceback 1-9 ทิ้งทั้งหมด เก็บเฉพาะผลการรันสำเร็จรอบที่ 10",
+                            "keep_verbatim": "เก็บ Log ทั้งหมดอย่างละเอียดครบถ้วนทุกบรรทัด"
+                        }
+                    },
+                    {
+                        id: "noise_score",
+                        type: "score",
+                        instructions: "ระดับความรกของข้อความ (Noise level: 0: มีสาระสำคัญทั้งหมด, 2: เป็นขยะซ้ำซ้อนที่ไม่จำเป็น)",
+                        criteria: [
+                            "สาระสำคัญ มีความรู้ที่ต้องใช้อ้างอิง",
+                            "มีทั้งสาระและขยะปะปนกัน",
+                            "ขยะซ้ำซ้อนสูงมาก (Redundant Error Logs)"
                         ]
                     }
                 ]

@@ -368,10 +368,154 @@ print(response.json())</code></pre>
             </div>
         </section>
 
-        <!-- Section 5: Practical Labs & Sandbox App -->
+        <!-- Section 5: Real-World Industry Examples & Patterns -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-rose-950 mb-4 border-b-2 border-rose-100 pb-2 flex items-center">
+                <span class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center mr-3 font-bold text-lg">5</span>
+                กรณีศึกษาและตัวอย่างการใช้งานจริงในอุตสาหกรรม (Deep-Dive Industry Examples)
+            </h2>
+            <p class="text-slate-600 leading-relaxed mb-6">
+                เพื่อให้เข้าใจความยืดหยุ่นของ <strong>Choice, Score, และ Noul</strong> ในสถาปัตยกรรม System 1 ต่อไปนี้คือ 4 ตัวอย่างการนำ Jev Model ไปประยุกต์ใช้แก้ปัญหาคอขวดด้าน Latency, Token Cost, และ Safety ในสายงานจริง:
+            </p>
+
+            <div class="space-y-6">
+                <!-- Example 1: E-Commerce Moderation -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50">
+                    <div class="bg-slate-100 px-5 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                            <h3 class="font-bold text-slate-800 text-sm">ตัวอย่างที่ 1: ตรวจจับสินค้าและรีวิวผิดกฎหมายแบบ Real-time (E-Commerce Moderation)</h3>
+                        </div>
+                        <span class="text-[10px] font-mono bg-rose-100 text-rose-800 px-2 py-0.5 rounded font-bold">SLA: &lt; 120 ms</span>
+                    </div>
+                    <div class="p-5 space-y-3 text-xs">
+                        <p class="text-slate-600 leading-relaxed">
+                            <strong>สถานการณ์:</strong> มีผู้ขายลงสินค้าหลายแสนรายการต่อวัน หากใช้ LLM ตรวจสอบจะกินเวลา 2-4 วินาที และมีค่าใช้จ่าย Token มหาศาล Jev ทำหน้าที่เป็นเกราะด่านหน้า (Frontline Gatekeeper) วิเคราะห์ State เพื่อเลือกว่าต้องลบสินค้าทันที หรือส่งให้ทีม Compliance ตรวจสอบ
+                        </p>
+                        <div class="bg-slate-900 rounded-xl p-4 font-mono text-[11px] text-slate-200 overflow-x-auto">
+                            <div class="text-rose-400 font-bold mb-1">// Jev JSON Request: Content Moderation Guard</div>
+<pre><code>{
+  <span class="text-cyan-300">"model"</span>: <span class="text-emerald-300">"typesafe/jev-1.13"</span>,
+  <span class="text-cyan-300">"state"</span>: <span class="text-emerald-300">"Product: 'ยาลดน้ำหนักสมุนไพรสูตรลับ ลด 10 กก. ใน 3 วัน ไม่ต้องมี อย. รับประกันผล คืนเงิน 100%'"</span>,
+  <span class="text-cyan-300">"questions"</span>: {
+    <span class="text-cyan-300">"violation_type"</span>: {
+      <span class="text-cyan-300">"type"</span>: <span class="text-emerald-300">"choice"</span>,
+      <span class="text-cyan-300">"instructions"</span>: <span class="text-emerald-300">"Identify primary policy violation category."</span>,
+      <span class="text-cyan-300">"criteria"</span>: {
+        <span class="text-amber-300">"medical_claims"</span>: <span class="text-emerald-300">"อวดอ้างสรรพคุณยารักษาโรคหรือยาลดน้ำหนักเกินจริงโดยไม่มี อย."</span>,
+        <span class="text-amber-300">"counterfeit"</span>: <span class="text-emerald-300">"สินค้าลอกเลียนแบบหรือละเมิดลิขสิทธิ์"</span>,
+        <span class="text-amber-300">"clean"</span>: <span class="text-emerald-300">"ถูกต้องตามกฎระเบียบแพลตฟอร์ม"</span>
+      }
+    },
+    <span class="text-cyan-300">"risk_score"</span>: {
+      <span class="text-cyan-300">"type"</span>: <span class="text-emerald-300">"score"</span>,
+      <span class="text-cyan-300">"instructions"</span>: <span class="text-emerald-300">"ระดับความเสี่ยงต่อผู้บริโภค (0: ปลอดภัย, 1: น่าสงสัย, 2: อันตรายร้ายแรง)"</span>,
+      <span class="text-cyan-300">"criteria"</span>: [<span class="text-emerald-300">"ปลอดภัย"</span>, <span class="text-emerald-300">"ต้องตรวจสอบเพิ่ม"</span>, <span class="text-emerald-300">"อันตรายต่อสุขภาพ/ผิดกฎหมาย"</span>]
+    },
+    <span class="text-cyan-300">"auto_ban"</span>: {
+      <span class="text-cyan-300">"type"</span>: <span class="text-emerald-300">"noul"</span>,
+      <span class="text-cyan-300">"instructions"</span>: <span class="text-emerald-300">"ระงับสินค้าออกจากหน้าค้นหาทันทีโดยไม่ต้องรอมนุษย์หรือไม่"</span>
+    }
+  }
+}</code></pre>
+                        </div>
+                        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900 text-[11px] leading-relaxed">
+                            <strong>ผลการประเมิน (~98ms):</strong> <code class="bg-emerald-100 px-1 py-0.5 rounded font-mono">violation_type: medical_claims (conf: 97.4%)</code>, <code class="bg-emerald-100 px-1 py-0.5 rounded font-mono">risk_score: 2.0</code>, และ <code class="bg-emerald-100 px-1 py-0.5 rounded font-mono">auto_ban.noul: 0.96</code> &rarr; ระบบ Auto-Takedown สั่งบล็อกสินค้าทันทีก่อนถูกเสิร์ชเจอ!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example 2: SRE & DevOps Incident Triage -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50">
+                    <div class="bg-slate-100 px-5 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                            <h3 class="font-bold text-slate-800 text-sm">ตัวอย่างที่ 2: จำแนกอุบัติการณ์เซิร์ฟเวอร์ล่ม & สั่ง Rollback อัตโนมัติ (DevOps Incident Guard)</h3>
+                        </div>
+                        <span class="text-[10px] font-mono bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">Reliability & On-call</span>
+                    </div>
+                    <div class="p-5 space-y-3 text-xs">
+                        <p class="text-slate-600 leading-relaxed">
+                            <strong>สถานการณ์:</strong> Alert พุ่งขึ้นพร้อมกันหลายสิบรายการเมื่อ Pod ใน Kubernetes เกิด CrashLoopBackOff ระบบต้องการตัดสินใจทันทีว่าจะโทรปลุก On-call Engineer ผ่าน PagerDuty หรือสั่ง Rollback Canary ทันที
+                        </p>
+                        <div class="bg-slate-900 rounded-xl p-4 font-mono text-[11px] text-slate-200 overflow-x-auto">
+                            <div class="text-amber-400 font-bold mb-1">// Jev JSON Request: Automated Incident Triaging</div>
+<pre><code>{
+  <span class="text-cyan-300">"model"</span>: <span class="text-emerald-300">"typesafe/jev-1.13"</span>,
+  <span class="text-cyan-300">"state"</span>: <span class="text-emerald-300">"Alert: Pod 'checkout-api-4bf9' CrashLoopBackOff. Error: OOMKilled (2Gi exceeded). Payment 500 error rate spiked to 16.5% after deployment v2.4.1."</span>,
+  <span class="text-cyan-300">"questions"</span>: {
+    <span class="text-cyan-300">"severity"</span>: {
+      <span class="text-cyan-300">"type"</span>: <span class="text-emerald-300">"choice"</span>,
+      <span class="text-cyan-300">"instructions"</span>: <span class="text-emerald-300">"Incident severity classification."</span>,
+      <span class="text-cyan-300">"criteria"</span>: {
+        <span class="text-amber-300">"sev1_critical"</span>: <span class="text-emerald-300">"กระทบการจ่ายเงินและรายได้หลักของบริษัท"</span>,
+        <span class="text-amber-300">"sev2_major"</span>: <span class="text-emerald-300">"บริการรองทำงานผิดพลาด มีระบบสำรอง"</span>,
+        <span class="text-amber-300">"sev3_minor"</span>: <span class="text-emerald-300">"เครื่องมือภายในหรือ Background batch ช้าลง"</span>
+      }
+    },
+    <span class="text-cyan-300">"wake_oncall"</span>: {
+      <span class="text-cyan-300">"type"</span>: <span class="text-emerald-300">"noul"</span>,
+      <span class="text-cyan-300">"instructions"</span>: <span class="text-emerald-300">"โทรปลุกวิศวกร On-call Engineer ตอนตี 3 หรือไม่"</span>
+    },
+    <span class="text-cyan-300">"auto_rollback_eligible"</span>: {
+      <span class="text-cyan-300">"type"</span>: <span class="text-emerald-300">"noul"</span>,
+      <span class="text-cyan-300">"instructions"</span>: <span class="text-emerald-300">"ปลอดภัยพอที่จะทริกเกอร์คำสั่ง Rollback Deployment อัตโนมัติหรือไม่"</span>
+    }
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example 3: Financial Fraud Detection -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50">
+                    <div class="bg-slate-100 px-5 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-indigo-500"></span>
+                            <h3 class="font-bold text-slate-800 text-sm">ตัวอย่างที่ 3: ตรวจจับทุจริตบัตรเครดิต & ทำ Step-up Authentication (Financial Anti-Fraud)</h3>
+                        </div>
+                        <span class="text-[10px] font-mono bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">Hard Latency Budget: 200 ms</span>
+                    </div>
+                    <div class="p-5 space-y-3 text-xs">
+                        <p class="text-slate-600 leading-relaxed">
+                            <strong>สถานการณ์:</strong> ในระบบ Payment Gateway เมื่อมีการรูดชำระเงิน Gateway มีเวลาประเมินไม่เกิน 200ms เท่านั้น (LLM ตอบไม่ทัน) Jev สามารถอ่านข้อมูล Transaction และตำแหน่ง IP ที่น่าสงสัยเพื่อตัดสินใจว่าจะ <code class="font-mono text-emerald-600">approve</code>, ขอ <code class="font-mono text-amber-600">step_up_otp</code> หรือ <code class="font-mono text-rose-600">block_and_freeze</code> ทันที
+                        </p>
+                        <div class="p-3 bg-slate-900 rounded-xl font-mono text-[11px] text-slate-200 overflow-x-auto">
+                            <div class="text-indigo-400 font-bold mb-1">// Decision Logic: Step-up Verification Threshold</div>
+<pre><code><span class="text-rose-400">const</span> res = <span class="text-rose-400">await</span> jev.evaluate(txState, fraudQuestions);
+<span class="text-rose-400">if</span> (res.fraud_probability.noul &gt; 0.85) {
+    gateway.blockTransaction(cardId, <span class="text-emerald-300">"FRAUD_SUSPECTED"</span>);
+} <span class="text-rose-400">else if</span> (res.fraud_probability.noul &gt; 0.40) {
+    gateway.challengeStepUpOTP(userPhone); <span class="text-slate-500">// ขอ SMS OTP ยืนยันตัวตน</span>
+} <span class="text-rose-400">else</span> {
+    gateway.approveImmediate(); <span class="text-slate-500">// อนุมัติผ่านฉลุยใน ~100ms</span>
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example 4: Agent Context Compaction & Pruning -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50">
+                    <div class="bg-slate-100 px-5 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-cyan-500"></span>
+                            <h3 class="font-bold text-slate-800 text-sm">ตัวอย่างที่ 4: บีบอัดประวัติคำสั่งของ Coding Agent (Context Compaction & Pruning)</h3>
+                        </div>
+                        <span class="text-[10px] font-mono bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded font-bold">Context Efficiency</span>
+                    </div>
+                    <div class="p-5 space-y-3 text-xs">
+                        <p class="text-slate-600 leading-relaxed">
+                            <strong>สถานการณ์:</strong> ในเอเจนต์เขียนโค้ดอัตโนมัติ (เช่น Cursor/Aider) เมื่อเอเจนต์รันคำสั่ง terminal ซ้ำๆ เช่น รันเทสต์ 10 รอบ ข้อผิดพลาด traceback ยาวหลายร้อยบรรทัดจะกิน Context Window อย่างรวดเร็ว Jev ทำหน้าที่เป็น System 1 เลือกว่าประวัติช่วงใดควรตัดทิ้ง (Drop) สรุปเก็บเฉพาะผลลัพธ์สุดท้าย (Keep Summary) หรือต้องคงรูปเดิม (Keep Verbatim) อย่างแม่นยำ
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Practical Labs & Sandbox App -->
         <section class="bg-gradient-to-r from-slate-900 via-rose-950 to-indigo-950 text-white rounded-3xl p-6 md:p-8 mb-8 border border-slate-800 shadow-xl">
             <h2 class="text-2xl font-bold text-white mb-2 flex items-center">
-                <span class="w-8 h-8 rounded-lg bg-rose-500/30 text-rose-300 flex items-center justify-center mr-3 font-bold text-sm">5</span>
+                <span class="w-8 h-8 rounded-lg bg-rose-500/30 text-rose-300 flex items-center justify-center mr-3 font-bold text-sm">6</span>
                 ห้องปฏิบัติการและแอปพลิเคชันแซนด์บ็อกซ์ (Hands-on Labs)
             </h2>
             <p class="text-slate-400 text-xs md:text-sm font-light mb-6 leading-relaxed">
